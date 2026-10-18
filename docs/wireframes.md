@@ -14,6 +14,7 @@ The layout follows the approved **Contemporary Heritage** direction: calm editor
 ├──────────────────────────────────────────────────────────────────────────────┤
 │                         HERO BANNER (cinematic, dark)                        │
 │         [approved shrine image with readable dark overlay]                   │
+│         [desktop/mobile asset + focal point handled responsively]             │
 │         [eyebrow / approved context]                                         │
 │         [H1: owner-approved shrine/site name]                                │
 │         [short introduction — copy TBD]                                      │
@@ -52,6 +53,7 @@ The layout follows the approved **Contemporary Heritage** direction: calm editor
 ### Desktop behavior
 
 - Use a full-width hero image with a constrained text column and strong contrast overlay; keep text separate in semantic markup, not baked into the image.
+- Future banner content should support a desktop image and optional mobile-specific image, a focal point for each asset, and responsive crop/selection behavior. Banner Management is not implemented in Phase 02.2.
 - Quick Information can use three or four concise highlights only when each value is verified.
 - Use asymmetric image/text layouts for editorial sections, balanced item cards, and a curated gallery mosaic. Do not let the catalog visually dominate the shrine/history content.
 - Keep section widths and headings aligned to a shared content grid; allow dark hero and footer surfaces without turning every section into a dark panel.
@@ -123,6 +125,7 @@ The layout follows the approved **Contemporary Heritage** direction: calm editor
 - Prefer single-column item and news cards at 320–375px. Add a two-column gallery grid only when images remain comfortably tappable.
 - Avoid horizontal overflow, hover-only controls, autoplay, sticky overlays that cover reading, or carousels that hide content from keyboard/screen-reader users.
 - Make image crops responsive and retain the subject's focal point. Use responsive source sizes and fixed aspect ratios to reduce layout shift.
+- Select a mobile banner asset at the appropriate viewport when one is supplied; otherwise use the approved desktop asset with a tested mobile crop.
 
 ## 3. Homepage section specification
 
@@ -154,11 +157,12 @@ These layouts supplement the route definitions in `information-architecture.md`.
 
 ### `/sakkara` listing
 
-- **Desktop:** breadcrumb/title/intro; optional category/filter sidebar; responsive item grid; pagination if needed.
+- **Desktop:** breadcrumb/title/intro; planned search and category filters when the catalog is ready; responsive item grid; pagination if needed.
 - **Tablet:** compact filters above or beside a two-column grid.
 - **Mobile:** title/intro first; category controls wrap or use an accessible filter panel; single-column cards at narrow widths; filter state is announced and clearable.
 - **Hierarchy:** title/intro → approved categories or filters → results count if meaningful → cards → pagination/empty state.
 - **CTA:** item detail `/sakkara/[slug]`; no cart/checkout/payment CTA.
+- Search and Category Filter are planned controls; implement their query/data behavior in Phase 03, not Phase 02.2.
 
 ### `/sakkara/[slug]` detail
 
@@ -178,7 +182,8 @@ These layouts supplement the route definitions in `information-architecture.md`.
 - **Desktop:** verified address/hours/contact next to a directions/map area; guidance and FAQ follow in distinct sections.
 - **Tablet/mobile:** stack critical location, schedule, and contact details before map/directions; make phone and verified LINE destinations tappable, labeled links.
 - **Hierarchy:** title/intro → location and schedule → travel guidance → contact → FAQ anchored as `#faq`.
-- **CTA:** directions or a verified contact channel. No blank form should be shown as if it is functional.
+- **CTA:** directions or a verified contact channel. The Contact Form and Contact Messages Management are essential planned CMS features for a later phase, not Phase 02.2 implementation.
+- The form must not launch without a published, legally reviewed Privacy Policy page, privacy notice, validation, spam protection, access controls, and data-retention policy. The policy route/content remain TBD; do not create the page in this phase.
 
 ## 5. Interaction and responsive QA notes
 

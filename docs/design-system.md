@@ -37,13 +37,25 @@ These are preliminary proposals. Test every foreground/background pairing in the
 | Muted Text | `#626860` | Secondary copy and supporting metadata on light backgrounds |
 | Soft Border | `#E6E0D5` | Subtle dividers, card borders, and input outlines |
 
+### Verified contrast pairs
+
+| Foreground | Background | Contrast | Guidance |
+|---|---|---:|---|
+| Deep Charcoal | Warm Ivory | 14.58:1 | Suitable for essential text on this background |
+| Dark Text | Warm Ivory | 13.74:1 | Suitable for essential text on this background |
+| Muted Text | Warm Ivory | 5.26:1 | Suitable for normal-sized secondary text on this background |
+| Deep Gold | Warm Ivory | 6.51:1 | Suitable for normal-sized text on this background |
+| White | Heritage Green | 9.83:1 | Preferred high-contrast primary-action pairing |
+| Antique Gold | Warm Ivory | 3.18:1 | Decorative or nonessential emphasis only; not normal-sized essential text |
+| White | Antique Gold | 3.47:1 | Do not use for normal-sized button labels or other essential text |
+
 ### Application rules
 
 - Keep long-form reading areas light; reserve dark surfaces for a small number of high-impact areas such as the hero and footer.
 - Use Heritage Green for primary actions with a tested high-contrast label. Use Antique Gold sparingly and never rely on it alone to communicate state.
-- Do not use low-contrast gold for small text or essential icons. Pair it with Deep Charcoal or use Deep Gold on light backgrounds only after testing.
+- Do not use Antique Gold for normal-sized essential text or as a button background with white normal-sized text. Pair it with Deep Charcoal for decorative treatments or use Deep Gold for essential text on light backgrounds.
 - Provide separate hover, active, selected, disabled, error, and success states. State must also be conveyed through text, shape, or iconography, not color alone.
-- Target WCAG 2.2 AA text contrast: at least 4.5:1 for normal text and 3:1 for large text. Check meaningful non-text controls and focus indicators against adjacent colors as well.
+- Target WCAG 2.2 AA text contrast: at least 4.5:1 for normal text and 3:1 for large text. Interactive controls and focus indicators must have at least 3:1 contrast against adjacent colors; verify the rendered state, including on dark hero surfaces.
 
 ## 3. Typography
 

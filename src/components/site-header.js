@@ -1,38 +1,46 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/config/site";
+import { MobileNavigation } from "@/components/mobile-navigation";
 
 export function SiteHeader() {
   return (
-    <header className="border-b border-[var(--line)] bg-[var(--page)]">
-      <div className="mx-auto flex min-h-18 max-w-6xl items-center justify-between gap-6 px-5 py-4 sm:px-8">
+    <header className="site-header">
+      <Container className="site-header__inner">
         <Link
           href="/"
-          aria-label={`${siteConfig.name} หน้าหลัก`}
-          className="rounded-sm text-base font-semibold tracking-tight text-[var(--ink)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
+          aria-label={`${siteConfig.name} — หน้าแรก`}
+          className="site-brand"
+          prefetch={false}
         >
-          {siteConfig.name}
+          <span className="site-brand__name">{siteConfig.name}</span>
+          <span className="site-brand__descriptor">เว็บไซต์ทางการ</span>
         </Link>
-        <nav aria-label="เมนูหลัก">
-          <ul className="flex items-center gap-5 text-sm text-[var(--muted)] sm:gap-8">
-            <li>
-              <Link
-                href="#about"
-                className="rounded-sm transition-colors hover:text-[var(--accent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
-              >
-                เกี่ยวกับ
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#foundation"
-                className="rounded-sm transition-colors hover:text-[var(--accent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
-              >
-                แนวทาง
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </div>
+        <div className="site-header__desktop">
+          <nav aria-label="เมนูหลัก">
+            <ul className="site-navigation__list">
+              {siteConfig.navigation.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="site-navigation__link"
+                    prefetch={false}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          {siteConfig.lineInquiryUrl ? (
+            <Button href={siteConfig.lineInquiryUrl} variant="secondary">
+              สอบถามผ่าน LINE
+            </Button>
+          ) : null}
+        </div>
+        <MobileNavigation />
+      </Container>
     </header>
   );
 }

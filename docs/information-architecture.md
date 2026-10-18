@@ -79,12 +79,14 @@ Use a readable single-column text measure, with occasional image/text editorial 
 ### Sacred-items listing `/sakkara`
 
 1. Breadcrumb, title, introduction, and any owner-approved category guidance.
-2. Optional search and filters only when the catalog size and maintained fields justify them.
+2. Planned Search and Category Filter controls, shown when the approved catalog taxonomy and content volume justify them.
 3. Responsive cards with item image, title, category, factual summary, and detail action.
 4. Clear empty state and pagination/load-more behavior if the catalog becomes large.
 5. LINE inquiry action only when the destination is verified and inquiry/reservation availability is current.
 
 Category names, filter dimensions, item ordering, and availability fields are **TBD** until the owner supplies the taxonomy. Do not display pricing, inventory, or “available” labels unless there is a defined, maintained source of truth.
+
+Search and Category Filter are planned catalog features; implement their query/data behavior in Phase 03, not Phase 02.2.
 
 ### Sacred-item detail `/sakkara/[slug]`
 
@@ -109,9 +111,9 @@ No cart, checkout, payment, customer account, shipping promise, price, edition q
 2. Verified location/address, opening schedule, contact channels, and a map/directions link if approved.
 3. Practical visit guidance and etiquette, written without unsupported claims.
 4. FAQ list with stable anchors, including `#faq`.
-5. Contact-message form only if a future implementation has approved privacy notice, validation, spam protection, access controls, retention, and delivery/monitoring.
+5. Essential planned Contact Form feature, implemented only in a later phase after its launch requirements are satisfied.
 
-Every operational detail is **TBD until reverified**. The reference site contains visit/contact information; do not assume it remains current.
+Every operational detail is **TBD until reverified**. The reference site contains visit/contact information; do not assume it remains current. The Contact Form must not launch without a published, legally reviewed Privacy Policy page and clear privacy notice, validation, spam protection, access controls, and an approved data-retention policy. The policy page route and wording are TBD; do not create the page in Phase 02.2.
 
 ## 5. SEO and rendering architecture (future)
 
@@ -140,14 +142,15 @@ These services are architectural options for later phases only; this specificati
 
 | CMS module | Public use | Suggested owner-managed content | Governance / notes |
 |---|---|---|---|
-| Banner | Homepage hero or approved campaign placements | Title, summary, image, alt text, focal point, CTA label/destination, order, publish window, status | Validate CTA destinations; allow only approved public images |
+| Banner | Homepage hero or approved campaign placements | Title, summary, desktop image, optional mobile image, focal point per image, responsive image behavior/crop, alt text, CTA label/destination, order, publish window, status | Validate CTA destinations; allow only approved public images. Banner Management is not part of Phase 02.2 |
 | Site Settings | Header, footer, visit, metadata, global LINE inquiry | Verified site name, contact channels, address, schedule, LINE destination, social links, default SEO values | Treat as source of truth; require explicit verification and restricted edit access |
 | Page Content | History, visit, worship guidance, homepage sections | Route/section key, title, body blocks, media references, order, locale, SEO fields, publish status | Preserve review and revision history; no unreviewed cultural claims |
 | Sacred Items | `/sakkara` and `/sakkara/[slug]` | Slug, title, category reference, summary, description, history/production story, images, alt text, optional verified facts, featured/order/status | No price/cart/payment fields in this phase; availability and reservation terms are optional and require an owner-maintained source |
 | News | `/news` and `/news/[slug]` | Slug, title, excerpt, body, cover image, alt text, category/tags if approved, publication date, status | Only published items are public; preserve edits and publication history |
 | Gallery | Homepage gallery and future approved media placements | Image/video asset, alt text/caption, collection, order, status, rights/consent note | Confirm permissions; avoid exposing private/unapproved media |
 | FAQ | Homepage and `/visit#faq` | Question, answer, group, order, status | Keep factual answers linked to verified settings/content; keyboard-accessible presentation |
-| Contact Messages | Future `/visit` inquiry flow and admin inbox | Submitted fields, timestamp, consent record, status, internal notes | Define data minimization, privacy notice, retention/deletion, spam handling, and least-privilege access before launch |
+| Contact Form | Future public inquiry on `/visit` | Minimal approved fields, consent record, validation messages | Essential planned feature for a later phase; requires a published Privacy Policy and the full launch safeguards above |
+| Contact Messages Management | Future protected admin inbox | Submitted fields, timestamp, status, restricted internal notes, retention/deletion controls | Essential planned CMS feature for a later phase; use least-privilege access and auditable handling |
 
 ### Homepage-to-CMS mapping
 
@@ -177,7 +180,7 @@ Admin (protected; route and role policy TBD)
 ├── News
 ├── Gallery
 ├── FAQ
-├── Contact Messages
+├── Contact Messages Management
 └── Site Settings
 ```
 
@@ -189,4 +192,5 @@ Authentication is a future Auth.js integration. Roles, approval workflow, audit 
 - Verify all address, opening schedule, map, phone, LINE, and social destinations before launch.
 - Approve product taxonomy and decide which item facts and reservation/availability states can be maintained.
 - Define content owners, editorial approval and revision workflow, privacy policy, and contact-message retention.
+- Publish a legally reviewed Privacy Policy page before enabling the planned Contact Form; its route and approved wording remain TBD. No policy page is created in this phase.
 - Confirm canonical production domain and whether English localization is in scope.
