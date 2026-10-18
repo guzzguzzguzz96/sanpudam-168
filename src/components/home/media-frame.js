@@ -34,8 +34,8 @@ export function MediaFrame({
         aria-label={placeholderLabel}
       >
         <span aria-hidden="true" className="home-media__placeholder-mark" />
-        <span className="home-media__placeholder-label">
-          {placeholderLabel}
+        <span aria-hidden="true" className="home-media__placeholder-label">
+          รอภาพที่ได้รับอนุมัติ
         </span>
       </div>
     );

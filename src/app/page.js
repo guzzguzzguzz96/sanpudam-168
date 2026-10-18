@@ -14,11 +14,7 @@ export default function HomePage() {
 
   return (
     <main id="main-content" className="home-page">
-      <HeroBanner
-        data={preview.banner}
-        developmentLabel={preview.developmentLabel}
-        pendingRoutes={preview.pendingRoutes}
-      />
+      <HeroBanner data={preview.banner} />
       <QuickInformation data={preview.quickInformation} />
       <AboutSanpudam data={preview.about} />
       <FeaturedSacredItems data={preview.featuredItems} />

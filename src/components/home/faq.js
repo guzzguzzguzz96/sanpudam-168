@@ -8,10 +8,8 @@ export function Faq({ data }) {
       <Container>
         <SectionIntro
           id="faq-title"
-          statusLabel="ตัวอย่างคำถาม · ยังไม่ใช่ข้อมูลยืนยัน"
           eyebrow="คำถามที่พบบ่อย"
           title="คำถามและคำตอบ"
-          description="เผยแพร่คำตอบหลังตรวจสอบข้อมูลกับเจ้าของแล้วเท่านั้น"
         />
         <div className="home-faq__list">
           {data.map((item) => (

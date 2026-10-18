@@ -22,11 +22,7 @@ function SacredItemCard({ item }) {
         <Button href={item.href} variant="outline">
           ดูรายละเอียด
         </Button>
-      ) : (
-        <p className="home-item-card__pending">
-          ลิงก์รายละเอียดจะแสดงเมื่อมีข้อมูลและหน้าที่พร้อมใช้งาน
-        </p>
-      )}
+      ) : null}
     </Card>
   );
 }
@@ -40,10 +36,8 @@ export function FeaturedSacredItems({ data }) {
       <Container>
         <SectionIntro
           id="featured-items-title"
-          statusLabel="รายการตัวอย่าง · ไม่มีข้อมูลสินค้าจริง"
           eyebrow="วัตถุมงคล"
           title="รายการแนะนำ"
-          description="ข้อมูลหมวดหมู่ ชื่อ และรายละเอียดจะแสดงหลังได้รับการตรวจสอบและอนุมัติ"
         />
         <div className="home-item-grid">
           {data.map((item) => (
@@ -54,7 +48,6 @@ export function FeaturedSacredItems({ data }) {
           <Button href="/sakkara" variant="secondary">
             ดูรายการทั้งหมด
           </Button>
-          <p className="home-route-note">หน้า /sakkara ยังอยู่ระหว่างการพัฒนา</p>
         </div>
       </Container>
     </Section>

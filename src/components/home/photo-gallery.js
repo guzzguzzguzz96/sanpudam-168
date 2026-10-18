@@ -9,10 +9,8 @@ export function PhotoGallery({ data }) {
       <Container>
         <SectionIntro
           id="photo-gallery-title"
-          statusLabel="ตัวอย่างพื้นที่แกลเลอรี · ไม่มีภาพสถานที่จริง"
           eyebrow="ภาพถ่าย"
           title="แกลเลอรี"
-          description="ภาพจะเพิ่มเมื่อได้รับไฟล์และคำอธิบายที่เจ้าของอนุมัติ"
         />
         <ul className="home-gallery__grid">
           {data.map((item) => (

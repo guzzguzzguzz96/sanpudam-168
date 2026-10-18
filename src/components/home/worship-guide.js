@@ -12,10 +12,8 @@ export function WorshipGuide({ data }) {
       <Container>
         <SectionIntro
           id="worship-guide-title"
-          statusLabel="ตัวอย่างโครงสร้าง · ไม่มีคำแนะนำจริง"
           eyebrow="คำแนะนำ"
           title="เตรียมข้อมูลการสักการะ"
-          description="ขั้นตอนจริงจะแสดงเมื่อได้รับคำแนะนำที่เจ้าของตรวจสอบและอนุมัติ"
         />
         <ol className="home-worship-guide__steps">
           {data.map((step, index) => (
@@ -32,7 +30,6 @@ export function WorshipGuide({ data }) {
           <Button href="/visit" variant="outline">
             ข้อมูลการเยี่ยมชม
           </Button>
-          <p className="home-route-note">หน้า /visit ยังอยู่ระหว่างการพัฒนา</p>
         </div>
       </Container>
     </Section>

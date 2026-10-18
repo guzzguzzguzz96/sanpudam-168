@@ -1,12 +1,9 @@
-const developmentLabel = "ตัวอย่างสำหรับการพัฒนา · ยังไม่ใช่ข้อมูลยืนยัน";
+import { siteConfig } from "@/config/site";
 
 export const homepagePreviewData = {
-  developmentLabel,
-  pendingRoutes:
-    "หน้า /history, /sakkara, /news และ /visit ยังอยู่ระหว่างการพัฒนา",
   banner: {
-    eyebrow: "ตัวอย่างชั่วคราว",
-    title: "Sanpudam 168",
+    eyebrow: siteConfig.name,
+    title: siteConfig.localName,
     description:
       "พื้นที่ตัวอย่างสำหรับข้อความแนะนำ เนื้อหาจริงจะเผยแพร่หลังเจ้าของตรวจสอบและอนุมัติ",
     primaryCta: { href: "/history", label: "อ่านข้อมูลประวัติ" },

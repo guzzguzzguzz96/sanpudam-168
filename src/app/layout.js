@@ -1,24 +1,25 @@
-import { Noto_Sans_Thai, Noto_Serif_Thai } from "next/font/google";
+import { Noto_Sans_Thai, Noto_Sans_Thai_Looped } from "next/font/google";
+import { PreviewNotice } from "@/components/preview-notice";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
 import "@/components/home/home.css";
 
-const bodyFont = Noto_Sans_Thai({
-  variable: "--font-noto-sans-thai",
+const bodyFont = Noto_Sans_Thai_Looped({
+  variable: "--font-noto-sans-thai-looped",
   subsets: ["latin", "thai"],
   weight: "variable",
   display: "swap",
   fallback: ["Tahoma", "sans-serif"],
 });
 
-const displayFont = Noto_Serif_Thai({
-  variable: "--font-noto-serif-thai",
+const displayFont = Noto_Sans_Thai({
+  variable: "--font-noto-sans-thai",
   subsets: ["latin", "thai"],
   weight: "variable",
   display: "swap",
-  fallback: ["Leelawadee UI", "serif"],
+  fallback: ["Leelawadee UI", "Tahoma", "sans-serif"],
 });
 
 export const metadata = {
@@ -54,6 +55,7 @@ export default function RootLayout({ children }) {
         >
           ข้ามไปยังเนื้อหาหลัก
         </a>
+        {siteConfig.isPreview ? <PreviewNotice /> : null}
         <SiteHeader />
         {children}
         <SiteFooter />

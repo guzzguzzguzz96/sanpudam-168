@@ -1,18 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { MediaFrame } from "@/components/home/media-frame";
-import { PreviewBadge } from "@/components/home/preview-badge";
 import { Section } from "@/components/ui/section";
+import { ThaiPhrases } from "@/components/ui/thai-phrases";
 
-export function HeroBanner({ data, developmentLabel, pendingRoutes }) {
+export function HeroBanner({ data }) {
   return (
     <Section aria-labelledby="home-hero-title" className="home-hero">
       <Container className="home-hero__inner">
         <div className="home-hero__copy">
-          <PreviewBadge>{developmentLabel}</PreviewBadge>
           <p className="home-hero__eyebrow">{data.eyebrow}</p>
           <h1 id="home-hero-title" className="home-hero__title">
-            {data.title}
+            <ThaiPhrases text={data.title} />
           </h1>
           <p className="home-hero__description">{data.description}</p>
           <div className="home-hero__actions">
@@ -27,7 +26,6 @@ export function HeroBanner({ data, developmentLabel, pendingRoutes }) {
               {data.secondaryCta.label}
             </Button>
           </div>
-          <p className="home-route-note home-hero__route-note">{pendingRoutes}</p>
         </div>
         <MediaFrame
           alt={data.desktopImage?.alt}

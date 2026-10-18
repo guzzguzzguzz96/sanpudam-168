@@ -10,10 +10,8 @@ export function VisitUs({ data }) {
         <div className="home-visit__content">
           <SectionIntro
             id="visit-us-title"
-            statusLabel="ข้อมูลการเยี่ยมชม · รอการยืนยัน"
             eyebrow="วางแผนการเดินทาง"
             title="เยี่ยมชม"
-            description="รายละเอียดจะแสดงเมื่อได้รับการยืนยันจากเจ้าของ"
           />
           <dl className="home-visit__details">
             {data.map((detail) => (
@@ -26,7 +24,6 @@ export function VisitUs({ data }) {
           <Button href="/visit" variant="outline">
             ข้อมูลการเยี่ยมชม
           </Button>
-          <p className="home-route-note">หน้า /visit ยังอยู่ระหว่างการพัฒนา</p>
         </div>
 
         <div

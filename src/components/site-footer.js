@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/config/site";
+import { ThaiPhrases } from "@/components/ui/thai-phrases";
 
 export function SiteFooter() {
   return (
@@ -9,9 +10,9 @@ export function SiteFooter() {
         <div className="site-footer__grid">
           <div className="site-footer__brand">
             <Link href="/" className="site-footer__brand-name" prefetch={false}>
-              {siteConfig.name}
+              <ThaiPhrases text={siteConfig.localName} />
             </Link>
-            <p>พื้นที่ตัวอย่างสำหรับการพัฒนาระบบส่วนติดต่อผู้ใช้</p>
+            <p>{siteConfig.name}</p>
           </div>
 
           <nav aria-label="เมนูหลักท้ายเว็บไซต์">
@@ -47,9 +48,6 @@ export function SiteFooter() {
             <p>นโยบายความเป็นส่วนตัวจะเผยแพร่ก่อนเปิดรับข้อมูลติดต่อ</p>
           </section>
         </div>
-        <p className="site-footer__note">
-          ตัวอย่างชั่วคราวเพื่อพัฒนาพื้นฐานเว็บไซต์
-        </p>
       </Container>
     </footer>
   );

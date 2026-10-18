@@ -18,7 +18,6 @@ export function AboutSanpudam({ data }) {
         <div className="home-about__copy">
           <SectionIntro
             id="about-sanpudam-title"
-            statusLabel="เนื้อหาตัวอย่าง · ยังไม่ยืนยัน"
             eyebrow="เกี่ยวกับ"
             title={data.title}
             description={data.description}
@@ -26,7 +25,6 @@ export function AboutSanpudam({ data }) {
           <Button href={data.href} variant="outline">
             อ่านประวัติเพิ่มเติม
           </Button>
-          <p className="home-route-note">หน้า /history ยังอยู่ระหว่างการพัฒนา</p>
         </div>
       </Container>
     </Section>

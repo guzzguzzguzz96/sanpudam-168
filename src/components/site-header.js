@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/config/site";
 import { SiteNavigation } from "@/components/site-navigation";
+import { ThaiPhrases } from "@/components/ui/thai-phrases";
 
 export function SiteHeader() {
   return (
@@ -10,12 +11,14 @@ export function SiteHeader() {
       <Container className="site-header__inner">
         <Link
           href="/"
-          aria-label={`${siteConfig.name} — หน้าแรก`}
+          aria-label={`${siteConfig.localName} — หน้าแรก`}
           className="site-brand"
           prefetch={false}
         >
-          <span className="site-brand__name">{siteConfig.name}</span>
-          <span className="site-brand__descriptor">เว็บไซต์ทางการ</span>
+          <span className="site-brand__name">
+            <ThaiPhrases text={siteConfig.localName} />
+          </span>
+          <span className="site-brand__descriptor">{siteConfig.name}</span>
         </Link>
         <Suspense fallback={null}>
           <SiteNavigation

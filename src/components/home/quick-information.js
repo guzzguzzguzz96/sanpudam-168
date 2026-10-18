@@ -12,10 +12,8 @@ export function QuickInformation({ data }) {
       <Container>
         <SectionIntro
           id="quick-information-title"
-          statusLabel="ข้อมูลตัวอย่าง · ยังไม่ยืนยัน"
           eyebrow="ข้อมูลเบื้องต้น"
           title="ข้อมูลสำหรับผู้มาเยือน"
-          description="ค่าจริงจะแสดงเมื่อเจ้าของตรวจสอบและยืนยันข้อมูลแล้ว"
         />
         <ul className="home-quick-information__list">
           {data.map((item) => (
@@ -29,7 +27,6 @@ export function QuickInformation({ data }) {
           <Button href="/visit" variant="secondary">
             ข้อมูลการเยี่ยมชม
           </Button>
-          <p className="home-route-note">หน้า /visit ยังอยู่ระหว่างการพัฒนา</p>
         </div>
       </Container>
     </Section>

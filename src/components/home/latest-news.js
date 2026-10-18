@@ -43,11 +43,7 @@ function NewsCard({ article, featured = false }) {
         >
           อ่านข่าวสาร
         </Link>
-      ) : (
-        <p className="home-news-card__pending">
-          ลิงก์บทความจะแสดงเมื่อมีเนื้อหาที่เผยแพร่แล้ว
-        </p>
-      )}
+      ) : null}
     </Card>
   );
 }
@@ -60,10 +56,8 @@ export function LatestNews({ data }) {
       <Container>
         <SectionIntro
           id="latest-news-title"
-          statusLabel="ตัวอย่างข่าวสาร · ไม่มีข่าวจริงหรือวันที่"
           eyebrow="ข่าวสาร"
           title="ข่าวสารล่าสุด"
-          description="เนื้อหาและวันที่จะเพิ่มหลังได้รับการตรวจสอบและอนุมัติ"
         />
         <div className="home-news-grid">
           {featuredArticle ? (
@@ -79,7 +73,6 @@ export function LatestNews({ data }) {
           <Link className="home-text-link" href="/news" prefetch={false}>
             ดูข่าวสารทั้งหมด
           </Link>
-          <p className="home-route-note">หน้า /news ยังอยู่ระหว่างการพัฒนา</p>
         </div>
       </Container>
     </Section>
