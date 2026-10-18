@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icons";
+
+const desktopQuery = "(min-width: 64rem)";
 
 function isCurrentRoute(pathname, href) {
   if (href === "/") {
@@ -13,14 +15,14 @@ function isCurrentRoute(pathname, href) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function NavigationLink({ item, pathname, onClick }) {
+function NavigationLink({ className, item, pathname, onClick }) {
   const active = isCurrentRoute(pathname, item.href);
   const currentPage = pathname === item.href;
 
   return (
     <Link
       href={item.href}
-      className={`site-navigation__link${active ? " is-active" : ""}`}
+      className={`${className}${active ? " is-active" : ""}`}
       aria-current={currentPage ? "page" : undefined}
       onClick={onClick}
       prefetch={false}
@@ -30,11 +32,33 @@ function NavigationLink({ item, pathname, onClick }) {
   );
 }
 
-export function SiteNavigation({ navigation, lineInquiryUrl }) {
+function ContactActionLink({ action, className = "" }) {
+  return (
+    <a
+      className={`ui-button ui-button--primary ${className}`.trim()}
+      href={action.href}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      {action.label}
+      <Icon name="external" size={18} />
+      <span className="sr-only">(เปิดในหน้าต่างใหม่)</span>
+    </a>
+  );
+}
+
+export function SiteNavigation({ navigation, contactActions = [] }) {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef(null);
   const panelRef = useRef(null);
   const pathname = usePathname();
+
+  const closeMenu = useCallback((restoreFocus = true) => {
+    setIsOpen(false);
+    if (restoreFocus) {
+      triggerRef.current?.focus({ preventScroll: true });
+    }
+  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -48,17 +72,27 @@ export function SiteNavigation({ navigation, lineInquiryUrl }) {
     function handleKeyDown(event) {
       if (event.key === "Escape") {
         event.preventDefault();
-        setIsOpen(false);
-        triggerRef.current?.focus({ preventScroll: true });
+        closeMenu();
+      }
+    }
+
+    // The mobile menu is hidden at desktop widths; close it so the page
+    // scroll lock does not persist after a resize or rotation.
+    const desktop = window.matchMedia(desktopQuery);
+    function handleViewportChange(event) {
+      if (event.matches) {
+        closeMenu(false);
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
+    desktop.addEventListener("change", handleViewportChange);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      desktop.removeEventListener("change", handleViewportChange);
       document.body.style.overflow = previousOverflow;
     };
-  }, [isOpen]);
+  }, [closeMenu, isOpen]);
 
   function handleBlur(event) {
     if (
@@ -78,15 +112,21 @@ export function SiteNavigation({ navigation, lineInquiryUrl }) {
           <ul className="site-navigation__list">
             {navigation.map((item) => (
               <li key={item.href}>
-                <NavigationLink item={item} pathname={pathname} />
+                <NavigationLink
+                  className="site-navigation__link"
+                  item={item}
+                  pathname={pathname}
+                />
               </li>
             ))}
           </ul>
         </nav>
-        {lineInquiryUrl ? (
-          <Button href={lineInquiryUrl} variant="secondary">
-            สอบถามผ่าน LINE
-          </Button>
+        {contactActions.length > 0 ? (
+          <div className="site-header__actions">
+            {contactActions.map((action) => (
+              <ContactActionLink key={action.id} action={action} />
+            ))}
+          </div>
         ) : null}
       </div>
 
@@ -95,34 +135,12 @@ export function SiteNavigation({ navigation, lineInquiryUrl }) {
           ref={triggerRef}
           type="button"
           className="mobile-navigation__trigger"
-          aria-label={isOpen ? "ปิดเมนูหลัก" : "เปิดเมนูหลัก"}
           aria-expanded={isOpen}
           aria-controls="mobile-site-navigation"
           onClick={() => setIsOpen((open) => !open)}
         >
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-            fill="none"
-          >
-            {isOpen ? (
-              <path
-                d="m6 6 12 12M18 6 6 18"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            ) : (
-              <path
-                d="M4 7h16M4 12h16M4 17h16"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            )}
-          </svg>
+          <Icon name={isOpen ? "close" : "menu"} />
+          <span>{isOpen ? "ปิดเมนู" : "เมนู"}</span>
         </button>
         {isOpen ? (
           <button
@@ -130,10 +148,7 @@ export function SiteNavigation({ navigation, lineInquiryUrl }) {
             className="mobile-navigation__backdrop"
             aria-label="ปิดเมนูหลัก"
             tabIndex="-1"
-            onClick={() => {
-              setIsOpen(false);
-              triggerRef.current?.focus({ preventScroll: true });
-            }}
+            onClick={() => closeMenu()}
           />
         ) : null}
         <div
@@ -147,26 +162,25 @@ export function SiteNavigation({ navigation, lineInquiryUrl }) {
               {navigation.map((item) => (
                 <li key={item.href}>
                   <NavigationLink
+                    className="mobile-navigation__link"
                     item={item}
                     pathname={pathname}
-                    onClick={() => {
-                      setIsOpen(false);
-                      triggerRef.current?.focus({ preventScroll: true });
-                    }}
+                    onClick={() => closeMenu()}
                   />
                 </li>
               ))}
-              {lineInquiryUrl ? (
-                <li>
-                  <Button
-                    href={lineInquiryUrl}
-                    className="mobile-navigation__line"
-                  >
-                    สอบถามผ่าน LINE
-                  </Button>
-                </li>
-              ) : null}
             </ul>
+            {contactActions.length > 0 ? (
+              <div className="mobile-navigation__actions">
+                {contactActions.map((action) => (
+                  <ContactActionLink
+                    key={action.id}
+                    action={action}
+                    className="mobile-navigation__action"
+                  />
+                ))}
+              </div>
+            ) : null}
           </nav>
         </div>
       </div>

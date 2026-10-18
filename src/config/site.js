@@ -6,7 +6,9 @@ export const siteConfig = {
   isPreview: true,
   description:
     "พื้นที่ออนไลน์สำหรับ Sanpudam 168 กำลังอยู่ระหว่างการจัดเตรียม",
+  // External contact actions render only when an owner-verified URL is set.
   lineInquiryUrl: null,
+  directionsUrl: null,
   navigation: [
     { href: "/", label: "หน้าแรก" },
     { href: "/history", label: "ประวัติ" },

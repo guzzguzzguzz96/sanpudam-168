@@ -1,8 +1,8 @@
 # Sanpudam 168 — design system
 
-**Phase:** 02.1 — UI/UX design specification
+**Phase:** 02.1 — UI/UX design specification; palette and typography revised and implemented in Phase 02.4
 
-**Status:** Direction approved; token values and component details below are proposals for validation, not a final identity or implemented UI.
+**Status:** Direction approved. The Thai Heritage Navy palette and Thai typography in sections 2–3 are implemented in `src/app/globals.css` as provisional tokens, approved by the owner in the Phase 02.4 visual review. They replace the earlier Deep Charcoal / Heritage Green / Antique Gold palette and Noto Serif Thai headings, which are no longer in use. Other component details remain proposals for validation, not a final identity.
 
 ## 1. Design direction
 
@@ -23,61 +23,73 @@ The supplied public reference was reviewed to understand the kinds of content an
 
 ## 2. Color tokens
 
-These are preliminary proposals. Test every foreground/background pairing in the rendered UI and adjust tokens if contrast or legibility is insufficient.
+**Thai Heritage Navy + Gold + Soft Blue** (provisional, Phase 02.4). Values below are the implemented CSS custom properties. Re-verify any new foreground/background pairing in the rendered UI before use.
 
-| Token | Proposed value | Intended use |
+| Token (CSS variable) | Value | Intended use |
 |---|---|---|
-| Deep Charcoal | `#1C2420` | Cinematic hero/footer surface; large headings on light surfaces only if contrast-checked |
-| Heritage Green | `#34483B` | Primary actions, selected states, and restrained navigation emphasis |
-| Antique Gold | `#A88448` | Small decorative accents, dividers, icon details, and highlights; not small text on ivory or white |
-| Deep Gold | `#715323` | Gold-toned text or icons on light surfaces, after contrast verification |
-| Warm Ivory | `#F8F5EE` | Primary warm page background |
-| White | `#FFFFFF` | Cards, forms, and content surfaces |
-| Dark Text | `#242824` | Main body copy and headings on light backgrounds |
-| Muted Text | `#626860` | Secondary copy and supporting metadata on light backgrounds |
-| Soft Border | `#E6E0D5` | Subtle dividers, card borders, and input outlines |
+| Primary Navy (`--navy`) | `#173B70` | Primary actions on light surfaces, active navigation, icons, selected states |
+| Deep Navy (`--deep-navy`) | `#102C52` | Hero and footer surfaces, headings on light surfaces, focus ring on light surfaces |
+| Royal Gold (`--royal-gold`) | `#C99A42` | Hero primary-button fill, dividers and decorative accents; text only on Deep Navy |
+| Royal Gold hover (`--royal-gold-hover`) | `#D6AC5C` | Hover state of the gold button |
+| Deep Gold (`--deep-gold`) | `#8A6420` | Gold-toned text (eyebrows, labels) on light surfaces |
+| Warm Ivory (`--warm-ivory`) | `#FAF8F3` | Primary page background; light text and focus ring on dark surfaces |
+| Soft Blue (`--soft-blue`) | `#EDF4FB` | Prototype notice, hover and active backgrounds, icon circles |
+| White (`--white`) | `#FFFFFF` | Header, cards, panels, and content surfaces |
+| Dark Text (`--dark-text`) | `#253247` | Main body copy on light backgrounds |
+| Muted Text (`--muted-text`) | `#5B6A7E` | Secondary copy and metadata on light backgrounds |
+| Soft Border (`--soft-border`) | `#DCE3EC` | Decorative dividers and card borders (non-essential boundaries only) |
+
+Muted Text was darkened from the proposed `#64748B`, which measured 4.48:1 on Warm Ivory and 4.29:1 on Soft Blue (below AA). Deep Gold was added because Royal Gold cannot carry text on light surfaces.
 
 ### Verified contrast pairs
 
 | Foreground | Background | Contrast | Guidance |
 |---|---|---:|---|
-| Deep Charcoal | Warm Ivory | 14.58:1 | Suitable for essential text on this background |
-| Dark Text | Warm Ivory | 13.74:1 | Suitable for essential text on this background |
-| Muted Text | Warm Ivory | 5.26:1 | Suitable for normal-sized secondary text on this background |
-| Deep Gold | Warm Ivory | 6.51:1 | Suitable for normal-sized text on this background |
-| White | Heritage Green | 9.83:1 | Preferred high-contrast primary-action pairing |
-| Antique Gold | Warm Ivory | 3.18:1 | Decorative or nonessential emphasis only; not normal-sized essential text |
-| White | Antique Gold | 3.47:1 | Do not use for normal-sized button labels or other essential text |
+| Dark Text | Warm Ivory / White / Soft Blue | 12.17 / 12.92 / 11.65:1 | Essential text |
+| Deep Navy | Warm Ivory | 13.15:1 | Headings and essential text |
+| Primary Navy | Warm Ivory / White / Soft Blue | 10.44 / 11.08 / 9.99:1 | Text links, outline buttons, active indicators, icons |
+| White | Primary Navy | 11.08:1 | Primary-button label on light surfaces |
+| Warm Ivory | Deep Navy | 13.15:1 | Hero/footer text, light outline button, focus ring on dark surfaces |
+| Deep Navy | Royal Gold | 5.44:1 | Hero primary-button label |
+| Deep Navy | Royal Gold hover | 6.59:1 | Hover state of the hero primary button |
+| Royal Gold | Deep Navy | 5.44:1 | Gold text on dark surfaces (eyebrows) |
+| Muted Text | Warm Ivory / White / Soft Blue | 5.20 / 5.52 / 4.97:1 | Normal-sized secondary text |
+| Deep Gold | Warm Ivory / Soft Blue | 5.04 / 4.82:1 | Normal-sized gold-toned text |
+| Royal Gold | Warm Ivory / White | 2.42 / 2.57:1 | Decorative only; never text or the only state indicator |
+| White | LINE green `#06C755` | 2.26:1 | Do not place white normal-sized text on LINE green |
 
 ### Application rules
 
-- Keep long-form reading areas light; reserve dark surfaces for a small number of high-impact areas such as the hero and footer.
-- Use Heritage Green for primary actions with a tested high-contrast label. Use Antique Gold sparingly and never rely on it alone to communicate state.
-- Do not use Antique Gold for normal-sized essential text or as a button background with white normal-sized text. Pair it with Deep Charcoal for decorative treatments or use Deep Gold for essential text on light backgrounds.
-- Provide separate hover, active, selected, disabled, error, and success states. State must also be conveyed through text, shape, or iconography, not color alone.
+- Keep long-form reading areas light; reserve Deep Navy surfaces for a small number of high-impact areas such as the hero and footer.
+- On light surfaces, primary actions use Primary Navy with a white label. On Deep Navy, the primary action uses a Royal Gold fill with a Deep Navy label and the secondary action uses a Warm Ivory outline — never navy-on-navy.
+- Use Royal Gold sparingly. Never use it for text on light surfaces or rely on it alone to communicate state; use Deep Gold for gold-toned text on light backgrounds.
+- LINE actions appear only for an owner-verified destination and follow LINE's brand guidelines; use the LINE mark in its brand color on an accessible button rather than white text on LINE green.
+- Provide separate hover, active, selected, disabled, error, and success states. State must also be conveyed through text, shape, weight, or iconography, not color alone (for example, the navigation active state uses a solid navy bar plus semibold weight).
 - Target WCAG 2.2 AA text contrast: at least 4.5:1 for normal text and 3:1 for large text. Interactive controls and focus indicators must have at least 3:1 contrast against adjacent colors; verify the rendered state, including on dark hero surfaces.
 
 ## 3. Typography
 
-### Proposed families
+### Families (implemented)
 
-- **Headings and editorial titles:** Noto Serif Thai, with a serif fallback suitable for Thai.
-- **Body, navigation, labels, and controls:** Noto Sans Thai, with a sans-serif fallback suitable for Thai.
-- Use self-hosted fonts or another owner-approved delivery method in implementation. Confirm font licensing and Thai glyph coverage before shipping. These fonts are recommendations, not a commitment to a provider.
+- **Headings, brand name, and editorial titles:** Noto Sans Thai (loopless), weights 600–700, fallback `"Leelawadee UI", Tahoma, sans-serif`.
+- **Body, navigation, labels, and controls:** Noto Sans Thai Looped, weights 400–600, fallback `Tahoma, Arial, sans-serif`. Looped forms are easier for older Thai readers.
+- Both load through `next/font/google` (self-hosted at build time) as variable fonts with Thai and Latin subsets. Confirm licensing before production launch.
 
-### Hierarchy
+### Hierarchy (implemented tokens)
 
-| Role | Proposed size / line height | Weight | Typical use |
+| Role | Size / line height | Weight | Typical use |
 |---|---:|---:|---|
-| Display | 48–64px / 1.12–1.2 | 500–600 | Homepage hero title; responsive down to 36–40px on small screens |
-| H1 | 36–48px / 1.2–1.3 | 500–600 | One primary title per page |
-| H2 | 28–36px / 1.25–1.35 | 500–600 | Major content sections |
-| H3 | 20–24px / 1.35–1.45 | 500–600 | Cards and subsections |
-| Lead | 18–20px / 1.6–1.75 | 400 | Introductory paragraphs |
-| Body | 16px / 1.65–1.8 | 400 | Main reading text and form help |
-| Small | 14px / 1.5–1.65 | 400–500 | Metadata, captions, and secondary labels |
+| Display | 36–60px / 1.3 | 700 | Homepage hero title |
+| H1 | 32–48px / 1.35 | 600 | One primary title per page |
+| H2 | 28–36px / 1.4 | 600 | Major content sections |
+| H3 | 20–24px / 1.5 | 600 | Cards and subsections |
+| Lead | 19–21px / 1.75 | 400 | Introductory paragraphs |
+| Body | 17px mobile, 18px from 768px / 1.8 | 400 | Main reading text |
+| Navigation | 17px desktop, 18px mobile menu | 500–600 | Header and menu links |
+| Button | 16px / 1.5 | 600 | All buttons |
+| Small | 16px / 1.65 | 400–600 | Metadata, captions, and secondary labels; the minimum size for essential text |
 
-These are starting values; test actual Thai text wrapping on all specified widths. Use natural Thai word wrapping, avoid forced letter spacing, and do not use long uppercase English labels as decoration. Keep paragraph measure around 60–75 Latin-equivalent characters, then adjust for Thai reading comfort.
+Thai stacked vowels and tone marks need taller line boxes than Latin text, so heading line heights are deliberately looser than typical Latin values. Thai has no spaces between words: keep owner-approved names intact by wrapping only at the spaces between phrases (`ThaiPhrases` component), and test wrapping at every QA width. Avoid forced letter spacing and long uppercase English labels as decoration. Keep paragraph measure around 60–75 Latin-equivalent characters, then adjust for Thai reading comfort.
 
 ## 4. Spacing, grid, and shape
 
@@ -119,8 +131,8 @@ Use mobile-first rules. Images should preserve their subject and focal point at 
 
 ### Buttons and links
 
-- **Primary:** Heritage Green fill, high-contrast label, clear verb, minimum 44×44px touch target.
-- **Secondary:** White or transparent surface with a Soft Border and Dark Text; use for a lower-priority action.
+- **Primary:** Primary Navy fill with a white label on light surfaces, or Royal Gold fill with a Deep Navy label on dark surfaces; clear verb; minimum 48×48px touch target.
+- **Secondary:** White or transparent surface with a Soft Border and Dark Text, a navy outline, or a Warm Ivory outline on dark surfaces; use for a lower-priority action.
 - **Text link:** Underlined or otherwise clearly distinguishable in body copy; include a visible keyboard focus treatment.
 - **LINE inquiry:** A distinct external action, visually consistent with primary actions but clearly identified as leaving the site. Use only an owner-verified LINE destination.
 - Provide hover, focus-visible, active, and disabled states. Never make the entire card an ambiguous cluster of nested links.
@@ -154,11 +166,11 @@ Forms are future product work, not Phase 02.1 implementation. When designed late
 
 - Semantic landmarks, one clear H1 per page, ordered headings, descriptive link labels, and a skip link.
 - Full keyboard support with a visible focus indicator, logical focus order, and no keyboard traps.
-- Touch targets should generally be at least 44×44px; keep adjacent controls separated.
+- Touch targets should be at least 48×48px; keep adjacent controls separated.
 - Images conveying information receive useful alt text; decorative images use empty alt text. Do not repeat adjacent captions in alt text.
 - Navigation, dialogs, gallery controls, and future accordions have accessible names and states.
 - Check contrast, zoom/reflow at 200%, reduced motion, Thai text scaling, and screen-reader announcements during implementation QA.
 
 ## 9. Design-to-implementation guardrails
 
-This document specifies direction only. Phase 02.1 does not change the existing application or load new fonts/dependencies. Future implementation should keep App Router pages and layouts server-rendered by default, use Client Components only for required interaction, and convert these tokens into a shared theme only after visual and contrast review.
+Phase 02.1 specified direction only. Phase 02.4 implemented the palette and typography above as shared tokens in `src/app/globals.css`; other values remain proposals. Future implementation should keep App Router pages and layouts server-rendered by default, use Client Components only for required interaction, and convert these tokens into a shared theme only after visual and contrast review.

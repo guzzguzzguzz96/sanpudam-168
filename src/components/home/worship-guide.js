@@ -6,6 +6,7 @@ import { Section } from "@/components/ui/section";
 export function WorshipGuide({ data }) {
   return (
     <Section
+      id="worship-guide"
       aria-labelledby="worship-guide-title"
       className="home-worship-guide"
     >

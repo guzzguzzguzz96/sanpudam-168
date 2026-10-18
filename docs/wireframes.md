@@ -4,7 +4,7 @@
 
 **Status:** Structural wireframes; not final visual comps, production copy, or implemented routes.
 
-The layout follows the approved **Contemporary Heritage** direction: calm editorial spacing, warm light content areas, a restrained cinematic hero, dark readable typography, and sparing antique-gold accents. The wireframes describe hierarchy and responsive behavior, not a final logo, photography, colors, or factual copy. See `design-system.md` for proposed tokens and `information-architecture.md` for route and CMS rules.
+The layout follows the approved **Contemporary Heritage** direction: calm editorial spacing, warm ivory content areas, a restrained cinematic Deep Navy hero, dark readable Thai typography, and sparing Royal Gold accents (the Thai Heritage Navy palette implemented in Phase 02.4). The wireframes describe hierarchy and responsive behavior, not a final logo, photography, colors, or factual copy. See `design-system.md` for proposed tokens and `information-architecture.md` for route and CMS rules.
 
 ## 1. Homepage — desktop wireframe
 
@@ -119,7 +119,7 @@ The layout follows the approved **Contemporary Heritage** direction: calm editor
 
 ### Mobile behavior
 
-- Keep the header compact. The menu trigger must have an accessible name, visible focus, and a touch area of at least 44×44px; expose expanded state and allow keyboard dismissal.
+- Keep the header compact. The menu trigger shows an icon with the visible Thai label “เมนู” (“ปิดเมนู” when open), visible focus, and a touch area of at least 48×48px; expose expanded state and allow keyboard dismissal.
 - Stack the hero title, introduction, and calls to action. Maintain readable contrast if the image is behind text; if contrast cannot be assured, place the copy on a solid panel below the image.
 - Stack quick-information details; do not create a horizontally scrolling strip for essential visit data.
 - Prefer single-column item and news cards at 320–375px. Add a two-column gallery grid only when images remain comfortably tappable.

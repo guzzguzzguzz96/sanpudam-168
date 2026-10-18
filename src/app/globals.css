@@ -66,6 +66,7 @@
   --navy: #173b70;
   --deep-navy: #102c52;
   --royal-gold: #c99a42;
+  --royal-gold-hover: #d6ac5c;
   --deep-gold: #8a6420;
   --warm-ivory: #faf8f3;
   --soft-blue: #edf4fb;
@@ -125,9 +126,8 @@
   --page-gutter: 1.25rem;
   --container-max: 80rem;
   --section-space: clamp(3.5rem, 7vw, 5.5rem);
-  --header-min-height: 4.5rem;
+  --header-min-height: 4rem;
   --touch-target-size: 3rem;
-  --menu-max-width: 24rem;
   --leading-control: 1.5;
   --control-radius: 0.5rem;
   --card-radius: 0.75rem;
@@ -155,6 +155,7 @@
 @media (min-width: 64rem) {
   :root {
     --page-gutter: 2.5rem;
+    --header-min-height: 4.5rem;
   }
 }
 
@@ -166,6 +167,12 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
+/* Keep in-page anchor targets clear of the sticky header. */
+[id] {
+  scroll-margin-top: 6rem;
 }
 
 body {
@@ -365,6 +372,27 @@ svg {
   color: var(--white);
 }
 
+.ui-button--gold {
+  border-color: var(--royal-gold);
+  background: var(--royal-gold);
+  color: var(--deep-navy);
+}
+
+.ui-button--gold:hover:not(:disabled) {
+  border-color: var(--royal-gold-hover);
+  background: var(--royal-gold-hover);
+}
+
+.ui-button--outline-light {
+  border: 2px solid var(--warm-ivory);
+  background: transparent;
+  color: var(--warm-ivory);
+}
+
+.ui-button--outline-light:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--warm-ivory) 14%, transparent);
+}
+
 .ui-button:disabled {
   border-color: var(--soft-border);
   background: var(--soft-border);
@@ -382,10 +410,12 @@ svg {
 }
 
 .site-header {
-  position: relative;
-  z-index: 20;
+  position: sticky;
+  z-index: 30;
+  top: 0;
   border-bottom: 1px solid var(--soft-border);
-  background: var(--warm-ivory);
+  background: var(--white);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--deep-navy) 6%, transparent);
 }
 
 .site-header__inner {
@@ -393,23 +423,23 @@ svg {
   min-height: var(--header-min-height);
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3);
   padding-block: var(--space-2);
 }
 
 .site-brand {
   display: grid;
+  min-width: 0;
   flex: 0 1 auto;
-  gap: var(--space-1);
   color: var(--deep-navy);
-  line-height: var(--leading-h3);
+  line-height: 1.4;
   text-decoration: none;
 }
 
 .site-brand__name {
   font-family: var(--font-display-family);
-  font-size: var(--type-h3);
-  font-weight: 600;
+  font-size: 1.0625rem;
+  font-weight: var(--weight-bold);
 }
 
 .site-brand__descriptor {
@@ -417,10 +447,24 @@ svg {
   font-size: var(--type-small);
 }
 
+.site-brand:hover .site-brand__name {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}
+
 .site-header__desktop {
   display: none;
   align-items: center;
   gap: var(--space-6);
+}
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-inline-start: var(--space-6);
+  border-inline-start: 1px solid var(--soft-border);
 }
 
 .site-navigation__list,
@@ -435,24 +479,28 @@ svg {
 .site-navigation__list {
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-1);
 }
 
 .site-navigation__link {
+  position: relative;
   display: inline-flex;
   min-height: var(--touch-target-size);
   align-items: center;
+  padding-inline: var(--space-3);
+  border-radius: var(--control-radius);
   color: var(--dark-text);
   font-size: var(--type-nav);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   text-decoration: none;
-  transition: color var(--motion-fast) var(--motion-ease);
+  transition:
+    background-color var(--motion-fast) var(--motion-ease),
+    color var(--motion-fast) var(--motion-ease);
 }
 
 .site-navigation__link:hover {
+  background: var(--soft-blue);
   color: var(--navy);
-  text-decoration: underline;
-  text-underline-offset: 0.3em;
 }
 
 .site-navigation__link.is-active {
@@ -460,30 +508,50 @@ svg {
   font-weight: var(--weight-semibold);
 }
 
-.site-navigation__link[aria-current="page"] {
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.35em;
+/* Active state is a solid navy bar plus weight, not color alone. */
+.site-navigation__link.is-active::after {
+  position: absolute;
+  right: var(--space-3);
+  bottom: 0.3rem;
+  left: var(--space-3);
+  height: 3px;
+  border-radius: 3px;
+  background: var(--navy);
+  content: "";
 }
 
 .mobile-navigation {
-  position: relative;
-  z-index: 2;
   margin-inline-start: auto;
 }
 
 .mobile-navigation__trigger {
   position: relative;
   z-index: 3;
-  display: inline-grid;
-  width: var(--touch-target-size);
-  height: var(--touch-target-size);
-  place-items: center;
-  border: 1px solid var(--soft-border);
+  display: inline-flex;
+  min-height: var(--touch-target-size);
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 6.75rem;
+  justify-content: center;
+  padding-inline: var(--space-3);
+  border: 1.5px solid var(--navy);
   border-radius: var(--control-radius);
   background: var(--white);
-  color: var(--deep-navy);
+  color: var(--navy);
   cursor: pointer;
+  font-size: var(--type-button);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-control);
+  white-space: nowrap;
+}
+
+.mobile-navigation__trigger:hover {
+  background: var(--soft-blue);
+}
+
+.mobile-navigation__trigger[aria-expanded="true"] {
+  background: var(--navy);
+  color: var(--white);
 }
 
 .mobile-navigation__backdrop {
@@ -492,25 +560,28 @@ svg {
   inset: 0;
   padding: 0;
   border: 0;
-  background: color-mix(in srgb, var(--deep-navy) 32%, transparent);
+  background: transparent;
   cursor: default;
 }
 
+/* Positioned against the sticky header so the panel spans the viewport.
+   The spread shadow dims the page; clip-path keeps it off the header. */
 .mobile-navigation__panel {
   position: absolute;
   z-index: 3;
-  top: calc(100% + var(--space-3));
+  top: 100%;
   right: 0;
-  width: min(
-    var(--menu-max-width),
-    calc(100vw - var(--page-gutter) - var(--page-gutter))
-  );
-  max-height: calc(100dvh - var(--header-min-height) - var(--space-4));
+  left: 0;
+  max-height: calc(100dvh - 6rem);
   overflow-y: auto;
-  padding: var(--space-3);
-  border: 1px solid var(--soft-border);
-  border-radius: var(--card-radius);
+  overscroll-behavior: contain;
+  padding: var(--space-2) var(--page-gutter) var(--space-6);
+  border-bottom: 1px solid var(--soft-border);
   background: var(--white);
+  box-shadow:
+    0 12px 24px color-mix(in srgb, var(--deep-navy) 14%, transparent),
+    0 0 0 100vmax color-mix(in srgb, var(--deep-navy) 40%, transparent);
+  clip-path: inset(0 0 -100vmax 0);
 }
 
 .mobile-navigation__panel[hidden] {
@@ -519,17 +590,41 @@ svg {
 
 .mobile-navigation__list {
   flex-direction: column;
-  gap: var(--space-1);
 }
 
-.mobile-navigation__list .site-navigation__link {
-  width: 100%;
-  padding-inline: var(--space-3);
+.mobile-navigation__link {
+  display: flex;
+  min-height: 3.5rem;
+  align-items: center;
+  padding-inline: var(--space-4);
+  border-bottom: 1px solid var(--soft-border);
+  border-inline-start: 4px solid transparent;
+  color: var(--dark-text);
+  font-size: 1.125rem;
+  font-weight: var(--weight-medium);
+  text-decoration: none;
 }
 
-.mobile-navigation__line {
+.mobile-navigation__link:hover {
+  background: var(--soft-blue);
+  color: var(--navy);
+}
+
+.mobile-navigation__link.is-active {
+  border-inline-start-color: var(--navy);
+  background: var(--soft-blue);
+  color: var(--navy);
+  font-weight: var(--weight-semibold);
+}
+
+.mobile-navigation__actions {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.mobile-navigation__action {
   width: 100%;
-  margin-top: var(--space-2);
 }
 
 .site-footer {
@@ -720,6 +815,10 @@ svg {
 }
 
 @media (min-width: 48rem) {
+  .site-brand__name {
+    font-size: 1.125rem;
+  }
+
   .site-footer__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -742,8 +841,8 @@ svg {
     display: none;
   }
 
-  .site-navigation__list {
-    gap: var(--space-3);
+  .site-brand__name {
+    font-size: 1.375rem;
   }
 
   .site-footer__grid {

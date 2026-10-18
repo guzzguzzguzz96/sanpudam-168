@@ -5,7 +5,7 @@ import { Section } from "@/components/ui/section";
 
 export function VisitUs({ data }) {
   return (
-    <Section aria-labelledby="visit-us-title" className="home-visit">
+    <Section id="visit" aria-labelledby="visit-us-title" className="home-visit">
       <Container className="home-visit__layout">
         <div className="home-visit__content">
           <SectionIntro

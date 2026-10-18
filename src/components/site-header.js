@@ -5,6 +5,16 @@ import { siteConfig } from "@/config/site";
 import { SiteNavigation } from "@/components/site-navigation";
 import { ThaiPhrases } from "@/components/ui/thai-phrases";
 
+// Only owner-verified destinations become header actions.
+const contactActions = [
+  siteConfig.lineInquiryUrl
+    ? { id: "line", href: siteConfig.lineInquiryUrl, label: "สอบถามทาง LINE" }
+    : null,
+  siteConfig.directionsUrl
+    ? { id: "directions", href: siteConfig.directionsUrl, label: "เส้นทาง" }
+    : null,
+].filter(Boolean);
+
 export function SiteHeader() {
   return (
     <header className="site-header">
@@ -23,7 +33,7 @@ export function SiteHeader() {
         <Suspense fallback={null}>
           <SiteNavigation
             navigation={siteConfig.navigation}
-            lineInquiryUrl={siteConfig.lineInquiryUrl}
+            contactActions={contactActions}
           />
         </Suspense>
       </Container>

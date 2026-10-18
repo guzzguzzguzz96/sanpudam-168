@@ -30,6 +30,7 @@ function SacredItemCard({ item }) {
 export function FeaturedSacredItems({ data }) {
   return (
     <Section
+      id="featured-items"
       aria-labelledby="featured-items-title"
       className="home-featured-items"
     >

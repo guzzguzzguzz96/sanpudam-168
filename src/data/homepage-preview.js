@@ -6,18 +6,64 @@ export const homepagePreviewData = {
     title: siteConfig.localName,
     description:
       "พื้นที่ตัวอย่างสำหรับข้อความแนะนำ เนื้อหาจริงจะเผยแพร่หลังเจ้าของตรวจสอบและอนุมัติ",
-    primaryCta: { href: "/history", label: "อ่านข้อมูลประวัติ" },
-    secondaryCta: { href: "/sakkara", label: "สำรวจวัตถุมงคล" },
+    // In-page anchors until the /sakkara and /history routes exist.
+    primaryCta: { href: "#featured-items", label: "ชมวัตถุมงคลแนะนำ" },
+    secondaryCta: { href: "#about", label: "ทำความรู้จักศาล" },
     desktopImage: null,
     mobileImage: null,
     desktopFocalPoint: "50% 50%",
     mobileFocalPoint: "50% 50%",
   },
   quickInformation: [
-    { id: "hours", label: "เวลาเปิดทำการ", value: "รอข้อมูลยืนยัน" },
-    { id: "location", label: "สถานที่", value: "รอข้อมูลยืนยัน" },
-    { id: "contact", label: "ช่องทางติดต่อ", value: "รอข้อมูลยืนยัน" },
+    {
+      id: "hours",
+      icon: "clock",
+      label: "เวลาเปิดทำการ",
+      value: "รอข้อมูลยืนยัน",
+    },
+    { id: "location", icon: "mapPin", label: "สถานที่", value: "รอข้อมูลยืนยัน" },
+    {
+      id: "contact",
+      icon: "chat",
+      label: "ช่องทางติดต่อ",
+      value: "รอข้อมูลยืนยัน",
+    },
   ],
+  // Only working actions: in-page anchors, plus external contact
+  // destinations once the owner has verified them in siteConfig.
+  quickActions: [
+    { id: "history", href: "#about", icon: "book", label: "ประวัติศาล" },
+    {
+      id: "worship",
+      href: "#worship-guide",
+      icon: "lotus",
+      label: "การสักการะ",
+    },
+    {
+      id: "sacred-items",
+      href: "#featured-items",
+      icon: "gem",
+      label: "วัตถุมงคล",
+    },
+    siteConfig.directionsUrl
+      ? {
+          id: "directions",
+          href: siteConfig.directionsUrl,
+          icon: "route",
+          label: "นำทางไปศาล",
+          external: true,
+        }
+      : { id: "directions", href: "#visit", icon: "route", label: "การเดินทาง" },
+    siteConfig.lineInquiryUrl
+      ? {
+          id: "line",
+          href: siteConfig.lineInquiryUrl,
+          icon: "chat",
+          label: "สอบถามทาง LINE",
+          external: true,
+        }
+      : null,
+  ].filter(Boolean),
   about: {
     title: "ข้อมูลเกี่ยวกับ Sanpudam 168",
     description:

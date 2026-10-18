@@ -6,7 +6,7 @@ import { Section } from "@/components/ui/section";
 
 export function AboutSanpudam({ data }) {
   return (
-    <Section aria-labelledby="about-sanpudam-title" className="home-about">
+    <Section id="about" aria-labelledby="about-sanpudam-title" className="home-about">
       <Container className="home-about__layout">
         <MediaFrame
           alt={data.imageAlt}
