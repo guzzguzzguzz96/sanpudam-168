@@ -410,12 +410,26 @@ svg {
   text-underline-offset: 0.3em;
 }
 
+.site-navigation__link.is-active {
+  color: var(--heritage-green);
+  font-weight: var(--weight-semibold);
+}
+
+.site-navigation__link[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.35em;
+}
+
 .mobile-navigation {
   position: relative;
+  z-index: 2;
   margin-inline-start: auto;
 }
 
 .mobile-navigation__trigger {
+  position: relative;
+  z-index: 3;
   display: inline-grid;
   width: var(--touch-target-size);
   height: var(--touch-target-size);
@@ -427,15 +441,27 @@ svg {
   cursor: pointer;
 }
 
+.mobile-navigation__backdrop {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--deep-charcoal) 32%, transparent);
+  cursor: default;
+}
+
 .mobile-navigation__panel {
   position: absolute;
-  z-index: 30;
+  z-index: 3;
   top: calc(100% + var(--space-3));
   right: 0;
   width: min(
     var(--menu-max-width),
     calc(100vw - var(--page-gutter) - var(--page-gutter))
   );
+  max-height: calc(100dvh - var(--header-min-height) - var(--space-4));
+  overflow-y: auto;
   padding: var(--space-3);
   border: 1px solid var(--soft-border);
   border-radius: var(--card-radius);

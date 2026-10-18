@@ -1,6 +1,6 @@
 # Sanpudam 168
 
-โครงสร้างตั้งต้นสำหรับเว็บไซต์ Sanpudam 168 ระยะที่ 01 ครอบคลุมเฉพาะพื้นฐานของโปรเจกต์และหน้าแนะนำแบบเรียบง่าย ยังไม่มีระบบแคตตาล็อก ข่าวสาร CMS หรือการยืนยันตัวตน
+โครงการ Sanpudam 168 ใช้ Next.js App Router และอยู่ระหว่างทำ Phase 02.3: responsive homepage prototype. หน้าแรกแสดงโครงสร้างและข้อมูลตัวอย่างสำหรับการพัฒนาเท่านั้น เนื้อหา ภาพ และข้อมูลปฏิบัติการยังไม่ใช่ข้อมูลที่เจ้าของยืนยันและไม่ควรเผยแพร่เป็นข้อเท็จจริง
 
 ## เริ่มต้นใช้งาน
 
@@ -46,7 +46,7 @@ src/
 
 ## ขอบเขตระยะนี้
 
-มีเพียงหน้าแนะนำ responsive ภาษาไทย, navigation พื้นฐาน, metadata สำหรับ SEO และโครงสร้างเริ่มต้น ยังไม่มี MongoDB Atlas/Mongoose connection, Cloudinary uploads, Auth.js, ระบบ Admin หรือ public registration
+หน้า `/` เป็น homepage prototype แบบ responsive ภาษาไทย ส่วนหน้า `/history`, `/sakkara`, `/news` และ `/visit` ในเมนูยังอยู่ระหว่างการพัฒนา ลิงก์เหล่านี้จึงยังไม่ใช่หน้าที่พร้อมใช้งาน ขณะนี้ยังไม่มี MongoDB Atlas/Mongoose connection, Cloudinary uploads, Auth.js, ระบบ Admin, Contact Form หรือ public registration และ metadata ของ prototype ตั้งค่าไม่ให้เครื่องมือค้นหาจัดทำดัชนี
 
 ## Git branching
 

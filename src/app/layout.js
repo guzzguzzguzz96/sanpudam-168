@@ -3,6 +3,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
+import "@/components/home/home.css";
 
 const bodyFont = Noto_Sans_Thai({
   variable: "--font-noto-sans-thai",
@@ -33,6 +34,10 @@ export const metadata = {
     siteName: siteConfig.name,
     title: siteConfig.name,
     description: siteConfig.description,
+  },
+  robots: {
+    index: false,
+    follow: false,
   },
 };
 

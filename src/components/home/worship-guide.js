@@ -1,0 +1,40 @@
+import { Button } from "@/components/ui/button";
+import { Container } from "@/components/ui/container";
+import { SectionIntro } from "@/components/home/section-intro";
+import { Section } from "@/components/ui/section";
+
+export function WorshipGuide({ data }) {
+  return (
+    <Section
+      aria-labelledby="worship-guide-title"
+      className="home-worship-guide"
+    >
+      <Container>
+        <SectionIntro
+          id="worship-guide-title"
+          statusLabel="ตัวอย่างโครงสร้าง · ไม่มีคำแนะนำจริง"
+          eyebrow="คำแนะนำ"
+          title="เตรียมข้อมูลการสักการะ"
+          description="ขั้นตอนจริงจะแสดงเมื่อได้รับคำแนะนำที่เจ้าของตรวจสอบและอนุมัติ"
+        />
+        <ol className="home-worship-guide__steps">
+          {data.map((step, index) => (
+            <li key={step.id} className="home-worship-guide__step">
+              <span className="home-worship-guide__number" aria-hidden="true">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </li>
+          ))}
+        </ol>
+        <div className="home-section-action">
+          <Button href="/visit" variant="outline">
+            ข้อมูลการเยี่ยมชม
+          </Button>
+          <p className="home-route-note">หน้า /visit ยังอยู่ระหว่างการพัฒนา</p>
+        </div>
+      </Container>
+    </Section>
+  );
+}

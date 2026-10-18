@@ -1,0 +1,160 @@
+const developmentLabel = "ตัวอย่างสำหรับการพัฒนา · ยังไม่ใช่ข้อมูลยืนยัน";
+
+export const homepagePreviewData = {
+  developmentLabel,
+  pendingRoutes:
+    "หน้า /history, /sakkara, /news และ /visit ยังอยู่ระหว่างการพัฒนา",
+  banner: {
+    eyebrow: "ตัวอย่างชั่วคราว",
+    title: "Sanpudam 168",
+    description:
+      "พื้นที่ตัวอย่างสำหรับข้อความแนะนำ เนื้อหาจริงจะเผยแพร่หลังเจ้าของตรวจสอบและอนุมัติ",
+    primaryCta: { href: "/history", label: "อ่านข้อมูลประวัติ" },
+    secondaryCta: { href: "/sakkara", label: "สำรวจวัตถุมงคล" },
+    desktopImage: null,
+    mobileImage: null,
+    desktopFocalPoint: "50% 50%",
+    mobileFocalPoint: "50% 50%",
+  },
+  quickInformation: [
+    { id: "hours", label: "เวลาเปิดทำการ", value: "รอข้อมูลยืนยัน" },
+    { id: "location", label: "สถานที่", value: "รอข้อมูลยืนยัน" },
+    { id: "contact", label: "ช่องทางติดต่อ", value: "รอข้อมูลยืนยัน" },
+  ],
+  about: {
+    title: "ข้อมูลเกี่ยวกับ Sanpudam 168",
+    description:
+      "ส่วนนี้เตรียมไว้สำหรับประวัติและความสำคัญ ซึ่งจะเพิ่มหลังได้รับข้อมูลที่เจ้าของตรวจสอบและอนุมัติแล้ว",
+    image: null,
+    imageAlt: "",
+    href: "/history",
+  },
+  featuredItems: [
+    {
+      id: "preview-item-01",
+      category: "หมวดหมู่รอการยืนยัน",
+      name: "ชื่อรายการรอการยืนยัน",
+      description: "พื้นที่สำหรับคำอธิบายรายการที่ผ่านการตรวจสอบ",
+      image: null,
+      href: null,
+    },
+    {
+      id: "preview-item-02",
+      category: "หมวดหมู่รอการยืนยัน",
+      name: "ชื่อรายการรอการยืนยัน",
+      description: "พื้นที่สำหรับคำอธิบายรายการที่ผ่านการตรวจสอบ",
+      image: null,
+      href: null,
+    },
+    {
+      id: "preview-item-03",
+      category: "หมวดหมู่รอการยืนยัน",
+      name: "ชื่อรายการรอการยืนยัน",
+      description: "พื้นที่สำหรับคำอธิบายรายการที่ผ่านการตรวจสอบ",
+      image: null,
+      href: null,
+    },
+  ],
+  worshipGuide: [
+    {
+      id: "preview-step-01",
+      title: "หัวข้อคำแนะนำรอการอนุมัติ",
+      description: "ยังไม่มีคำแนะนำการสักการะที่ได้รับการยืนยัน",
+    },
+    {
+      id: "preview-step-02",
+      title: "หัวข้อคำแนะนำรอการอนุมัติ",
+      description: "ยังไม่มีคำแนะนำการสักการะที่ได้รับการยืนยัน",
+    },
+    {
+      id: "preview-step-03",
+      title: "หัวข้อคำแนะนำรอการอนุมัติ",
+      description: "ยังไม่มีคำแนะนำการสักการะที่ได้รับการยืนยัน",
+    },
+  ],
+  news: [
+    {
+      id: "preview-news-01",
+      title: "หัวข้อข่าวสารรอการยืนยัน",
+      publicationDate: null,
+      description: "พื้นที่สำหรับข่าวสารที่ผ่านการตรวจสอบและอนุมัติ",
+      image: null,
+      href: null,
+    },
+    {
+      id: "preview-news-02",
+      title: "หัวข้อข่าวสารรอการยืนยัน",
+      publicationDate: null,
+      description: "พื้นที่สำหรับข่าวสารที่ผ่านการตรวจสอบและอนุมัติ",
+      image: null,
+      href: null,
+    },
+    {
+      id: "preview-news-03",
+      title: "หัวข้อข่าวสารรอการยืนยัน",
+      publicationDate: null,
+      description: "พื้นที่สำหรับข่าวสารที่ผ่านการตรวจสอบและอนุมัติ",
+      image: null,
+      href: null,
+    },
+  ],
+  gallery: [
+    {
+      id: "preview-gallery-01",
+      label: "พื้นที่สำหรับภาพที่ได้รับอนุมัติ 01",
+      image: null,
+      alt: "",
+      layout: "home-gallery__item--feature",
+    },
+    {
+      id: "preview-gallery-02",
+      label: "พื้นที่สำหรับภาพที่ได้รับอนุมัติ 02",
+      image: null,
+      alt: "",
+      layout: "",
+    },
+    {
+      id: "preview-gallery-03",
+      label: "พื้นที่สำหรับภาพที่ได้รับอนุมัติ 03",
+      image: null,
+      alt: "",
+      layout: "",
+    },
+    {
+      id: "preview-gallery-04",
+      label: "พื้นที่สำหรับภาพที่ได้รับอนุมัติ 04",
+      image: null,
+      alt: "",
+      layout: "",
+    },
+    {
+      id: "preview-gallery-05",
+      label: "พื้นที่สำหรับภาพที่ได้รับอนุมัติ 05",
+      image: null,
+      alt: "",
+      layout: "home-gallery__item--wide",
+    },
+  ],
+  visit: [
+    { id: "address", label: "สถานที่", value: "รอข้อมูลยืนยัน" },
+    { id: "hours", label: "เวลาเปิดทำการ", value: "รอข้อมูลยืนยัน" },
+    { id: "contact", label: "ช่องทางติดต่อ", value: "รอข้อมูลยืนยัน" },
+  ],
+  faq: [
+    {
+      id: "preview-question-01",
+      question: "ตัวอย่างคำถามที่รอการตรวจสอบและอนุมัติ",
+      answer: "คำตอบจะแสดงเมื่อได้รับข้อมูลที่เจ้าของตรวจสอบแล้ว",
+    },
+    {
+      id: "preview-question-02",
+      question: "ตัวอย่างคำถามที่รอการตรวจสอบและอนุมัติ",
+      answer: "คำตอบจะแสดงเมื่อได้รับข้อมูลที่เจ้าของตรวจสอบแล้ว",
+    },
+    {
+      id: "preview-question-03",
+      question: "ตัวอย่างคำถามที่รอการตรวจสอบและอนุมัติ",
+      answer: "คำตอบจะแสดงเมื่อได้รับข้อมูลที่เจ้าของตรวจสอบแล้ว",
+    },
+  ],
+};
