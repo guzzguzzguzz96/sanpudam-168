@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --page: #f7f6f2;
+  --surface: #ffffff;
+  --ink: #242820;
+  --muted: #62695f;
+  --line: #e4e5dc;
+  --accent: #506b57;
+  --accent-hover: #3f5746;
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: Tahoma, "Leelawadee UI", "Noto Sans Thai", sans-serif;
+}
+
+:focus-visible {
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
