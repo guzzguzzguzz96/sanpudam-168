@@ -148,7 +148,7 @@
 | รูปแบนเนอร์ (3:2 แนวนอน) | `mediaId` | media | R | 🖼 | `image.assetId` |
 | alt | `alt` | text | O | | `image.alt` |
 | คำบรรยายสั้นบนภาพ | `caption` | (40) | R | | `image.caption` |
-| จุดสำคัญบนภาพ (มือถือ) | `focalPoint {x,y}` | normalized | O | 🖼 | `image.focalPoint` (0–1) **ห้ามแปลงสเกล** หากระบบเดิมเก็บเป็นเปอร์เซ็นต์ให้หาร 100 แล้วบันทึกค่าเดิมใน `legacy.raw` |
+| จุดสำคัญบนภาพ (มือถือ) | `fx`, `fy` ใน `image` | เปอร์เซ็นต์ 0–100 (ยืนยันใน 02.5.3) | O | 🖼 | `image.focalPoint` (0–1) = ค่าเดิม ÷ 100 และบันทึกค่าเดิมใน `legacy.raw` |
 | แสดงบนเว็บ | `isPublished` | boolean | — | PUB | `legacy.isPublished` |
 | ลำดับ | `sortOrder` | — | — | ORD | `sortOrder` |
 
@@ -232,7 +232,7 @@
 
 ไม่มี publish toggle ใน singleton นี้ (A §5.10) `status` ของเอกสารจึงควบคุมโดยระบบใหม่ ไม่ได้มาจากระบบเดิม
 
-ค่าไอคอนเดิม 7 ค่าแปลงเป็น enum ภาษาอังกฤษ: ลูกศรขึ้น → `arrow-up`, หมวกบัณฑิต → `graduation-cap`, กระเป๋า → `briefcase`, เอกสาร → `document`, เหรียญ → `coin`, มงกุฎ → `crown`, โล่ → `shield` (ชุดไอคอนปัจจุบันใน `src/components/ui/icons.js` ยังไม่มีไอคอนเหล่านี้ ต้องเพิ่มในเฟสพัฒนา CMS)
+ค่าไอคอนเดิม 7 ค่าแปลงเป็น enum ภาษาอังกฤษ: ลูกศรขึ้น → `arrow-up`, หมวกบัณฑิต → `graduation-cap`, กระเป๋า → `briefcase`, เอกสาร → `file-text`, เหรียญ → `coins`, มงกุฎ → `crown`, โล่ → `shield` (Phase 02.5.3 ยืนยันจากข้อมูลจริงแล้วว่าใช้ `briefcase`, `file-text`, `coins`, `crown`) (ชุดไอคอนปัจจุบันใน `src/components/ui/icons.js` ยังไม่มีไอคอนเหล่านี้ ต้องเพิ่มในเฟสพัฒนา CMS)
 
 ทุก item ใน array ได้รับ `key` คงที่ (เช่น `wish-01`) ตอนนำเข้า เพื่อให้ path ของ placeholder ไม่เปลี่ยนเมื่อมีการเรียงลำดับใหม่ (§7)
 
@@ -489,6 +489,8 @@ import ─► draft + pending_review
 เอกสาร 02.5.1 ที่เกี่ยวข้องได้รับหมายเหตุชี้มายังเอกสารนี้แล้ว
 
 ## 15. คำถามที่ยังไม่มีคำตอบ
+
+> **อัปเดต (Phase 02.5.3):** คำถามข้อ 1–9 และ 14 ได้คำตอบจากข้อมูล Admin จริงแล้ว ดู [`legacy-extraction-report.md`](legacy-extraction-report.md) §4 สรุปสำคัญ: หมวดหมู่ resolve ได้ครบจาก ID ที่เก็บไว้ (selector เสียที่ UI), focal point เก็บเป็นเปอร์เซ็นต์, รีวิว 3 รายการเป็นข้อมูลตัวอย่าง, วิดีโอไม่มีไฟล์ และไม่มีสื่อเฉพาะใน Admin
 
 1. ผู้พัฒนาระบบเดิม export ข้อมูลทั้งหมดได้หรือไม่ (รวมรายการที่ไม่เผยแพร่ legacy ID ธง placeholder และ media ID) และใช้รูปแบบใด
 2. category selector ไม่แสดงตัวเลือกเพราะอะไร (H1–H4 ใน §6) และค่า `categoryId` ของทั้ง 5 รายการคืออะไร

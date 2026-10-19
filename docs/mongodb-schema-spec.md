@@ -219,7 +219,9 @@ const PageSchema = new Schema({
     topic: { type: String, required: true, maxlength: 40 },
     description: { type: String, maxlength: 140, default: null },
     icon: { type: String, required: true,
-      enum: ["arrow-up", "graduation-cap", "briefcase", "document", "coin", "crown", "shield"] } }],
+      // briefcase, file-text, coins, crown confirmed from legacy data (Phase 02.5.3);
+      // the other three keys are inferred from the audit labels and unconfirmed.
+      enum: ["arrow-up", "graduation-cap", "briefcase", "file-text", "coins", "crown", "shield"] } }],
   worshipSteps: [{ ...ListItemBase,
     title: { type: String, required: true, maxlength: 80 },
     detail: { type: String, maxlength: 300, default: null } }],

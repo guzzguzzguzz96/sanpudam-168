@@ -38,6 +38,13 @@ yarn-error.log*
 # vercel
 .vercel
 
+# legacy migration working data: media binaries, extracted content,
+# reports, and the temporary admin browser profile stay local.
+# Only the scripts and README are committed.
+/migration/*
+!/migration/README.md
+!/migration/scripts/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
