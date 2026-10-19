@@ -72,6 +72,8 @@ sanpudam168/                          ← โฟลเดอร์รากข�
 
 ## 3. โครงสร้าง MongoDB ที่เสนอ
 
+> **ถูกแทนที่ (Phase 02.5.2):** schema ในหัวข้อนี้เขียนก่อนได้รับรายงาน Admin audit ให้ใช้ [`mongodb-schema-spec.md`](mongodb-schema-spec.md) เป็นข้อกำหนดหลัก ส่วนที่เปลี่ยน ได้แก่ `categories`, `gallery_items`, `banners` รายการละเอกสาร, `faqs`, `videos`, `reviews`, `team_members`, `type` ของ sacred items และ alt ระดับการใช้งาน (ดู [`legacy-data-mapping.md`](legacy-data-mapping.md) §14)
+
 ทุก collection มีฟิลด์มาตรฐาน: `status` (`draft` | `published` | `archived`), `verification` (`pending_owner` | `verified`), `createdAt`, `updatedAt` และ `migration` (`{ sourceKey, sourceUrl, runId, importedAt }`) สำหรับเรคอร์ดที่มาจากการนำเข้า
 
 ### 3.1 `media_assets`
