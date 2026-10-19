@@ -1,0 +1,2171 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-19",
+  "source": {
+    "site": "https://sanpudam168.1d1d.workers.dev",
+    "robots": "Allow: / ; Disallow: /admin, /api/",
+    "sitemap": "https://sanpudam168.1d1d.workers.dev/sitemap.xml"
+  },
+  "method": "HTML ของหน้าสาธารณะ 16 หน้าถูกวิเคราะห์; ไฟล์สื่อถูกอ่านในหน่วยความจำเพื่อหา MIME ขนาด มิติ SHA-256 และ dHash เท่านั้น ไม่ได้บันทึกไฟล์ภาพลงดิสก์",
+  "summary": {
+    "pagesInspected": 16,
+    "mediaReferences": 343,
+    "uniqueUrls": 34,
+    "masters": 17,
+    "derivatives": 17,
+    "exactDuplicateGroupsBySha256": 0
+  },
+  "assets": [
+    {
+      "id": "brand-logo-mark",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/logo-192.png",
+      "canonicalPath": "/img/logo-192.png",
+      "filename": "logo-192.png",
+      "extension": "png",
+      "mimeType": "image/png",
+      "width": 192,
+      "height": 192,
+      "bytes": 46071,
+      "sha256": "bb67cc8baba9c30ae820140c174b33b81ded46578a779469de0ea14887ff4109",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "b23272696971e0f0"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "branding",
+      "sourcePages": [
+        "/",
+        "/history",
+        "/news",
+        "/news/know-tra-phaendin-siam",
+        "/news/monks-blessing-ceremony",
+        "/news/tra-phaendin-ceremony-2569",
+        "/sakkara",
+        "/sakkara/coin-charoenlap-charoenyot",
+        "/sakkara/luang-pu-sila",
+        "/sakkara/pu-dam-168",
+        "/sakkara/shrine-gate",
+        "/sakkara/tra-phaendin-siam",
+        "/sakkara?cat=check-in",
+        "/sakkara?cat=sacred-place",
+        "/sakkara?cat=saimu",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 32,
+      "currentUsage": [
+        "img | div.wrap",
+        "img | div.wrap | หน่วยประชาสัมพันธ์และกิจกรรมสัมพันธ์",
+        "img | div.wrap | ฝากข้อความถึงศาล",
+        "img | div.wrap | พระสงฆ์ประพรมน้ำพระพุทธมนต์ตราแผ่นดิน และให้พรผู้ศรัทธา",
+        "img | div.wrap | ผบ.ตร. เป็นประธานพิธีบวงสรวง \"ตราแผ่นดิน\" เสริมสิริมงคล ณ สน.พระราชวัง",
+        "img | div.wrap | ซุ้มประตูศาลปู่ดำ ตราแผ่นดิน",
+        "img | div.wrap | รูปเหมือนหลวงปู่ศิลา สิริจันโท",
+        "img | div.wrap | เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ",
+        "img | div.wrap | ส่งข้อความถึงศาล"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": "โลโก้ส่วนหัวและส่วนท้ายเว็บไซต์ ไอคอนเว็บไซต์ และ Organization logo ใน structured data",
+      "cloudinary": {
+        "folder": "sanpudam168/brand",
+        "publicId": "sanpudam168/brand/logo-mark"
+      },
+      "mongoAssociation": "site_settings.branding.logoAssetId",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ขอไฟล์ต้นฉบับความละเอียดสูงหรือเวกเตอร์จากเจ้าของ (ไฟล์ที่พบมีขนาดเพียง 192×192 px)",
+          "ยืนยันสิทธิ์ในการใช้เครื่องหมายและผู้ออกแบบ"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"390fc223bea607b47f72931e8557bac4\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "shrine-pu-dam-168-statue",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/pu-dam-168-statue.webp",
+      "canonicalPath": "/img/pu-dam-168-statue.webp",
+      "filename": "pu-dam-168-statue.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 175864,
+      "sha256": "e14d1739982437a50de094d939dd588fcad09b1beb994613b5bed73b83d4c8ea",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "302270686a70f0e8"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "shrine-sacred-object",
+      "sourcePages": [
+        "/",
+        "/history",
+        "/sakkara",
+        "/sakkara/coin-charoenlap-charoenyot",
+        "/sakkara/luang-pu-sila",
+        "/sakkara/pu-dam-168",
+        "/sakkara/shrine-gate",
+        "/sakkara/tra-phaendin-siam",
+        "/sakkara?cat=sacred-place",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 26,
+      "currentUsage": [
+        "img | figure.split-media | ประวัติความเป็นมาของศาลปู่ดำ168",
+        "img-srcset | figure.split-media | ประวัติความเป็นมาของศาลปู่ดำ168",
+        "img | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img-srcset | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img-srcset | div.j-item | บรรยากาศแห่งศรัทธา",
+        "a-href-image | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img | article.card | สักการะและวัตถุมงคล",
+        "img-srcset | article.card | สักการะและวัตถุมงคล",
+        "img | article.card | รายการอื่นที่น่าสนใจ",
+        "img-srcset | article.card | รายการอื่นที่น่าสนใจ",
+        "img | figure.detail-media | องค์ปู่ดำ 168",
+        "img-srcset | figure.detail-media | องค์ปู่ดำ 168",
+        "og:image",
+        "twitter:image",
+        "img | figure.g-item | บรรยากาศภายในศาล",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล",
+        "a-href-image | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [
+        "องค์ปู่ดำ 168 ประทับนั่งบนแท่นประดับตราแผ่นดิน",
+        "องค์ปู่ดำ 168 ประทับนั่งขัดสมาธิบนแท่นสีแดงทอง มีตราแผ่นดินด้านหลัง",
+        "องค์ปู่ดำ 168 บนแท่นสีแดงทอง"
+      ],
+      "sourceCaptions": [
+        "องค์ปู่ดำ 168"
+      ],
+      "suggestedFutureUsage": "ภาพหลักขององค์ปู่ดำในหน้า /sakkara/pu-dam-168 ประวัติ และแกลเลอรี",
+      "cloudinary": {
+        "folder": "sanpudam168/shrine/sacred-objects",
+        "publicId": "sanpudam168/shrine/sacred-objects/pu-dam-168-statue"
+      },
+      "mongoAssociation": "sacred_items[pu-dam-168].images[0]; galleries[shrine-main]; pages[history]",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ยืนยันผู้ถ่ายภาพและสิทธิ์การใช้",
+          "ยืนยันความเหมาะสมทางศาสนาในการเผยแพร่ภาพองค์ปู่ดำ"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"05b980a53aea8f902999556d1fbabc8a\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/pu-dam-168-statue-800.webp",
+      "canonicalPath": "/img/pu-dam-168-statue-800.webp",
+      "filename": "pu-dam-168-statue-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 800,
+      "bytes": 93394,
+      "sha256": "ac4c8d5944873c9228befdcecade8a24b871831e82f834b899119a2209e57c96",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "302270686a70f0f0"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/pu-dam-168-statue.webp",
+      "category": "shrine-sacred-object",
+      "sourcePages": [
+        "/",
+        "/history",
+        "/sakkara",
+        "/sakkara/coin-charoenlap-charoenyot",
+        "/sakkara/luang-pu-sila",
+        "/sakkara/pu-dam-168",
+        "/sakkara/shrine-gate",
+        "/sakkara/tra-phaendin-siam",
+        "/sakkara?cat=sacred-place",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 11,
+      "currentUsage": [
+        "img-srcset | figure.split-media | ประวัติความเป็นมาของศาลปู่ดำ168",
+        "img-srcset | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img-srcset | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img-srcset | article.card | สักการะและวัตถุมงคล",
+        "img-srcset | article.card | รายการอื่นที่น่าสนใจ",
+        "img-srcset | figure.detail-media | องค์ปู่ดำ 168",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"e06604bc05b38bf0a3676357a5d3aa53\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "shrine-tra-phaendin-coat-of-arms",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/tra-phaendin-coat-of-arms.webp",
+      "canonicalPath": "/img/tra-phaendin-coat-of-arms.webp",
+      "filename": "tra-phaendin-coat-of-arms.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1066,
+      "height": 1600,
+      "bytes": 334728,
+      "sha256": "11fde69e7b0e7e83bac7ed7e0b08e63f62ef8aeb2d7dab53802116c03e5a9037",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "17960f0f0e969e8e"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "shrine-sacred-object",
+      "sourcePages": [
+        "/",
+        "/history",
+        "/news/know-tra-phaendin-siam",
+        "/sakkara",
+        "/sakkara/coin-charoenlap-charoenyot",
+        "/sakkara/luang-pu-sila",
+        "/sakkara/pu-dam-168",
+        "/sakkara/shrine-gate",
+        "/sakkara/tra-phaendin-siam",
+        "/sakkara?cat=sacred-place",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 29,
+      "currentUsage": [
+        "img | figure.split-media | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img-srcset | figure.split-media | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img-srcset | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img-srcset | div.j-item | บรรยากาศแห่งศรัทธา",
+        "a-href-image | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img | figure.g-item | ภาพประกอบ",
+        "img-srcset | figure.g-item | ภาพประกอบ",
+        "a-href-image | figure.g-item | ภาพประกอบ",
+        "img | article.card | องค์ปู่ดำ 168",
+        "img-srcset | article.card | องค์ปู่ดำ 168",
+        "img | article.card | รายการอื่นที่น่าสนใจ",
+        "img-srcset | article.card | รายการอื่นที่น่าสนใจ",
+        "img | figure.detail-media | ตราแผ่นดินสยาม",
+        "img-srcset | figure.detail-media | ตราแผ่นดินสยาม",
+        "og:image",
+        "twitter:image",
+        "img | figure.g-item | บรรยากาศภายในศาล",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล",
+        "a-href-image | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [
+        "ตราแผ่นดินสยามประดิษฐานบนผนังกระเบื้องลายทองภายในศาล",
+        "ตราแผ่นดินสยามประดับกระจกสีทองเขียวแดง บนผนังกระเบื้องลายทอง",
+        "ตราแผ่นดินสยามบนผนังกระเบื้องลายทอง",
+        "ตราแผ่นดินสยามภายในศาลปู่ดำ"
+      ],
+      "sourceCaptions": [
+        "ตราแผ่นดินสยามภายในศาลปู่ดำ",
+        "ตราแผ่นดินสยาม"
+      ],
+      "suggestedFutureUsage": "ภาพหลักของตราแผ่นดินสยามในหน้า /sakkara/tra-phaendin-siam ประวัติ ข่าว และแกลเลอรี",
+      "cloudinary": {
+        "folder": "sanpudam168/shrine/sacred-objects",
+        "publicId": "sanpudam168/shrine/sacred-objects/tra-phaendin-coat-of-arms"
+      },
+      "mongoAssociation": "sacred_items[tra-phaendin-siam].images[0]; galleries[shrine-main]; pages[history]; news[know-tra-phaendin-siam].gallery",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ยืนยันผู้ถ่ายภาพและสิทธิ์การใช้",
+          "ตรวจข้อกฎหมายการใช้ภาพตราแผ่นดิน/เครื่องหมายราชการ โดยเฉพาะในบริบทที่เกี่ยวกับวัตถุมงคล"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"f50eb8dd91d6cbfeb2ac502c42c62cd8\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/tra-phaendin-coat-of-arms-800.webp",
+      "canonicalPath": "/img/tra-phaendin-coat-of-arms-800.webp",
+      "filename": "tra-phaendin-coat-of-arms-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 1201,
+      "bytes": 196738,
+      "sha256": "186606a473ca094add12dcfb3533cb33f0d2586b7c5cd5c0b62dc23980eb8d12",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "97960f0f0e969e8e"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/tra-phaendin-coat-of-arms.webp",
+      "category": "shrine-sacred-object",
+      "sourcePages": [
+        "/",
+        "/history",
+        "/news/know-tra-phaendin-siam",
+        "/sakkara",
+        "/sakkara/coin-charoenlap-charoenyot",
+        "/sakkara/luang-pu-sila",
+        "/sakkara/pu-dam-168",
+        "/sakkara/shrine-gate",
+        "/sakkara/tra-phaendin-siam",
+        "/sakkara?cat=sacred-place",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 12,
+      "currentUsage": [
+        "img-srcset | figure.split-media | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img-srcset | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img-srcset | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img-srcset | figure.g-item | ภาพประกอบ",
+        "img-srcset | article.card | องค์ปู่ดำ 168",
+        "img-srcset | article.card | รายการอื่นที่น่าสนใจ",
+        "img-srcset | figure.detail-media | ตราแผ่นดินสยาม",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"279f89d1ff755ed969d6c267ed7a47c2\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "brand-og-default",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/og-default.jpg",
+      "canonicalPath": "/img/og-default.jpg",
+      "filename": "og-default.jpg",
+      "extension": "jpg",
+      "mimeType": "image/jpeg",
+      "width": 1200,
+      "height": 630,
+      "bytes": 172321,
+      "sha256": "61599f93299fc141414c2ac3c288bbebe1dfa4a993aab02955b35b7a39a9f2d6",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "a48408dcdcd8585c"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "branding",
+      "sourcePages": [
+        "/",
+        "/history",
+        "/news",
+        "/sakkara",
+        "/sakkara?cat=check-in",
+        "/sakkara?cat=sacred-place",
+        "/sakkara?cat=saimu",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 16,
+      "currentUsage": [
+        "og:image",
+        "twitter:image"
+      ],
+      "sourceAltTexts": [
+        "ซุ้มประตูศาลปู่ดำ ตราแผ่นดิน"
+      ],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": "ภาพแชร์โซเชียลเริ่มต้น (Open Graph/Twitter)",
+      "cloudinary": {
+        "folder": "sanpudam168/brand",
+        "publicId": "sanpudam168/brand/og-default"
+      },
+      "mongoAssociation": "site_settings.seo.defaultOgImageAssetId",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "น่าจะเป็นภาพครอปจาก shrine-front-entrance (dHash ห่าง 7/64 และ og:image:alt คือ \"ซุ้มประตูศาลปู่ดำ ตราแผ่นดิน\"): ตรวจด้วยตาก่อนตัดสินใจนำเข้าแยก",
+          "ยืนยันสิทธิ์ภาพต้นฉบับ"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"e585973409e3c526cd282de2b13d25b0\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/favicon.png",
+      "canonicalPath": "/favicon.png",
+      "filename": "favicon.png",
+      "extension": "png",
+      "mimeType": "image/png",
+      "width": 48,
+      "height": 48,
+      "bytes": 3173,
+      "sha256": "273c1048eb3549c83a23afbe6b401bf6c0f4f78aaee779bb3be1497c0e92d36d",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "b23270696971e0f0"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/logo-192.png",
+      "category": "branding",
+      "sourcePages": [
+        "/",
+        "/history",
+        "/news",
+        "/news/know-tra-phaendin-siam",
+        "/news/monks-blessing-ceremony",
+        "/news/tra-phaendin-ceremony-2569",
+        "/sakkara",
+        "/sakkara/coin-charoenlap-charoenyot",
+        "/sakkara/luang-pu-sila",
+        "/sakkara/pu-dam-168",
+        "/sakkara/shrine-gate",
+        "/sakkara/tra-phaendin-siam",
+        "/sakkara?cat=check-in",
+        "/sakkara?cat=sacred-place",
+        "/sakkara?cat=saimu",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 16,
+      "currentUsage": [
+        "link:icon"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "regenerate",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "สร้างใหม่จากโลโก้ต้นฉบับผ่าน Cloudinary/Next.js แทนการนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"255f4c2c19436764d37e4772779d1f99\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/apple-touch-icon.png",
+      "canonicalPath": "/apple-touch-icon.png",
+      "filename": "apple-touch-icon.png",
+      "extension": "png",
+      "mimeType": "image/png",
+      "width": 180,
+      "height": 180,
+      "bytes": 40376,
+      "sha256": "4615ffedd615131f65cbd6b45dbd1d5d4c0567c3efde19eb1b39cb6906629a47",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "b27270696971e0f0"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/logo-192.png",
+      "category": "branding",
+      "sourcePages": [
+        "/",
+        "/history",
+        "/news",
+        "/news/know-tra-phaendin-siam",
+        "/news/monks-blessing-ceremony",
+        "/news/tra-phaendin-ceremony-2569",
+        "/sakkara",
+        "/sakkara/coin-charoenlap-charoenyot",
+        "/sakkara/luang-pu-sila",
+        "/sakkara/pu-dam-168",
+        "/sakkara/shrine-gate",
+        "/sakkara/tra-phaendin-siam",
+        "/sakkara?cat=check-in",
+        "/sakkara?cat=sacred-place",
+        "/sakkara?cat=saimu",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 16,
+      "currentUsage": [
+        "link:apple-touch-icon"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "regenerate",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "สร้างใหม่จากโลโก้ต้นฉบับผ่าน Cloudinary/Next.js แทนการนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"d9153d1807f4a6e470241d47dda4c482\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "id": "shrine-interior-altar",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/shrine-interior-altar.webp",
+      "canonicalPath": "/img/shrine-interior-altar.webp",
+      "filename": "shrine-interior-altar.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1600,
+      "height": 1066,
+      "bytes": 252748,
+      "sha256": "d0b3b75282d2ffe8db1b9d88fff314ee0a9327b1a21564014eb3d1084f8cd57f",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "e4e1caca9ae6e4f0"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "shrine-place",
+      "sourcePages": [
+        "/",
+        "/sakkara",
+        "/sakkara/coin-charoenlap-charoenyot",
+        "/sakkara/luang-pu-sila",
+        "/sakkara/pu-dam-168",
+        "/sakkara/shrine-gate",
+        "/sakkara/tra-phaendin-siam",
+        "/sakkara?cat=sacred-place",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 26,
+      "currentUsage": [
+        "img | figure.hero-slide",
+        "img-srcset | figure.hero-slide",
+        "img | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img-srcset | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img-srcset | div.j-item | บรรยากาศแห่งศรัทธา",
+        "a-href-image | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img | article.card | ตราแผ่นดินสยาม",
+        "img-srcset | article.card | ตราแผ่นดินสยาม",
+        "img | figure.detail-media | รูปเหมือนหลวงปู่ศิลา สิริจันโท",
+        "img-srcset | figure.detail-media | รูปเหมือนหลวงปู่ศิลา สิริจันโท",
+        "og:image",
+        "twitter:image",
+        "img | article.card | องค์ปู่ดำ 168",
+        "img-srcset | article.card | องค์ปู่ดำ 168",
+        "img | figure.g-item | บรรยากาศภายในศาล",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล",
+        "a-href-image | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [
+        "โถงสักการะภายในศาล ตราแผ่นดินตรงกลาง ศาลไม้สองข้าง และรูปเหมือนหลวงปู่ศิลาด้านขวา",
+        "ภายในศาล มีตราแผ่นดินตรงกลาง ศาลไม้สองข้าง และรูปเหมือนหลวงปู่ศิลาด้านขวา",
+        "โถงภายในศาล ตราแผ่นดินตรงกลาง ขนาบด้วยศาลไม้และช้างทอง"
+      ],
+      "sourceCaptions": [
+        "โถงสักการะภายในศาล"
+      ],
+      "suggestedFutureUsage": "แบนเนอร์หน้าแรก ภาพรูปเหมือนหลวงปู่ศิลา และแกลเลอรี",
+      "cloudinary": {
+        "folder": "sanpudam168/shrine/interior",
+        "publicId": "sanpudam168/shrine/interior/interior-altar"
+      },
+      "mongoAssociation": "banners[home-hero].slides[0]; sacred_items[luang-pu-sila].images[0]; galleries[shrine-main]",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ยืนยันผู้ถ่ายภาพและสิทธิ์การใช้"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"53d4e55f689742ef3b0c115c84b7e1a9\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/shrine-interior-altar-800.webp",
+      "canonicalPath": "/img/shrine-interior-altar-800.webp",
+      "filename": "shrine-interior-altar-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 533,
+      "bytes": 78690,
+      "sha256": "e51093cb0c958e117b7ecd1cc0967e838fb9c6157ee62f03d2106ce069653b52",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "e4e1caca9ae6e4f0"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/shrine-interior-altar.webp",
+      "category": "shrine-place",
+      "sourcePages": [
+        "/",
+        "/sakkara",
+        "/sakkara/coin-charoenlap-charoenyot",
+        "/sakkara/luang-pu-sila",
+        "/sakkara/pu-dam-168",
+        "/sakkara/shrine-gate",
+        "/sakkara/tra-phaendin-siam",
+        "/sakkara?cat=sacred-place",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 11,
+      "currentUsage": [
+        "img-srcset | figure.hero-slide",
+        "img-srcset | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img-srcset | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img-srcset | article.card | ตราแผ่นดินสยาม",
+        "img-srcset | figure.detail-media | รูปเหมือนหลวงปู่ศิลา สิริจันโท",
+        "img-srcset | article.card | องค์ปู่ดำ 168",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"5227f31d07d1258b72f94bad64118067\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "shrine-front-entrance",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/shrine-front-entrance.webp",
+      "canonicalPath": "/img/shrine-front-entrance.webp",
+      "filename": "shrine-front-entrance.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1600,
+      "height": 1066,
+      "bytes": 236966,
+      "sha256": "64bb585e34967805fcdbce8346a9fd63017895c81c0cbf017277e355bcd78b0c",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "a084c0dcd8d8583c"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "shrine-place",
+      "sourcePages": [
+        "/",
+        "/sakkara",
+        "/sakkara/shrine-gate",
+        "/sakkara?cat=check-in",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 20,
+      "currentUsage": [
+        "img | figure.hero-slide",
+        "img-srcset | figure.hero-slide",
+        "img | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img-srcset | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img-srcset | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img | div.visit-photo | เดินทางมาสักการะ",
+        "img-srcset | div.visit-photo | เดินทางมาสักการะ",
+        "a-href-image | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img | article.card | เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ",
+        "img-srcset | article.card | เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ",
+        "img | article.card | สักการะและวัตถุมงคล",
+        "img-srcset | article.card | สักการะและวัตถุมงคล",
+        "img | figure.detail-media | ซุ้มประตูศาลปู่ดำ ตราแผ่นดิน",
+        "img-srcset | figure.detail-media | ซุ้มประตูศาลปู่ดำ ตราแผ่นดิน",
+        "og:image",
+        "twitter:image",
+        "img | figure.g-item | บรรยากาศภายในศาล",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล",
+        "a-href-image | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [
+        "ซุ้มประตูศาลปู่ดำ ตราแผ่นดิน ประดับลายทอง มีป้ายชื่อศาลด้านบน",
+        "ซุ้มประตูศาลสีเหลืองครีม ประดับลายไทยสีทอง มีป้ายชื่อศาลปู่ดำ ตราแผ่นดิน",
+        "ซุ้มประตูศาลปู่ดำ ตราแผ่นดิน"
+      ],
+      "sourceCaptions": [
+        "ซุ้มประตูหน้าศาล"
+      ],
+      "suggestedFutureUsage": "แบนเนอร์หน้าแรก จุดเช็กอินซุ้มประตู ส่วนเยี่ยมชม และแกลเลอรี",
+      "cloudinary": {
+        "folder": "sanpudam168/shrine/exterior",
+        "publicId": "sanpudam168/shrine/exterior/front-entrance"
+      },
+      "mongoAssociation": "banners[home-hero].slides[1]; sacred_items[shrine-gate].images[0]; galleries[shrine-main]; pages[visit]",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ยืนยันผู้ถ่ายภาพและสิทธิ์การใช้"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"59d02829420718212bc9b66397697630\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/shrine-front-entrance-800.webp",
+      "canonicalPath": "/img/shrine-front-entrance-800.webp",
+      "filename": "shrine-front-entrance-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 533,
+      "bytes": 76780,
+      "sha256": "8b1af023fef52034dd167426f1fb6c4ab96eba4c3c9cc1365c281a29fbfcc43d",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "a084c0dcd8d8583c"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/shrine-front-entrance.webp",
+      "category": "shrine-place",
+      "sourcePages": [
+        "/",
+        "/sakkara",
+        "/sakkara/shrine-gate",
+        "/sakkara?cat=check-in",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 8,
+      "currentUsage": [
+        "img-srcset | figure.hero-slide",
+        "img-srcset | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img-srcset | div.j-item | บรรยากาศแห่งศรัทธา",
+        "img-srcset | div.visit-photo | เดินทางมาสักการะ",
+        "img-srcset | article.card | เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ",
+        "img-srcset | article.card | สักการะและวัตถุมงคล",
+        "img-srcset | figure.detail-media | ซุ้มประตูศาลปู่ดำ ตราแผ่นดิน",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"457d5e7fc99c753f7a8e55a41213de7b\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "shrine-signboard-side",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/shrine-signboard-side.webp",
+      "canonicalPath": "/img/shrine-signboard-side.webp",
+      "filename": "shrine-signboard-side.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1600,
+      "height": 1066,
+      "bytes": 216232,
+      "sha256": "9697d6a4ffac411f2a25c0b0611e63f9aabedcb1ee8f171816922596379b2959",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "d0e1e06428286961"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "shrine-place",
+      "sourcePages": [
+        "/",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 5,
+      "currentUsage": [
+        "img | figure.hero-slide",
+        "img-srcset | figure.hero-slide",
+        "img | figure.g-item | บรรยากาศภายในศาล",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล",
+        "a-href-image | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [
+        "ป้ายศาลปู่ดำ ตราแผ่นดิน สน.พระราชวัง ด้านข้างอาคารศาล",
+        "ป้ายศาลปู่ดำ ตราแผ่นดิน ข้างอาคาร"
+      ],
+      "sourceCaptions": [
+        "ป้ายศาลด้านข้างอาคาร"
+      ],
+      "suggestedFutureUsage": "แบนเนอร์หน้าแรกและแกลเลอรี",
+      "cloudinary": {
+        "folder": "sanpudam168/shrine/exterior",
+        "publicId": "sanpudam168/shrine/exterior/signboard-side"
+      },
+      "mongoAssociation": "banners[home-hero].slides[2]; galleries[shrine-main]",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ยืนยันผู้ถ่ายภาพและสิทธิ์การใช้"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"e46a475cc95eb5f267304c2fd8f5cb42\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/shrine-signboard-side-800.webp",
+      "canonicalPath": "/img/shrine-signboard-side-800.webp",
+      "filename": "shrine-signboard-side-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 533,
+      "bytes": 76880,
+      "sha256": "494c3bffa672e7ec6dc4d356efa1137e5389cbc2450288c1b1fdd66304bbdd45",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "c0e1e06428286961"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/shrine-signboard-side.webp",
+      "category": "shrine-place",
+      "sourcePages": [
+        "/",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 2,
+      "currentUsage": [
+        "img-srcset | figure.hero-slide",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"13b80173f2130dcbc476717360cb0391\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "surroundings-phraratchawang-police-station",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/phraratchawang-police-station.webp",
+      "canonicalPath": "/img/phraratchawang-police-station.webp",
+      "filename": "phraratchawang-police-station.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1600,
+      "height": 1066,
+      "bytes": 147128,
+      "sha256": "a675822c61b7c6ca94bdf37c14a563c2510bb5e11a1b7b9793fb92118a7fe65d",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "e0f0e0c8d47131b9"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "surroundings",
+      "sourcePages": [
+        "/",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 5,
+      "currentUsage": [
+        "img | figure.hero-slide",
+        "img-srcset | figure.hero-slide",
+        "img | figure.g-item | บรรยากาศภายในศาล",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล",
+        "a-href-image | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [
+        "อาคารสถานีตำรวจนครบาลพระราชวัง ถนนมหาราช",
+        "อาคารสถานีตำรวจนครบาลพระราชวัง"
+      ],
+      "sourceCaptions": [
+        "สถานีตำรวจนครบาลพระราชวัง"
+      ],
+      "suggestedFutureUsage": "ภาพประกอบการเดินทางในหน้า /visit และแกลเลอรี",
+      "cloudinary": {
+        "folder": "sanpudam168/shrine/surroundings",
+        "publicId": "sanpudam168/shrine/surroundings/phraratchawang-police-station"
+      },
+      "mongoAssociation": "banners[home-hero].slides[3]; galleries[shrine-main]; pages[visit]",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ยืนยันผู้ถ่ายภาพและสิทธิ์การใช้",
+          "อาคารของหน่วยงานราชการ (สน.พระราชวัง): ตรวจความเหมาะสมก่อนใช้เป็นภาพแบนเนอร์"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"3215a1b6064a3067ac43692d688df0cb\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/phraratchawang-police-station-800.webp",
+      "canonicalPath": "/img/phraratchawang-police-station-800.webp",
+      "filename": "phraratchawang-police-station-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 533,
+      "bytes": 45776,
+      "sha256": "cf70c0152ebff2b7d3d7962d75fefcc4fb2c73cc452c1e0b88f1dd70dad40be5",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "e0f0e0c8d47131b9"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/phraratchawang-police-station.webp",
+      "category": "surroundings",
+      "sourcePages": [
+        "/",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 2,
+      "currentUsage": [
+        "img-srcset | figure.hero-slide",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"f328f46fc98421a952ebe2dbb13a0415\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "item-coin-charoenlap-charoenyot-poster",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/pu-dam-coin-charoenlap-charoenyot.webp",
+      "canonicalPath": "/img/pu-dam-coin-charoenlap-charoenyot.webp",
+      "filename": "pu-dam-coin-charoenlap-charoenyot.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1600,
+      "height": 1131,
+      "bytes": 229362,
+      "sha256": "c1a4464667adbde76cf3172a94524b6e6916c25b629992c86aee1ad4841e6206",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "4c4ecc5555555555"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "sacred-item",
+      "sourcePages": [
+        "/",
+        "/sakkara",
+        "/sakkara/coin-charoenlap-charoenyot",
+        "/sakkara/luang-pu-sila",
+        "/sakkara/pu-dam-168",
+        "/sakkara/tra-phaendin-siam",
+        "/sakkara?cat=saimu"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 18,
+      "currentUsage": [
+        "img | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img-srcset | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img | div.btn-row | เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ",
+        "img-srcset | div.btn-row | เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ",
+        "img | article.card | รูปเหมือนหลวงปู่ศิลา สิริจันโท",
+        "img-srcset | article.card | รูปเหมือนหลวงปู่ศิลา สิริจันโท",
+        "img | article.card | สักการะและวัตถุมงคล",
+        "img-srcset | article.card | สักการะและวัตถุมงคล",
+        "img | figure.detail-media | เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ",
+        "img-srcset | figure.detail-media | เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ",
+        "og:image",
+        "twitter:image",
+        "img | article.card | ตราแผ่นดินสยาม",
+        "img-srcset | article.card | ตราแผ่นดินสยาม"
+      ],
+      "sourceAltTexts": [
+        "โปสเตอร์เหรียญบารมีปู่ดำ รุ่นเจริญลาภ เจริญยศ แสดงเหรียญ 8 เนื้อ พร้อมจำนวนจัดสร้าง"
+      ],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": "ภาพหลักของเหรียญรุ่นเจริญลาภ เจริญยศ ในหน้ารายการและรายละเอียด",
+      "cloudinary": {
+        "folder": "sanpudam168/sacred-items/coin-charoenlap-charoenyot",
+        "publicId": "sanpudam168/sacred-items/coin-charoenlap-charoenyot/poster"
+      },
+      "mongoAssociation": "sacred_items[coin-charoenlap-charoenyot].images[0]",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ภาพโปสเตอร์มีข้อความจำนวนจัดสร้าง: ต้องให้เจ้าของยืนยันตัวเลขก่อนเผยแพร่",
+          "ขอภาพเหรียญจริงแยกแต่ละเนื้อ (ถ้ามี) แทนโปสเตอร์"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"9ff2a786eb781330c6132b79453bbb8f\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/pu-dam-coin-charoenlap-charoenyot-800.webp",
+      "canonicalPath": "/img/pu-dam-coin-charoenlap-charoenyot-800.webp",
+      "filename": "pu-dam-coin-charoenlap-charoenyot-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 566,
+      "bytes": 74288,
+      "sha256": "6aca3c968bf51cade0ea24549a9f9f3840ba0114b44b7902155efa25ce09acf6",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "4c4ecc5555535555"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/pu-dam-coin-charoenlap-charoenyot.webp",
+      "category": "sacred-item",
+      "sourcePages": [
+        "/",
+        "/sakkara",
+        "/sakkara/coin-charoenlap-charoenyot",
+        "/sakkara/luang-pu-sila",
+        "/sakkara/pu-dam-168",
+        "/sakkara/tra-phaendin-siam",
+        "/sakkara?cat=saimu"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 8,
+      "currentUsage": [
+        "img-srcset | div.j-item | สิ่งศักดิ์สิทธิ์และวัตถุมงคล",
+        "img-srcset | div.btn-row | เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ",
+        "img-srcset | article.card | รูปเหมือนหลวงปู่ศิลา สิริจันโท",
+        "img-srcset | article.card | สักการะและวัตถุมงคล",
+        "img-srcset | figure.detail-media | เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ",
+        "img-srcset | article.card | ตราแผ่นดินสยาม"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"fc7d9b42100d58250115f4a00fefa6dc\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "editorial-tra-phaendin-infographic",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/tra-phaendin-infographic.webp",
+      "canonicalPath": "/img/tra-phaendin-infographic.webp",
+      "filename": "tra-phaendin-infographic.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1131,
+      "height": 1600,
+      "bytes": 234406,
+      "sha256": "12bd9a9d780bee3489901ecbd3e7852c1bd451ed3a2c9e8a10c886d28dcc4478",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "acddb068e8f24128"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "editorial",
+      "sourcePages": [
+        "/",
+        "/news",
+        "/news/know-tra-phaendin-siam",
+        "/news/monks-blessing-ceremony",
+        "/news/tra-phaendin-ceremony-2569"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 12,
+      "currentUsage": [
+        "img | article.news-card | ข่าวสารและเรื่องราว",
+        "img-srcset | article.news-card | ข่าวสารและเรื่องราว",
+        "img | article.card | ข่าวสารและกิจกรรม",
+        "img-srcset | article.card | ข่าวสารและกิจกรรม",
+        "img | figure.article-cover | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img-srcset | figure.article-cover | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "og:image",
+        "twitter:image",
+        "img | article.card | ข่าวอื่นๆ",
+        "img-srcset | article.card | ข่าวอื่นๆ"
+      ],
+      "sourceAltTexts": [
+        "อินโฟกราฟิกอธิบายความหมายของแต่ละส่วนบนตราแผ่นดินสยาม"
+      ],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": "ภาพปกและภาพประกอบบทความความรู้เรื่องตราแผ่นดิน",
+      "cloudinary": {
+        "folder": "sanpudam168/editorial/infographics",
+        "publicId": "sanpudam168/editorial/infographics/tra-phaendin-infographic"
+      },
+      "mongoAssociation": "news[know-tra-phaendin-siam].coverImage",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ยืนยันผู้จัดทำอินโฟกราฟิกและแหล่งอ้างอิงข้อมูล (อาจเป็นผลงานของบุคคลที่สาม)",
+          "ข้อความในภาพเป็นข้อเท็จจริงทางประวัติศาสตร์ที่ต้องตรวจทาน"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"f767beb3dae48cd9d0c87e793de24d3c\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/tra-phaendin-infographic-800.webp",
+      "canonicalPath": "/img/tra-phaendin-infographic-800.webp",
+      "filename": "tra-phaendin-infographic-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 1132,
+      "bytes": 140156,
+      "sha256": "4e8924aa18e85186f2e2077d5f1d748abfdea4ae289f6e8aaa9dce74a21b787e",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "acddb068e8f20128"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/tra-phaendin-infographic.webp",
+      "category": "editorial",
+      "sourcePages": [
+        "/",
+        "/news",
+        "/news/know-tra-phaendin-siam",
+        "/news/monks-blessing-ceremony",
+        "/news/tra-phaendin-ceremony-2569"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 5,
+      "currentUsage": [
+        "img-srcset | article.news-card | ข่าวสารและเรื่องราว",
+        "img-srcset | article.card | ข่าวสารและกิจกรรม",
+        "img-srcset | figure.article-cover | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img-srcset | article.card | ข่าวอื่นๆ"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"f1bbb4eb73e8f044fae77cdca4589316\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "event-2569-03-16-newsletter-a",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/newsletter-ceremony-2569-a.webp",
+      "canonicalPath": "/img/newsletter-ceremony-2569-a.webp",
+      "filename": "newsletter-ceremony-2569-a.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1131,
+      "height": 1600,
+      "bytes": 348064,
+      "sha256": "a89b6b012dae6ed0adcdd48265dc8c0007b5302fa6ba3189fbf149266c5652f6",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "2d3bd08e9acae656"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "event",
+      "sourcePages": [
+        "/",
+        "/news",
+        "/news/know-tra-phaendin-siam",
+        "/news/monks-blessing-ceremony",
+        "/news/tra-phaendin-ceremony-2569"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 12,
+      "currentUsage": [
+        "img | article.news-card | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img-srcset | article.news-card | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img | article.card | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img-srcset | article.card | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img | article.card | ข่าวอื่นๆ",
+        "img-srcset | article.card | ข่าวอื่นๆ",
+        "img | figure.article-cover | ผบ.ตร. เป็นประธานพิธีบวงสรวง \"ตราแผ่นดิน\" เสริมสิริมงคล ณ สน.พระราชวัง",
+        "img-srcset | figure.article-cover | ผบ.ตร. เป็นประธานพิธีบวงสรวง \"ตราแผ่นดิน\" เสริมสิริมงคล ณ สน.พระราชวัง",
+        "og:image",
+        "twitter:image"
+      ],
+      "sourceAltTexts": [
+        "จดหมายข่าวศาลปู่ดำ ตราแผ่นดิน ฉบับวันที่ 16 มีนาคม 2569 พิธีบวงสรวงตราแผ่นดิน"
+      ],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": "ภาพปกข่าวพิธีบวงสรวงตราแผ่นดิน",
+      "cloudinary": {
+        "folder": "sanpudam168/events",
+        "publicId": "sanpudam168/events/2569-03-16-tra-phaendin-ceremony-newsletter-a"
+      },
+      "mongoAssociation": "news[tra-phaendin-ceremony-2569].coverImage",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "จดหมายข่าวที่มีภาพบุคคลและเจ้าหน้าที่ระดับสูง: ยืนยันผู้จัดทำและความยินยอม",
+          "ข้อความในภาพเป็นข้อมูลข่าวที่ต้องตรวจทาน"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"c295f333989b3e58ac35b94d451dc411\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/newsletter-ceremony-2569-a-800.webp",
+      "canonicalPath": "/img/newsletter-ceremony-2569-a-800.webp",
+      "filename": "newsletter-ceremony-2569-a-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 1132,
+      "bytes": 206318,
+      "sha256": "39f2d45d6e0fb414daa46548d25c4b64be0593478a0a5db1b4b26cc658424b8c",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "2d3bd08e9acae656"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/newsletter-ceremony-2569-a.webp",
+      "category": "event",
+      "sourcePages": [
+        "/",
+        "/news",
+        "/news/know-tra-phaendin-siam",
+        "/news/monks-blessing-ceremony",
+        "/news/tra-phaendin-ceremony-2569"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 5,
+      "currentUsage": [
+        "img-srcset | article.news-card | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img-srcset | article.card | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img-srcset | article.card | ข่าวอื่นๆ",
+        "img-srcset | figure.article-cover | ผบ.ตร. เป็นประธานพิธีบวงสรวง \"ตราแผ่นดิน\" เสริมสิริมงคล ณ สน.พระราชวัง"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"aef85fadbcb19790a9487a62259dce36\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "event-monks-holy-water",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/monks-holy-water-coat-of-arms.webp",
+      "canonicalPath": "/img/monks-holy-water-coat-of-arms.webp",
+      "filename": "monks-holy-water-coat-of-arms.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1600,
+      "height": 1066,
+      "bytes": 446046,
+      "sha256": "78ff846a0999f3cbfa0b6bd1edbd0998fcfc22b45afe0155ed69f1f67eac1bc5",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "38981b3b91d35b31"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "event",
+      "sourcePages": [
+        "/news",
+        "/news/know-tra-phaendin-siam",
+        "/news/monks-blessing-ceremony",
+        "/news/tra-phaendin-ceremony-2569",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 13,
+      "currentUsage": [
+        "img | article.card | ผบ.ตร. เป็นประธานพิธีบวงสรวง \"ตราแผ่นดิน\" เสริมสิริมงคล ณ สน.พระราชวัง",
+        "img-srcset | article.card | ผบ.ตร. เป็นประธานพิธีบวงสรวง \"ตราแผ่นดิน\" เสริมสิริมงคล ณ สน.พระราชวัง",
+        "img | figure.article-cover | พระสงฆ์ประพรมน้ำพระพุทธมนต์ตราแผ่นดิน และให้พรผู้ศรัทธา",
+        "img-srcset | figure.article-cover | พระสงฆ์ประพรมน้ำพระพุทธมนต์ตราแผ่นดิน และให้พรผู้ศรัทธา",
+        "og:image",
+        "twitter:image",
+        "img | article.card | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img-srcset | article.card | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img | figure.g-item | บรรยากาศภายในศาล",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล",
+        "a-href-image | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [
+        "พระสงฆ์ประพรมน้ำพระพุทธมนต์ที่ตราแผ่นดินภายในศาล",
+        "พระสงฆ์ประพรมน้ำพระพุทธมนต์ตราแผ่นดิน"
+      ],
+      "sourceCaptions": [
+        "พิธีประพรมน้ำพระพุทธมนต์"
+      ],
+      "suggestedFutureUsage": "ภาพปกข่าวพระสงฆ์ประพรมน้ำพระพุทธมนต์และแกลเลอรี",
+      "cloudinary": {
+        "folder": "sanpudam168/events",
+        "publicId": "sanpudam168/events/monks-holy-water-coat-of-arms"
+      },
+      "mongoAssociation": "news[monks-blessing-ceremony].coverImage; galleries[shrine-main]",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ภาพพระสงฆ์และบุคคล: ตรวจความยินยอมและความเหมาะสม",
+          "ยืนยันชื่องานและวันที่ (หน้าข่าวระบุว่ายังเป็นข้อความตัวอย่าง)"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"c3ba2fdf9c37807746b553906576faca\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/monks-holy-water-coat-of-arms-800.webp",
+      "canonicalPath": "/img/monks-holy-water-coat-of-arms-800.webp",
+      "filename": "monks-holy-water-coat-of-arms-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 533,
+      "bytes": 118960,
+      "sha256": "250e8bc782e350b35e560e9b12272a4bb6dc7368d2a53cc6a2a771d0d641f08d",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "38981b3b91d35b31"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/monks-holy-water-coat-of-arms.webp",
+      "category": "event",
+      "sourcePages": [
+        "/news",
+        "/news/know-tra-phaendin-siam",
+        "/news/monks-blessing-ceremony",
+        "/news/tra-phaendin-ceremony-2569",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 5,
+      "currentUsage": [
+        "img-srcset | article.card | ผบ.ตร. เป็นประธานพิธีบวงสรวง \"ตราแผ่นดิน\" เสริมสิริมงคล ณ สน.พระราชวัง",
+        "img-srcset | figure.article-cover | พระสงฆ์ประพรมน้ำพระพุทธมนต์ตราแผ่นดิน และให้พรผู้ศรัทธา",
+        "img-srcset | article.card | ทำความรู้จักตราแผ่นดินสยาม \"หัวใจพระนคร\"",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"916db507c7194eae17026f2fb08402a1\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "event-monk-blessing-ceremony",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/monk-blessing-ceremony.webp",
+      "canonicalPath": "/img/monk-blessing-ceremony.webp",
+      "filename": "monk-blessing-ceremony.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1600,
+      "height": 1068,
+      "bytes": 163294,
+      "sha256": "75a33d141e9b0a9472141b2be26ae53aedebf439796ba65f3f0a610272958830",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "4be3d2d49fad8488"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "event",
+      "sourcePages": [
+        "/news/monks-blessing-ceremony"
+      ],
+      "appearsOnMultiplePages": false,
+      "referenceCount": 3,
+      "currentUsage": [
+        "img | figure.g-item | ภาพประกอบ",
+        "img-srcset | figure.g-item | ภาพประกอบ",
+        "a-href-image | figure.g-item | ภาพประกอบ"
+      ],
+      "sourceAltTexts": [
+        "พระสงฆ์นั่งให้พรข้าราชการและแขกผู้มีเกียรติภายในศาล"
+      ],
+      "sourceCaptions": [
+        "พระสงฆ์นั่งให้พรข้าราชการและแขกผู้มีเกียรติภายในศาล"
+      ],
+      "suggestedFutureUsage": "ภาพประกอบข่าวพระสงฆ์ให้พร",
+      "cloudinary": {
+        "folder": "sanpudam168/events",
+        "publicId": "sanpudam168/events/monk-blessing-ceremony"
+      },
+      "mongoAssociation": "news[monks-blessing-ceremony].gallery",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ภาพพระสงฆ์ ข้าราชการ และแขกผู้มีเกียรติ: ตรวจความยินยอม",
+          "ยืนยันชื่องานและวันที่"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"8bdaa7f00609f20b2fca26dfd69220d0\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/monk-blessing-ceremony-800.webp",
+      "canonicalPath": "/img/monk-blessing-ceremony-800.webp",
+      "filename": "monk-blessing-ceremony-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 534,
+      "bytes": 68534,
+      "sha256": "be3cc01dac1a0bfbacac9595dc9c24ea56ecef89706b2a00c65f6ce91a28a161",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "4be3d2d49fad8488"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/monk-blessing-ceremony.webp",
+      "category": "event",
+      "sourcePages": [
+        "/news/monks-blessing-ceremony"
+      ],
+      "appearsOnMultiplePages": false,
+      "referenceCount": 1,
+      "currentUsage": [
+        "img-srcset | figure.g-item | ภาพประกอบ"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"e1736a9a76cd41afb01916efe0d91ab5\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "event-monk-blessing-devotees",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/monk-blessing-devotees.webp",
+      "canonicalPath": "/img/monk-blessing-devotees.webp",
+      "filename": "monk-blessing-devotees.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1600,
+      "height": 1066,
+      "bytes": 279180,
+      "sha256": "503d871a18a7862b52116cbc630862499ff0ccf2941fda0a611c5664361f9529",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "9eccdce858cc4686"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "event",
+      "sourcePages": [
+        "/news/monks-blessing-ceremony",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 6,
+      "currentUsage": [
+        "img | figure.g-item | ภาพประกอบ",
+        "img-srcset | figure.g-item | ภาพประกอบ",
+        "a-href-image | figure.g-item | ภาพประกอบ",
+        "img | figure.g-item | บรรยากาศภายในศาล",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล",
+        "a-href-image | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [
+        "พระสงฆ์ผูกสายสิญจน์ให้ผู้ศรัทธาที่พนมมือรับพร",
+        "พระสงฆ์ให้พรผู้ศรัทธา"
+      ],
+      "sourceCaptions": [
+        "พระสงฆ์ผูกสายสิญจน์ให้ผู้ศรัทธาที่พนมมือรับพร",
+        "พระสงฆ์ให้พร"
+      ],
+      "suggestedFutureUsage": "ภาพประกอบข่าวและแกลเลอรี",
+      "cloudinary": {
+        "folder": "sanpudam168/events",
+        "publicId": "sanpudam168/events/monk-blessing-devotees"
+      },
+      "mongoAssociation": "news[monks-blessing-ceremony].gallery; galleries[shrine-main]",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ภาพผู้ศรัทธาที่ระบุตัวตนได้: ตรวจความยินยอมตาม PDPA"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"8390712b0f794b4527885f9b31738a8b\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/monk-blessing-devotees-800.webp",
+      "canonicalPath": "/img/monk-blessing-devotees-800.webp",
+      "filename": "monk-blessing-devotees-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 533,
+      "bytes": 80458,
+      "sha256": "624ba15be782ab42b0ef22a16d85515daf946e87e5e1bc2462005506786f73cd",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "9eccdce858cc4686"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/monk-blessing-devotees.webp",
+      "category": "event",
+      "sourcePages": [
+        "/news/monks-blessing-ceremony",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 2,
+      "currentUsage": [
+        "img-srcset | figure.g-item | ภาพประกอบ",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"9d8bc2bda64c6ba3ca64ed4e55798960\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "event-2569-03-16-newsletter-b",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/newsletter-ceremony-2569-b.webp",
+      "canonicalPath": "/img/newsletter-ceremony-2569-b.webp",
+      "filename": "newsletter-ceremony-2569-b.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1131,
+      "height": 1600,
+      "bytes": 376848,
+      "sha256": "dde9c280c4a54370e4263992c64588bff4055abba9b54af18b6650ea1b817310",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "4d53d08e9acbe656"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "event",
+      "sourcePages": [
+        "/news/tra-phaendin-ceremony-2569"
+      ],
+      "appearsOnMultiplePages": false,
+      "referenceCount": 3,
+      "currentUsage": [
+        "img | figure.g-item | ภาพประกอบ",
+        "img-srcset | figure.g-item | ภาพประกอบ",
+        "a-href-image | figure.g-item | ภาพประกอบ"
+      ],
+      "sourceAltTexts": [
+        "จดหมายข่าวพิธีบวงสรวงตราแผ่นดิน ภาพข้าราชการตำรวจกราบสักการะ"
+      ],
+      "sourceCaptions": [
+        "จดหมายข่าวพิธีบวงสรวงตราแผ่นดิน ภาพข้าราชการตำรวจกราบสักการะ"
+      ],
+      "suggestedFutureUsage": "ภาพประกอบข่าวพิธีบวงสรวงตราแผ่นดิน",
+      "cloudinary": {
+        "folder": "sanpudam168/events",
+        "publicId": "sanpudam168/events/2569-03-16-tra-phaendin-ceremony-newsletter-b"
+      },
+      "mongoAssociation": "news[tra-phaendin-ceremony-2569].gallery",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "จดหมายข่าวที่มีภาพบุคคล: ยืนยันผู้จัดทำและความยินยอม",
+          "รูปแบบคล้ายฉบับ -a (dHash ห่าง 5–6/64): ตรวจด้วยตาว่าเป็นคนละหน้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"2d21567d4e85e50af3e7622f478764db\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/newsletter-ceremony-2569-b-800.webp",
+      "canonicalPath": "/img/newsletter-ceremony-2569-b-800.webp",
+      "filename": "newsletter-ceremony-2569-b-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 1132,
+      "bytes": 218396,
+      "sha256": "e61563484f115be559b8f30ae31f052792823ef23a1c703b247de23b1dc3978e",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "4d53d08e9acae656"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/newsletter-ceremony-2569-b.webp",
+      "category": "event",
+      "sourcePages": [
+        "/news/tra-phaendin-ceremony-2569"
+      ],
+      "appearsOnMultiplePages": false,
+      "referenceCount": 1,
+      "currentUsage": [
+        "img-srcset | figure.g-item | ภาพประกอบ"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"37f4a2b8d3c6d3d0c9dcdc4ceb0dfef2\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "event-officer-paying-respect",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/officer-paying-respect-coat-of-arms.webp",
+      "canonicalPath": "/img/officer-paying-respect-coat-of-arms.webp",
+      "filename": "officer-paying-respect-coat-of-arms.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1567,
+      "height": 1045,
+      "bytes": 449552,
+      "sha256": "c20417bfd3ce31876e3aaf902c42336463c731aeda51d69a2633456a21f8c636",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "0f070f0547654585"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "event",
+      "sourcePages": [
+        "/news/tra-phaendin-ceremony-2569",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 6,
+      "currentUsage": [
+        "img | figure.g-item | ภาพประกอบ",
+        "img-srcset | figure.g-item | ภาพประกอบ",
+        "a-href-image | figure.g-item | ภาพประกอบ",
+        "img | figure.g-item | บรรยากาศภายในศาล",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล",
+        "a-href-image | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [
+        "ข้าราชการตำรวจปิดทองพระบรมรูปหน้าตราแผ่นดิน",
+        "ข้าราชการตำรวจปิดทองหน้าตราแผ่นดิน"
+      ],
+      "sourceCaptions": [
+        "ข้าราชการตำรวจปิดทองพระบรมรูปหน้าตราแผ่นดิน",
+        "ข้าราชการตำรวจร่วมสักการะ"
+      ],
+      "suggestedFutureUsage": "ภาพประกอบข่าวพิธีและแกลเลอรี",
+      "cloudinary": {
+        "folder": "sanpudam168/events",
+        "publicId": "sanpudam168/events/officer-paying-respect-coat-of-arms"
+      },
+      "mongoAssociation": "news[tra-phaendin-ceremony-2569].gallery; galleries[shrine-main]",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ภาพบุคคล (ข้าราชการตำรวจ) ที่ระบุตัวตนได้: ตรวจความยินยอมตาม PDPA"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"f2184f07164f306406d1ca656f7989e4\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/officer-paying-respect-coat-of-arms-800.webp",
+      "canonicalPath": "/img/officer-paying-respect-coat-of-arms-800.webp",
+      "filename": "officer-paying-respect-coat-of-arms-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 534,
+      "bytes": 137118,
+      "sha256": "c976488985d20b0e5a4b0a75f5349e9644613128cda1cf30683f3c787a566d89",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "0f070f0547654585"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/officer-paying-respect-coat-of-arms.webp",
+      "category": "event",
+      "sourcePages": [
+        "/news/tra-phaendin-ceremony-2569",
+        "/visit"
+      ],
+      "appearsOnMultiplePages": true,
+      "referenceCount": 2,
+      "currentUsage": [
+        "img-srcset | figure.g-item | ภาพประกอบ",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"7b422e6f318ea2a5a75299176d07cb51\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": "shrine-devotee-at-coat-of-arms",
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/devotee-at-coat-of-arms.webp",
+      "canonicalPath": "/img/devotee-at-coat-of-arms.webp",
+      "filename": "devotee-at-coat-of-arms.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 1108,
+      "height": 1477,
+      "bytes": 77650,
+      "sha256": "619e705267974456d9c207e3248d1b3f45e4e12a9393309e0aaf979d3782c4b9",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "f3a1a16362040c25"
+      },
+      "role": "master",
+      "derivativeOf": null,
+      "category": "shrine-people",
+      "sourcePages": [
+        "/visit"
+      ],
+      "appearsOnMultiplePages": false,
+      "referenceCount": 3,
+      "currentUsage": [
+        "img | figure.g-item | บรรยากาศภายในศาล",
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล",
+        "a-href-image | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [
+        "ผู้ศรัทธาสักการะตราแผ่นดิน"
+      ],
+      "sourceCaptions": [
+        "ผู้ศรัทธามาสักการะ"
+      ],
+      "suggestedFutureUsage": "แกลเลอรีบรรยากาศ",
+      "cloudinary": {
+        "folder": "sanpudam168/shrine/devotees",
+        "publicId": "sanpudam168/shrine/devotees/devotee-at-coat-of-arms"
+      },
+      "mongoAssociation": "galleries[shrine-main]",
+      "importDecision": "import-after-approval",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ภาพผู้ศรัทธาที่อาจระบุตัวตนได้: ตรวจความยินยอมตาม PDPA",
+          "ไม่ทราบวันที่และงาน"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"e8e5d4920105a7fdfeb63ffa2d5b4b9d\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    },
+    {
+      "id": null,
+      "sourceUrl": "https://sanpudam168.1d1d.workers.dev/img/devotee-at-coat-of-arms-800.webp",
+      "canonicalPath": "/img/devotee-at-coat-of-arms-800.webp",
+      "filename": "devotee-at-coat-of-arms-800.webp",
+      "extension": "webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 1066,
+      "bytes": 52042,
+      "sha256": "f460c3dfc63b6b5f6b9e4812a959c4072497d0be35e694f6f60b7a27a39db8f2",
+      "perceptualHash": {
+        "algorithm": "dHash-64",
+        "value": "f3a1a16362040c25"
+      },
+      "role": "derivative",
+      "derivativeOf": "https://sanpudam168.1d1d.workers.dev/img/devotee-at-coat-of-arms.webp",
+      "category": "shrine-people",
+      "sourcePages": [
+        "/visit"
+      ],
+      "appearsOnMultiplePages": false,
+      "referenceCount": 1,
+      "currentUsage": [
+        "img-srcset | figure.g-item | บรรยากาศภายในศาล"
+      ],
+      "sourceAltTexts": [],
+      "sourceCaptions": [],
+      "suggestedFutureUsage": null,
+      "cloudinary": null,
+      "mongoAssociation": null,
+      "importDecision": "skip-derivative-use-cloudinary-transformation",
+      "rights": {
+        "status": "pending_owner_confirmation",
+        "reviewNotes": [
+          "ไฟล์ย่อขนาดของต้นฉบับ: ไม่ต้องนำเข้า"
+        ]
+      },
+      "approval": {
+        "status": "pending",
+        "approvedBy": null,
+        "approvedAt": null
+      },
+      "httpHeaders": {
+        "etag": "\"5492edf8cbc9630a62bc28418b44f4ef\"",
+        "lastModified": null,
+        "cacheControl": "public, max-age=604800"
+      }
+    }
+  ]
+}
