@@ -75,6 +75,9 @@
   --muted-text: #5b6a7e;
   --soft-border: #dce3ec;
   --navy-hover: var(--deep-navy);
+  /* LINE brand green: decorative badge only; white text on it is 2.26:1. */
+  --line-green: #06c755;
+  --line-tint: #ebfaf1;
 
   --page: var(--warm-ivory);
   --surface: var(--white);
@@ -459,13 +462,6 @@ svg {
   gap: var(--space-6);
 }
 
-.site-header__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding-inline-start: var(--space-6);
-  border-inline-start: 1px solid var(--soft-border);
-}
 
 .site-navigation__list,
 .mobile-navigation__list,
@@ -617,14 +613,125 @@ svg {
   font-weight: var(--weight-semibold);
 }
 
+/* Header contact actions need room beside the full navigation. */
+.site-header__desktop .site-header__actions {
+  display: none;
+}
+
 .mobile-navigation__actions {
-  display: grid;
-  gap: var(--space-2);
   margin-top: var(--space-4);
 }
 
-.mobile-navigation__action {
+/* Contact actions: LINE, Google Maps, and phone (see src/lib/contact-actions.js). */
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contact-actions--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.contact-actions--stack .contact-action {
   width: 100%;
+}
+
+.contact-action {
+  display: inline-flex;
+  min-height: var(--touch-target-size);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1.5px solid var(--navy);
+  border-radius: var(--control-radius);
+  background: var(--white);
+  color: var(--navy);
+  font-size: var(--type-button);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-control);
+  text-align: center;
+  text-decoration: none;
+  transition:
+    background-color var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease);
+}
+
+.contact-action:hover {
+  background: var(--soft-blue);
+}
+
+.contact-action--maps {
+  background: var(--navy);
+  color: var(--white);
+}
+
+.contact-action--maps:hover {
+  border-color: var(--deep-navy);
+  background: var(--deep-navy);
+}
+
+/* LINE: dark label on white with a LINE-green badge, not white on green. */
+.contact-action--line {
+  border-color: var(--line-green);
+  color: var(--deep-navy);
+}
+
+.contact-action--line:hover {
+  background: var(--line-tint);
+}
+
+.contact-action__line-badge {
+  display: inline-grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.5rem;
+  background: var(--line-green);
+  color: var(--white);
+}
+
+.contact-action__external {
+  flex: 0 0 auto;
+  opacity: 0.8;
+}
+
+.contact-actions--dark .contact-action--maps {
+  border-color: var(--royal-gold);
+  background: var(--royal-gold);
+  color: var(--deep-navy);
+}
+
+.contact-actions--dark .contact-action--maps:hover {
+  border-color: var(--royal-gold-hover);
+  background: var(--royal-gold-hover);
+}
+
+.contact-actions--dark .contact-action--phone {
+  border: 2px solid var(--warm-ivory);
+  background: transparent;
+  color: var(--warm-ivory);
+}
+
+.contact-actions--dark .contact-action--phone:hover {
+  background: color-mix(in srgb, var(--warm-ivory) 14%, transparent);
+}
+
+.contact-actions--dark .contact-action--line {
+  border-color: var(--white);
+}
+
+.contact-actions__empty {
+  margin: 0;
+  color: var(--muted-text);
+  font-size: var(--type-small);
+  line-height: var(--leading-small);
 }
 
 .site-footer {
@@ -669,8 +776,7 @@ svg {
   gap: var(--space-2);
 }
 
-.site-footer__links a,
-.site-footer section a {
+.site-footer__links a {
   color: var(--warm-ivory);
   font-size: var(--type-small);
   text-underline-offset: 0.25em;
@@ -846,11 +952,23 @@ svg {
   }
 
   .site-footer__grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns:
+      minmax(0, 1.2fr) minmax(0, 0.8fr) minmax(0, 1.4fr)
+      minmax(0, 1fr);
   }
 
   .preview-card-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 80rem) {
+  .site-header__desktop .site-header__actions {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+    padding-inline-start: var(--space-4);
+    border-inline-start: 1px solid var(--soft-border);
   }
 }
 

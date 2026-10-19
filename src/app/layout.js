@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
 import "@/components/home/home.css";
+import "@/components/sacred-items/sacred-items.css";
 
 const bodyFont = Noto_Sans_Thai_Looped({
   variable: "--font-noto-sans-thai-looped",

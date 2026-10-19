@@ -2,18 +2,12 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/config/site";
+import { getContactActions } from "@/lib/contact-actions";
 import { SiteNavigation } from "@/components/site-navigation";
 import { ThaiPhrases } from "@/components/ui/thai-phrases";
 
 // Only owner-verified destinations become header actions.
-const contactActions = [
-  siteConfig.lineInquiryUrl
-    ? { id: "line", href: siteConfig.lineInquiryUrl, label: "สอบถามทาง LINE" }
-    : null,
-  siteConfig.directionsUrl
-    ? { id: "directions", href: siteConfig.directionsUrl, label: "เส้นทาง" }
-    : null,
-].filter(Boolean);
+const contactActions = getContactActions(["line", "maps"]);
 
 export function SiteHeader() {
   return (

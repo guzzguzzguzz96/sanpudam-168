@@ -1,9 +1,14 @@
-import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { ContactActions } from "@/components/ui/contact-actions";
+import { Icon } from "@/components/ui/icons";
 import { SectionIntro } from "@/components/home/section-intro";
 import { Section } from "@/components/ui/section";
+import { getContactActions } from "@/lib/contact-actions";
 
 export function VisitUs({ data }) {
+  const actions = getContactActions(["maps", "line", "phone"]);
+  const hasDirections = actions.some((action) => action.id === "maps");
+
   return (
     <Section id="visit" aria-labelledby="visit-us-title" className="home-visit">
       <Container className="home-visit__layout">
@@ -11,28 +16,38 @@ export function VisitUs({ data }) {
           <SectionIntro
             id="visit-us-title"
             eyebrow="วางแผนการเดินทาง"
-            title="เยี่ยมชม"
+            title="การเยี่ยมชมและการเดินทาง"
           />
           <dl className="home-visit__details">
             {data.map((detail) => (
               <div key={detail.id} className="home-visit__detail">
-                <dt>{detail.label}</dt>
+                <dt>
+                  <span className="home-visit__icon">
+                    <Icon name={detail.icon} />
+                  </span>
+                  {detail.label}
+                </dt>
                 <dd>{detail.value}</dd>
               </div>
             ))}
           </dl>
-          <Button href="/visit" variant="outline">
-            ข้อมูลการเยี่ยมชม
-          </Button>
+          <ContactActions
+            actions={actions}
+            className="home-visit__actions"
+            emptyMessage="ปุ่มนำทางและช่องทางติดต่อจะแสดงเมื่อได้รับข้อมูลที่ยืนยันแล้ว"
+          />
         </div>
 
-        <div
-          className="home-visit__map-placeholder"
-          role="img"
-          aria-label="พื้นที่สำหรับแผนที่หรือข้อมูลเส้นทางที่ยืนยันแล้ว; ยังไม่มีตำแหน่งที่อนุมัติ"
-        >
-          <span aria-hidden="true" className="home-visit__map-mark" />
-          <p>แผนที่และเส้นทางจะแสดงเมื่อได้รับตำแหน่งที่ยืนยัน</p>
+        {/* No map embed until the owner verifies the location. */}
+        <div className="home-visit__map">
+          <span aria-hidden="true" className="home-visit__map-pin">
+            <Icon name="mapPin" size={32} />
+          </span>
+          <p>
+            {hasDirections
+              ? "เปิดเส้นทางไปยังศาลได้จากปุ่ม “นำทางด้วย Google Maps”"
+              : "แผนที่จะแสดงเมื่อได้รับตำแหน่งที่ยืนยันแล้ว"}
+          </p>
         </div>
       </Container>
     </Section>

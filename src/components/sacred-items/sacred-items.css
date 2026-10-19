@@ -1,0 +1,151 @@
+/* Sacred item grid and card, shared by the homepage and future /sakkara. */
+.sacred-item-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sacred-item-grid > li {
+  display: flex;
+  min-width: 0;
+}
+
+.sacred-item-grid__empty {
+  margin: 0;
+  color: var(--muted-text);
+}
+
+.sacred-item-card {
+  position: relative;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--white);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--deep-navy) 8%, transparent);
+  transition: box-shadow var(--motion-fast) var(--motion-ease);
+}
+
+/* One consistent square crop for every item image. */
+.sacred-item-card__media {
+  flex: 0 0 auto;
+  aspect-ratio: 1;
+  border-radius: 0;
+}
+
+.sacred-item-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6) var(--space-6);
+}
+
+.sacred-item-card__category {
+  margin: 0;
+  color: var(--deep-gold);
+  font-size: var(--type-small);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-small);
+}
+
+.sacred-item-card__title {
+  margin: 0;
+  color: var(--deep-navy);
+  font-size: 1.25rem;
+  font-weight: var(--weight-semibold);
+  line-height: 1.45;
+}
+
+.sacred-item-card__summary {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted-text);
+  line-height: var(--leading-body);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.sacred-item-card__more {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  color: var(--navy);
+  font-weight: var(--weight-semibold);
+}
+
+.sacred-item-card__more::after {
+  content: " →";
+}
+
+/* The title link covers the whole card: one link, one tab stop. */
+.sacred-item-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Above the media layer, including placeholder labels, so the whole card is clickable. */
+.sacred-item-card__link::after {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  content: "";
+}
+
+.sacred-item-card--linked:hover {
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--deep-navy) 14%, transparent);
+}
+
+.sacred-item-card--linked:hover .sacred-item-card__title {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}
+
+@supports selector(:has(*)) {
+  .sacred-item-card__link:focus-visible {
+    outline: none;
+  }
+
+  .sacred-item-card:has(.sacred-item-card__link:focus-visible) {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+@media (min-width: 48rem) {
+  .sacred-item-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Tablet: an odd last card spans the row as a side-by-side card. */
+@media (min-width: 48rem) and (max-width: 63.99rem) {
+  .sacred-item-grid > li:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .sacred-item-grid > li:last-child:nth-child(odd) .sacred-item-card {
+    flex-direction: row;
+  }
+
+  .sacred-item-grid > li:last-child:nth-child(odd) .sacred-item-card__media {
+    width: 50%;
+  }
+
+  .sacred-item-grid > li:last-child:nth-child(odd) .sacred-item-card__body {
+    justify-content: center;
+    padding: var(--space-6) var(--space-8);
+  }
+}
+
+@media (min-width: 64rem) {
+  .sacred-item-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-8);
+  }
+}

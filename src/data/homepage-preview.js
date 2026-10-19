@@ -1,4 +1,11 @@
 import { siteConfig } from "@/config/site";
+import { getContactActions } from "@/lib/contact-actions";
+
+const verifiedContacts = Object.fromEntries(
+  getContactActions(["line", "maps"]).map((action) => [action.id, action]),
+);
+
+const previewCategory = { id: "preview-category", label: "หมวดหมู่รอการยืนยัน" };
 
 export const homepagePreviewData = {
   banner: {
@@ -45,19 +52,19 @@ export const homepagePreviewData = {
       icon: "gem",
       label: "วัตถุมงคล",
     },
-    siteConfig.directionsUrl
+    verifiedContacts.maps
       ? {
           id: "directions",
-          href: siteConfig.directionsUrl,
+          href: verifiedContacts.maps.href,
           icon: "route",
           label: "นำทางไปศาล",
           external: true,
         }
       : { id: "directions", href: "#visit", icon: "route", label: "การเดินทาง" },
-    siteConfig.lineInquiryUrl
+    verifiedContacts.line
       ? {
           id: "line",
-          href: siteConfig.lineInquiryUrl,
+          href: verifiedContacts.line.href,
           icon: "chat",
           label: "สอบถามทาง LINE",
           external: true,
@@ -72,32 +79,38 @@ export const homepagePreviewData = {
     imageAlt: "",
     href: "/history",
   },
-  featuredItems: [
-    {
-      id: "preview-item-01",
-      category: "หมวดหมู่รอการยืนยัน",
-      name: "ชื่อรายการรอการยืนยัน",
-      description: "พื้นที่สำหรับคำอธิบายรายการที่ผ่านการตรวจสอบ",
-      image: null,
-      href: null,
-    },
-    {
-      id: "preview-item-02",
-      category: "หมวดหมู่รอการยืนยัน",
-      name: "ชื่อรายการรอการยืนยัน",
-      description: "พื้นที่สำหรับคำอธิบายรายการที่ผ่านการตรวจสอบ",
-      image: null,
-      href: null,
-    },
-    {
-      id: "preview-item-03",
-      category: "หมวดหมู่รอการยืนยัน",
-      name: "ชื่อรายการรอการยืนยัน",
-      description: "พื้นที่สำหรับคำอธิบายรายการที่ผ่านการตรวจสอบ",
-      image: null,
-      href: null,
-    },
-  ],
+  // Placeholder records in the normalized shape (src/lib/sacred-items.js).
+  // No prices, stock, or availability.
+  featuredItems: {
+    // Set to "/sakkara" once the catalog route exists.
+    catalogHref: null,
+    items: [
+      {
+        id: "preview-item-01",
+        name: "ชื่อรายการรอการยืนยัน",
+        summary: "พื้นที่สำหรับคำอธิบายรายการที่ผ่านการตรวจสอบ",
+        category: previewCategory,
+        image: null,
+        href: null,
+      },
+      {
+        id: "preview-item-02",
+        name: "ชื่อรายการรอการยืนยัน",
+        summary: "พื้นที่สำหรับคำอธิบายรายการที่ผ่านการตรวจสอบ",
+        category: previewCategory,
+        image: null,
+        href: null,
+      },
+      {
+        id: "preview-item-03",
+        name: "ชื่อรายการรอการยืนยัน",
+        summary: "พื้นที่สำหรับคำอธิบายรายการที่ผ่านการตรวจสอบ",
+        category: previewCategory,
+        image: null,
+        href: null,
+      },
+    ],
+  },
   worshipGuide: [
     {
       id: "preview-step-01",
@@ -178,10 +191,11 @@ export const homepagePreviewData = {
       layout: "home-gallery__item--wide",
     },
   ],
+  // Ordered by visitor priority: hours, location, then contact.
   visit: [
-    { id: "address", label: "สถานที่", value: "รอข้อมูลยืนยัน" },
-    { id: "hours", label: "เวลาเปิดทำการ", value: "รอข้อมูลยืนยัน" },
-    { id: "contact", label: "ช่องทางติดต่อ", value: "รอข้อมูลยืนยัน" },
+    { id: "hours", icon: "clock", label: "เวลาเปิดทำการ", value: "รอข้อมูลยืนยัน" },
+    { id: "address", icon: "mapPin", label: "สถานที่", value: "รอข้อมูลยืนยัน" },
+    { id: "contact", icon: "chat", label: "ช่องทางติดต่อ", value: "รอข้อมูลยืนยัน" },
   ],
   faq: [
     {

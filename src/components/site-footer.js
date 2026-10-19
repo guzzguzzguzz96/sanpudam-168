@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
+import { ContactActions } from "@/components/ui/contact-actions";
 import { siteConfig } from "@/config/site";
 import { ThaiPhrases } from "@/components/ui/thai-phrases";
+import { getContactActions } from "@/lib/contact-actions";
+
+const contactActions = getContactActions(["line", "phone", "maps"]);
 
 export function SiteFooter() {
   return (
@@ -30,15 +34,14 @@ export function SiteFooter() {
 
           <section aria-labelledby="footer-contact-title">
             <h2 id="footer-contact-title" className="site-footer__heading">
-              ข้อมูลติดต่อ
+              ติดต่อและการเดินทาง
             </h2>
-            {siteConfig.lineInquiryUrl ? (
-              <p>
-                <a href={siteConfig.lineInquiryUrl}>สอบถามผ่าน LINE</a>
-              </p>
-            ) : (
-              <p>จะแสดงช่องทางติดต่อเมื่อได้รับการยืนยัน</p>
-            )}
+            <ContactActions
+              actions={contactActions}
+              emptyMessage="ช่องทางติดต่อจะแสดงเมื่อได้รับการยืนยัน"
+              layout="stack"
+              tone="dark"
+            />
           </section>
 
           <section aria-labelledby="footer-privacy-title">

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ContactActions } from "@/components/ui/contact-actions";
 import { Icon } from "@/components/ui/icons";
 
 const desktopQuery = "(min-width: 64rem)";
@@ -29,21 +30,6 @@ function NavigationLink({ className, item, pathname, onClick }) {
     >
       {item.label}
     </Link>
-  );
-}
-
-function ContactActionLink({ action, className = "" }) {
-  return (
-    <a
-      className={`ui-button ui-button--primary ${className}`.trim()}
-      href={action.href}
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      {action.label}
-      <Icon name="external" size={18} />
-      <span className="sr-only">(เปิดในหน้าต่างใหม่)</span>
-    </a>
   );
 }
 
@@ -121,13 +107,11 @@ export function SiteNavigation({ navigation, contactActions = [] }) {
             ))}
           </ul>
         </nav>
-        {contactActions.length > 0 ? (
-          <div className="site-header__actions">
-            {contactActions.map((action) => (
-              <ContactActionLink key={action.id} action={action} />
-            ))}
-          </div>
-        ) : null}
+        <ContactActions
+          actions={contactActions}
+          className="site-header__actions"
+          compact
+        />
       </div>
 
       <div className="mobile-navigation" onBlur={handleBlur}>
@@ -170,17 +154,11 @@ export function SiteNavigation({ navigation, contactActions = [] }) {
                 </li>
               ))}
             </ul>
-            {contactActions.length > 0 ? (
-              <div className="mobile-navigation__actions">
-                {contactActions.map((action) => (
-                  <ContactActionLink
-                    key={action.id}
-                    action={action}
-                    className="mobile-navigation__action"
-                  />
-                ))}
-              </div>
-            ) : null}
+            <ContactActions
+              actions={contactActions}
+              className="mobile-navigation__actions"
+              layout="stack"
+            />
           </nav>
         </div>
       </div>
