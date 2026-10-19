@@ -32,6 +32,13 @@ node migration/scripts/admin-browser.mjs --cleanup   # after closing the window
 # 3. Normalize and report (local files only)
 node migration/scripts/build-content.mjs
 node migration/scripts/dry-run-report.mjs
+
+# 4. Cloudinary import (Phase 02.5.4; see docs/cloudinary-import-plan.md)
+node migration/scripts/verify-media.mjs
+node migration/scripts/import-cloudinary.mjs                    # offline dry run
+node --env-file=.env.local migration/scripts/import-cloudinary.mjs --preflight   # read-only
+node --env-file=.env.local migration/scripts/import-cloudinary.mjs --apply --plan-hash=<hash>   # approval required
+node --test migration/scripts/tests/cloudinary.test.mjs         # mock-server tests
 ```
 
 ## Safety rules built into the scripts
