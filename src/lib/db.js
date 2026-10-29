@@ -13,7 +13,26 @@ export function getDatabaseConfig(env = process.env) {
   if (!uri) throw new Error("MONGODB_URI is not set.");
   if (!dbName) throw new Error("MONGODB_DB_NAME must be set explicitly; the database is never inferred from the connection string.");
   if (!/^[A-Za-z0-9_-]{1,63}$/.test(dbName)) throw new Error("MONGODB_DB_NAME has an invalid format.");
+  assertDatabaseMatchesEnvironment(dbName, env);
   return { uri, dbName };
+}
+
+const tokensOf = (name) => name.toLowerCase().split(/[^a-z0-9]+|(?<=[a-z])(?=\d)|(?<=\d)(?=[a-z])/).filter(Boolean);
+const NON_PRODUCTION_TOKENS = ["staging", "stage", "stg", "dev", "development", "test", "preview", "sandbox"];
+const PRODUCTION_TOKENS = ["prod", "production", "prd", "live"];
+
+// Fails closed when a deployment points at the wrong database: Vercel
+// Production must not use a staging/test database, and Preview or
+// Development deployments must not use a production database.
+export function assertDatabaseMatchesEnvironment(dbName, env = process.env) {
+  const tokens = tokensOf(dbName);
+  const deployment = env.VERCEL_ENV;
+  if (deployment === "production" && tokens.some((t) => NON_PRODUCTION_TOKENS.includes(t))) {
+    throw new Error("MONGODB_DB_NAME looks like a non-production database, but VERCEL_ENV is production.");
+  }
+  if ((deployment === "preview" || deployment === "development") && tokens.some((t) => PRODUCTION_TOKENS.includes(t))) {
+    throw new Error(`MONGODB_DB_NAME looks like a production database, but VERCEL_ENV is ${deployment}.`);
+  }
 }
 
 // Removes the connection string and its parts (user, password, hosts,
