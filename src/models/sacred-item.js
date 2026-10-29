@@ -51,7 +51,8 @@ SacredItemSchema.index({ "primaryImage.assetId": 1 });
 enforcePublishRules(SacredItemSchema, (doc) => {
   const issues = [];
   if (!doc.categoryId || doc.categoryMapping?.status === "unresolved") issues.push("category is not resolved");
-  if (doc.inquiryText && /\d/.test(doc.inquiryText)) issues.push("inquiryText contains digits (possible price); owner must review");
+  // inquiryText (legacy price_note) is preserved verbatim and may contain a
+  // price; no blanket rule blocks numbers. The dry run flags digits for review.
   return issues;
 });
 

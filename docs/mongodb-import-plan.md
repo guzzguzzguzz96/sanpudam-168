@@ -2,7 +2,7 @@
 
 **Phase:** 02.5.5 — MongoDB Content & Media Migration Preparation
 **วันที่:** 29 ตุลาคม 2569 (2026-10-29)
-**สถานะ:** สร้าง Mongoose models, importer และชุดทดสอบเสร็จแล้ว รัน **dry run แบบออฟไลน์** แล้ว **ยังไม่ได้เชื่อมต่อ MongoDB Atlas และยังไม่มีการเขียนข้อมูล** การรัน preflight หรือ apply ต้องได้รับอนุมัติแยก
+**สถานะ:** สร้าง Mongoose models, importer และชุดทดสอบเสร็จแล้ว รัน **dry run แบบออฟไลน์** แล้ว เจ้าของอนุมัติ **preflight แบบอ่านอย่างเดียว** แล้ว แต่ **ยังไม่ได้เชื่อมต่อ** เพราะ `.env.local` ยังไม่มี `MONGODB_DB_NAME` (ดู §13) ยังไม่มีการเขียนข้อมูลใด ๆ การรัน apply ต้องได้รับอนุมัติแยก
 
 เอกสารที่เกี่ยวข้อง: [`mongodb-schema-spec.md`](mongodb-schema-spec.md) · [`legacy-data-mapping.md`](legacy-data-mapping.md) · [`content-extraction-results.md`](content-extraction-results.md) · [`cloudinary-import-plan.md`](cloudinary-import-plan.md) · [`migration-validation-checklist.md`](migration-validation-checklist.md)
 
@@ -66,7 +66,11 @@ models ใช้ relative import จึงโหลดได้ทั้งใ�
 | Placeholder ระดับฟิลด์ | `placeholderFields[]` (`path`, `legacyPath`, `status`, `source`, `flaggedAt`) |
 | Legacy identifiers | `legacy` ครบ: module, id, key, checksum, `isPublished`, `isPlaceholder`, sortOrder, เวลาเดิม |
 
-**Draft กับ published:** draft บันทึกได้แม้ข้อมูลยังไม่ครบ (เช่น วิดีโอที่ไม่มีไฟล์) แต่ hook `pre("validate")` จะ **ปฏิเสธการบันทึกเป็น `published`** ถ้า `review.status` ไม่ใช่ `approved`, ยังมีธง placeholder, มีภาพที่ resolve ไม่ได้ และตามกฎเฉพาะ collection: sacred items ต้องมีหมวดและ `inquiryText` ต้องไม่มีตัวเลข, วิดีโอต้องมีไฟล์, reviews และ team members ต้องได้ความยินยอม
+**Draft กับ published:** draft บันทึกได้แม้ข้อมูลยังไม่ครบ (เช่น วิดีโอที่ไม่มีไฟล์) แต่ hook `pre("validate")` จะ **ปฏิเสธการบันทึกเป็น `published`** ถ้า `review.status` ไม่ใช่ `approved`, ยังมีธง placeholder, มีภาพที่ resolve ไม่ได้ และตามกฎเฉพาะ collection: sacred items ต้องมีหมวด, วิดีโอต้องมีไฟล์, reviews และ team members ต้องได้ความยินยอม
+
+**ข้อความราคา/การบูชา (`inquiryText`, เดิม `price_note`):** เก็บตามต้นฉบับทุกตัวอักษร **ไม่มีกฎห้ามตัวเลขแบบเหมารวม** (ปรับตามคำสั่งเจ้าของใน preflight) ถ้ามีตัวเลข dry run จะแสดงหมายเหตุระดับ `info` ให้เจ้าของพิจารณา แต่ไม่บล็อกการนำเข้าหรือการเผยแพร่ ค่าปัจจุบันของเหรียญคือ "สอบถามราคาและสั่งจองทางไลน์" (ไม่มีตัวเลข)
+
+**ไม่สร้าง collection หรือ index โดยอัตโนมัติ:** ทุก schema ตั้ง `autoCreate: false` และ `autoIndex: false` และ `src/lib/db.js` ส่งค่าเดียวกันตอนเชื่อมต่อ collection และ index จะถูกสร้างเฉพาะขั้น `createIndexes()` ของ apply ที่ได้รับอนุมัติเท่านั้น
 
 **รักษาข้อมูลเดิม:** ไม่มีการตัดหรือเขียนข้อความใหม่ `inquiryText` (เดิม `price_note`) เก็บตามต้นฉบับ วันที่ข่าวเป็น `YYYY-MM-DD` เนื้อหา `body` เป็นรูปแบบเดิม (`legacy-text-v1`)
 
@@ -137,17 +141,21 @@ node migration/scripts/import-mongodb.mjs
 | จำลองนำเข้า | รอบแรก `created` 56 · รอบสอง `unchanged` 56 · ไม่มีปัญหา |
 | Plan hash | `3525e33166360a3b45362b17c0095eb4a2e62363f424c4171c17bfc37f8f29a4` (คงที่ทุกครั้งที่รัน) |
 
-## 6. Preflight กับ staging (อนาคต ต้องได้รับอนุมัติ)
+## 6. Preflight กับ staging (อ่านอย่างเดียว)
 
 ```bash
 node --env-file=.env.local migration/scripts/import-mongodb.mjs --preflight
 ```
 
 - ต้องตั้ง `MONGODB_URI` และ `MONGODB_DB_NAME` ใน `.env.local` (ผู้ดูแลตั้งเอง)
-- ตรวจกฎชื่อฐานข้อมูล (§3) ก่อนเชื่อมต่อ แล้วตรวจชื่อหลังเชื่อมต่อ
-- **อ่านอย่างเดียว:** แต่ละเรคอร์ดได้ `would_create`, `unchanged`, `edited_in_cms`, `source_changed`, `conflict` หรือ `would_block`
-- ไม่สร้าง index ไม่เขียนเอกสาร ไม่เขียน `migration_runs`
-- รายงานเก็บที่ `migration/reports/mongodb-preflight-<runId>.json`
+- ตรวจกฎชื่อฐานข้อมูล (§3) **ก่อนเชื่อมต่อ** ถ้าไม่ผ่านจะหยุดทันที
+- **ใช้ MongoDB driver โดยตรง (`mongoose.mongo.MongoClient`) ไม่ใช้ Mongoose connection** จึงไม่มี `autoCreate`/`autoIndex` ของ model เข้ามาเกี่ยว
+- wrapper (`migration/scripts/lib/mongo-readonly.mjs`) เปิดให้ใช้เฉพาะ `connectionStatus`, `listCollections`, `countDocuments`, `indexes`, `find`, `findOne` adapter ที่ส่งให้ importer โยน error ทุกครั้งที่มีการเรียกเขียน
+- **ตรวจทุกคำสั่งที่ driver ส่งจริง** ผ่าน command monitoring เทียบกับ allowlist (`hello`, `saslStart`, `saslContinue`, `ping`, `connectionStatus`, `listCollections`, `listIndexes`, `count`, `aggregate` ที่ไม่มี `$out`/`$merge`, `find`, `getMore`, `killCursors`, `endSessions` ฯลฯ) ถ้าพบคำสั่งอื่นจะรายงาน violation และ exit 1
+- สิ่งที่ตรวจ: สิทธิ์ของผู้ใช้ (ชื่อ role และขอบเขตเท่านั้น ไม่แสดงชื่อผู้ใช้), collection ที่มีอยู่, จำนวนเอกสาร, index ที่มีเทียบกับที่ model ต้องการ, validate เอกสารที่มีอยู่ด้วย model, และผลรายเรคอร์ด `would_create`/`unchanged`/`edited_in_cms`/`source_changed`/`conflict`/`would_block`
+- collection ที่ยังไม่มีจะรายงานว่าไม่มี (การอ่าน index ของ collection ที่ไม่มีไม่สร้าง collection) ฐานข้อมูลที่ยังว่างจะแสดงเป็นไม่มี collection
+- ไม่สร้าง collection/index ไม่เขียนเอกสาร ไม่เขียน `migration_runs`
+- รายงานเก็บที่ `migration/reports/mongodb-preflight-<runId>.json` (ไม่มี connection string)
 
 ## 7. Apply กับ staging (อนาคต ต้องได้รับอนุมัติ)
 
@@ -160,7 +168,7 @@ node --env-file=.env.local migration/scripts/import-mongodb.mjs --apply \
 ลำดับ:
 
 1. ตรวจกฎเป้าหมาย plan hash และ confirm-db (fail closed)
-2. เชื่อมต่อและยืนยันชื่อฐานข้อมูล
+2. เชื่อมต่อด้วย Mongoose (`autoCreate: false`, `autoIndex: false`) และยืนยันชื่อฐานข้อมูล
 3. `createIndexes()` ของทุก model (สร้าง index ที่ยังไม่มีเท่านั้น **ไม่ลบ index** ไม่ใช้ `syncIndexes`)
 4. บันทึก `migration_runs` สถานะ `running`
 5. นำเข้า 56 เรคอร์ดตามลำดับ §4
@@ -226,9 +234,53 @@ Exit code: `0` สำเร็จ · `1` ตรวจเป้าหมาย/pl
 
 ## 12. ความเสี่ยงที่เหลือ
 
-1. **ยังไม่ได้ทดสอบกับ MongoDB จริง:** การทดสอบใช้ in-memory adapter กับ model จริง แต่ `createMongooseAdapter` (lean read, `replaceOne` แบบมีเงื่อนไข, unique index จริง) ยังไม่ได้รันกับ server preflight บน staging คือการตรวจครั้งแรก
+1. **ยังไม่ได้เชื่อมต่อ MongoDB จริง (§13):** การทดสอบใช้ in-memory adapter กับ model จริง แต่ `createMongooseAdapter` (lean read, `replaceOne` แบบมีเงื่อนไข, unique index จริง) ยังไม่ได้รันกับ server preflight บน staging คือการตรวจครั้งแรก
 2. **การตรวจ "แก้ไขหลังนำเข้า" อาศัย checksum:** CMS ใหม่ควรตั้ง `migration.editedAfterImport = true` เมื่อแก้เอกสารที่นำเข้า เพื่อเป็นสัญญาณที่สองนอกจาก checksum
 3. **ข้อมูลตัวอย่าง:** 32 ฟิลด์ยังเป็นข้อมูลตัวอย่าง รีวิว 3 รายการและทีมงานเป็นตัวอย่าง จึงยังเผยแพร่ไม่ได้จนกว่าเจ้าของแก้
 4. **ข้อมูลติดต่อ:** `contact.verified = false` และลิงก์แผนที่ `share.google` ยังไม่ผ่าน `getMapsUrl()`
 5. **การเปลี่ยนชนิดโมดูลเป็น ESM:** `"type": "module"` ผ่าน lint/build แล้ว แต่ไฟล์ config ในอนาคตที่เป็น CommonJS ต้องใช้นามสกุล `.cjs`
 6. **สิทธิ์ฐานข้อมูล:** ควรใช้ผู้ใช้ MongoDB ที่จำกัดสิทธิ์เฉพาะฐานข้อมูล staging เพื่อป้องกันการเขียนผิดฐาน
+
+## 13. ผล preflight กับ Atlas staging (29 ตุลาคม 2569)
+
+เจ้าของอนุมัติให้เชื่อมต่อ **แบบอ่านอย่างเดียว** เท่านั้น ผล:
+
+### 13.1 การตรวจ environment (ไม่ได้เชื่อมต่อ)
+
+| ตรวจ | ผล |
+|---|---|
+| `MONGODB_URI` | ตั้งไว้แล้ว รูปแบบ `mongodb+srv` มีข้อมูลยืนยันตัวตน ไม่มีชื่อฐานข้อมูลใน path (ไม่ได้พิมพ์ค่า) |
+| `MONGODB_DB_NAME` | **ไม่ได้ตั้ง** (ไม่มีตัวแปรชื่อใกล้เคียงใน `.env.local`) |
+| ชื่อที่คาดไว้ `sanpudam168_staging` | ยืนยันไม่ได้ |
+| ผล | **หยุดก่อนเชื่อมต่อ** ตามข้อกำหนด ไม่มีคำสั่งใดถูกส่งไปยัง Atlas |
+
+`node --env-file=.env.local migration/scripts/import-mongodb.mjs --preflight` ได้ exit 1 พร้อมข้อความ "MONGODB_DB_NAME must be set explicitly" และไม่มีรายงาน preflight ถูกสร้าง
+
+### 13.2 ข้อบกพร่องด้านความปลอดภัยที่พบและแก้ก่อนเชื่อมต่อ
+
+preflight เดิมเชื่อมต่อด้วย `mongoose.connect()` ขณะที่ model ทั้ง 13 ตัวลงทะเบียนอยู่ ค่าเริ่มต้นของ Mongoose (`autoCreate`, `autoIndex`) จะ **สร้าง collection และ index ทันทีที่เชื่อมต่อ** ซึ่งเป็นการเขียนลง Atlas แม้ preflight ไม่ได้เรียก insert ใด ๆ แก้แล้วโดย:
+
+1. preflight เปลี่ยนไปใช้ driver โดยตรงผ่าน wrapper อ่านอย่างเดียวพร้อม command monitoring (§6)
+2. ทุก schema ตั้ง `autoCreate: false`, `autoIndex: false` และ `src/lib/db.js` กับขั้น apply ส่งค่าเดียวกันตอนเชื่อมต่อ
+3. เพิ่มการทดสอบ: ทุก schema ปิด autoCreate/autoIndex, wrapper ตรวจจับ `insert`/`createIndexes`/`aggregate` ที่มี `$out` ได้, adapter ปฏิเสธการเขียน, preflight หยุดก่อนเชื่อมต่อเมื่อไม่มีชื่อฐานข้อมูล (รวม 22 การทดสอบ MongoDB ผ่านทั้งหมด)
+
+### 13.3 ผลที่ตรวจได้โดยไม่ต้องเชื่อมต่อ
+
+| ตรวจ | ผล |
+|---|---|
+| Plan hash | `3525e33166360a3b45362b17c0095eb4a2e62363f424c4171c17bfc37f8f29a4` **ตรงกับแผนเดิม** (รันทั้งแบบปกติและแบบ `--env-file`) |
+| เรคอร์ด | 56 = media 17 + content 39, identity ไม่ซ้ำ |
+| การอ้างอิง | สื่อ 31/31, หมวดหมู่ 5/5 |
+| ธง placeholder | 32 |
+| สถานะ | ทุกเรคอร์ดเนื้อหา `draft` / `pending_review` |
+| วิดีโอ | ยังมีธง `videoMapping.status: "missing"` |
+| Cloudinary mapping | ใช้ `media-assets-mapping.json` ที่ตรวจแล้วใน Phase 02.5.4 (ไม่ได้เชื่อมต่อ Cloudinary) |
+| จำลองนำเข้า | รอบแรก `created` 56 · รอบสอง `unchanged` 56 |
+
+**Index ที่ model ต้องการ** (จะถูกสร้างโดย apply ผ่าน `createIndexes()` เท่านั้น): media_assets 6, categories 6, site_settings 6, pages 6, sacred_items 10, news 9, banners 7, gallery_items 8, faqs 7, videos 5, reviews 5, team_members 5, migration_runs 1 รวม unique index ของ `legacy.key`, `legacy.module + legacy.id`, slug, `key` ของ singleton และ `manifestId`/`cloudinary.publicId`/`contentHash.sha256` ของสื่อ ข้อสังเกต: index เดี่ยว `status` ซ้อนกับ compound `status + sortOrder` บางส่วน ไม่ใช่ปัญหาความถูกต้อง แต่ลดได้ภายหลัง
+
+### 13.4 ต้องทำก่อนรัน preflight อีกครั้ง
+
+1. ผู้ดูแลเพิ่ม `MONGODB_DB_NAME=sanpudam168_staging` ใน `.env.local` (ไม่ต้องแก้ `MONGODB_URI`)
+2. แนะนำให้ผู้ใช้ฐานข้อมูลมีสิทธิ์เฉพาะ `sanpudam168_staging` (เช่น `readWrite@sanpudam168_staging`) ไม่ใช่ `readWriteAnyDatabase` หรือ `atlasAdmin` preflight จะรายงาน role และขอบเขตสิทธิ์ให้ตรวจ
+3. รัน preflight ใหม่ (อ่านอย่างเดียว) แล้วตรวจรายงานก่อนขออนุมัติ apply

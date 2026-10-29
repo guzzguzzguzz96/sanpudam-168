@@ -60,7 +60,11 @@ node --test migration/scripts/tests/mongodb.test.mjs            # in-memory test
   ready. Offline dry run: 56 records (17 media + 39 content), 31 media usages
   resolved, 32 placeholder flags, plan hash
   `3525e33166360a3b45362b17c0095eb4a2e62363f424c4171c17bfc37f8f29a4`.
-- MongoDB has not been connected to or written. That step needs separate approval.
+- 2026-10-29: read-only staging preflight was approved but not run, because
+  `MONGODB_DB_NAME` is not set in `.env.local`. The preflight now uses a
+  read-only driver connection with command monitoring; schemas disable
+  autoCreate/autoIndex. See `docs/mongodb-import-plan.md` §13.
+- MongoDB has not been connected to or written. Apply needs separate approval.
 
 ## Safety rules built into the scripts
 

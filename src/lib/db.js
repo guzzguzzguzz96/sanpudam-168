@@ -26,7 +26,8 @@ export async function connectToDatabase(env = process.env) {
   if (!cache.promise) {
     const { uri, dbName } = getDatabaseConfig(env);
     cache.promise = mongoose
-      .connect(uri, { dbName, bufferCommands: false, serverSelectionTimeoutMS: 10000 })
+      // No implicit collection or index creation from the app.
+      .connect(uri, { dbName, bufferCommands: false, autoCreate: false, autoIndex: false, serverSelectionTimeoutMS: 10000 })
       .then((instance) => {
         const connected = instance.connection.db?.databaseName;
         if (connected !== dbName) throw new Error(`Connected to an unexpected database (${connected}).`);

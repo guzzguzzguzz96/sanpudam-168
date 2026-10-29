@@ -270,3 +270,71 @@ test("target: errors never contain the connection string", async () => {
   const uri = "mongodb+srv://user:secret-pass@cluster.example.net/";
   assert.ok(!sanitizeError(new Error(`failed for ${uri}`), uri).message.includes("secret-pass"));
 });
+
+// --- read-only preflight safety ------------------------------------------------
+
+test("models: automatic collection and index creation is disabled on every schema", async () => {
+  const { modelsByCollection } = await import("../../../src/models/index.js");
+  for (const [collection, Model] of Object.entries(modelsByCollection)) {
+    assert.equal(Model.schema.get("autoCreate"), false, `${collection} autoCreate`);
+    assert.equal(Model.schema.get("autoIndex"), false, `${collection} autoIndex`);
+  }
+});
+
+test("read-only wrapper: write commands are flagged and the adapter refuses writes", async () => {
+  const { EventEmitter } = await import("node:events");
+  const { openReadOnlyDatabase, createReadOnlyAdapter } = await import("../lib/mongo-readonly.mjs");
+  let client;
+  class FakeClient extends EventEmitter {
+    constructor(uri, options) {
+      super();
+      this.options = options;
+      client = this;
+    }
+    async connect() {}
+    db(name) {
+      const missing = Object.assign(new Error("ns does not exist"), { code: 26 });
+      return {
+        databaseName: name,
+        command: async () => ({ authInfo: { authenticatedUsers: [{ user: "someone", db: "admin" }], authenticatedUserRoles: [{ role: "readWrite", db: name }], authenticatedUserPrivileges: [] } }),
+        listCollections: () => ({ toArray: async () => [] }),
+        collection: () => ({ countDocuments: async () => 0, indexes: async () => { throw missing; }, find: () => ({ limit: () => ({ toArray: async () => [] }) }), findOne: async () => null }),
+      };
+    }
+    async close() {}
+  }
+  const ro = await openReadOnlyDatabase("mongodb+srv://u:p@cluster.example.net/", "sanpudam168_staging", { MongoClientImpl: FakeClient });
+  assert.equal(client.options.monitorCommands, true);
+  assert.deepEqual(await ro.indexes("news"), [], "missing collection reads as no indexes, without creating it");
+  const status = await ro.connectionStatus();
+  assert.ok(!JSON.stringify(status).includes("someone"), "user names are not reported");
+  client.emit("commandStarted", { commandName: "find", command: {} });
+  client.emit("commandStarted", { commandName: "aggregate", command: { pipeline: [{ $match: {} }] } });
+  assert.deepEqual(ro.violations(), []);
+  client.emit("commandStarted", { commandName: "insert", command: {} });
+  client.emit("commandStarted", { commandName: "createIndexes", command: {} });
+  client.emit("commandStarted", { commandName: "aggregate", command: { pipeline: [{ $out: "x" }] } });
+  assert.deepEqual(ro.violations(), ["insert", "createIndexes", "aggregate"]);
+  const adapter = createReadOnlyAdapter(ro);
+  for (const method of ["insert", "replaceIfUnchanged", "saveRun"]) assert.throws(() => adapter[method](), /Read-only/);
+});
+
+test("target: preflight with a URI but no database name stops before connecting", () => {
+  const env = { ...process.env, MONGODB_URI: "mongodb+srv://u:p@cluster.invalid.example/" };
+  delete env.MONGODB_DB_NAME;
+  const run = spawnSync(process.execPath, [fromRoot("migration/scripts/import-mongodb.mjs"), "--preflight"], { env, encoding: "utf8", timeout: 60000 });
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /MONGODB_DB_NAME must be set explicitly/);
+  assert.ok(!run.stderr.includes("u:p@"), "connection string not printed");
+});
+
+test("models: a price in inquiryText is preserved and does not block publishing", async () => {
+  const fixture = makeFixture();
+  fixture.content.sacred_items[0].inquiryText = "บูชา 1,500 บาท สอบถามทางไลน์";
+  fixture.content.sacred_items[0].placeholderFields = [];
+  const plan = await buildMigrationPlan(fixture);
+  const doc = plan.records.find((r) => r.collection === "sacred_items").doc;
+  assert.equal(doc.inquiryText, "บูชา 1,500 บาท สอบถามทางไลน์");
+  assert.ok(plan.issues.some((i) => i.severity === "info" && /possible price/.test(i.message)));
+  await new SacredItem({ ...doc, status: "published", review: { status: "approved" } }).validate();
+});

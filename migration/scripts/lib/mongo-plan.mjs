@@ -208,6 +208,13 @@ export async function buildMigrationPlan({ mediaMapping, content }) {
     }
   }
 
+  // Offering text that may contain a price: preserved, flagged for owner review.
+  for (const { collection, doc } of records) {
+    if (collection === "sacred_items" && doc.inquiryText && /\d/.test(doc.inquiryText)) {
+      issues.push({ severity: "info", where: `sacred_items:${doc.slug}`, message: `inquiryText contains digits (possible price), kept verbatim for owner review: "${doc.inquiryText}"` });
+    }
+  }
+
   // Missing-media indicators that must stay explicit.
   for (const { collection, doc } of records) {
     if (collection === "videos" && !doc.videoAssetId) {

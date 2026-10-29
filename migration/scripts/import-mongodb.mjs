@@ -2,7 +2,8 @@
 //
 // Offline dry run (default; no credentials, no network):
 //   node migration/scripts/import-mongodb.mjs
-// Read-only staging preflight (future; needs approval and credentials):
+// Read-only staging preflight (native driver, read commands only; no
+// collections, indexes, documents, or migration_runs are created):
 //   node --env-file=.env.local migration/scripts/import-mongodb.mjs --preflight
 // Apply to staging (future; needs explicit approval):
 //   node --env-file=.env.local migration/scripts/import-mongodb.mjs --apply \
@@ -21,6 +22,7 @@ import { buildMigrationPlan, loadPlanInputs } from "./lib/mongo-plan.mjs";
 import { PROBLEM_RESULTS, applyPlan, countResults } from "./lib/mongo-apply.mjs";
 import { createMemoryAdapter, createMongooseAdapter } from "./lib/mongo-adapters.mjs";
 import { assertConnectedTarget, resolveStagingTarget } from "./lib/db-target.mjs";
+import { createReadOnlyAdapter, openReadOnlyDatabase } from "./lib/mongo-readonly.mjs";
 import { fromRoot, parseArgs, readJson, writeJson } from "./lib/files.mjs";
 import { modelsByCollection } from "../../src/models/index.js";
 import { sanitizeError } from "../../src/lib/db.js";
@@ -109,8 +111,17 @@ async function runAgainstStaging() {
     return;
   }
 
+  if (mode === "preflight") {
+    await runReadOnlyPreflight(target);
+    return;
+  }
+
+  // Apply (separately approved). autoCreate/autoIndex are off so collections
+  // and indexes are only created by the explicit createIndexes() step below.
   try {
-    await mongoose.connect(process.env.MONGODB_URI, { dbName: target.dbName, bufferCommands: false, serverSelectionTimeoutMS: 10000 });
+    mongoose.set("autoCreate", false);
+    mongoose.set("autoIndex", false);
+    await mongoose.connect(process.env.MONGODB_URI, { dbName: target.dbName, bufferCommands: false, autoCreate: false, autoIndex: false, serverSelectionTimeoutMS: 10000 });
     assertConnectedTarget(mongoose.connection, target.dbName);
   } catch (error) {
     console.error(`Connection failed: ${sanitizeError(error, process.env.MONGODB_URI).message}`);
@@ -121,15 +132,7 @@ async function runAgainstStaging() {
 
   const adapter = createMongooseAdapter();
   try {
-    if (mode === "preflight") {
-      const results = await applyPlan(plan, adapter, { runId, write: false });
-      const data = report(`mongodb-preflight-${runId}`, { target: { database: target.dbName }, counts: countResults(results), results });
-      console.log(JSON.stringify({ ...summary, target: data.target, results: data.counts }, null, 1));
-      if (results.some((r) => PROBLEM_RESULTS.has(r.result))) process.exitCode = 2;
-      return;
-    }
-
-    // Apply: non-destructive index creation, then the records in dependency order.
+    // Non-destructive index creation (never syncIndexes), then records in dependency order.
     for (const Model of Object.values(modelsByCollection)) await Model.createIndexes();
     const startedAt = new Date();
     await adapter.saveRun({ runId, track: "mongodb", mode: "apply", planHash: plan.planHash, targetDatabase: target.dbName, sourceType: "admin_ui_capture", status: "running", startedAt });
@@ -149,5 +152,92 @@ async function runAgainstStaging() {
     process.exitCode = 1;
   } finally {
     await mongoose.disconnect();
+  }
+}
+
+// Read-only preflight: native driver, read commands only, no Mongoose
+// connection (so no autoCreate/autoIndex), no migration_runs record.
+async function runReadOnlyPreflight(target) {
+  let ro;
+  try {
+    ro = await openReadOnlyDatabase(process.env.MONGODB_URI, target.dbName);
+  } catch (error) {
+    console.error(`Connection failed: ${sanitizeError(error, process.env.MONGODB_URI).message}`);
+    process.exitCode = 1;
+    return;
+  }
+  try {
+    const access = await ro.connectionStatus();
+    const collections = await ro.listCollections();
+    const existing = new Set(collections.map((c) => c.name));
+    const inventory = {};
+    for (const name of [...existing].sort()) {
+      inventory[name] = { documents: await ro.countDocuments(name), indexes: (await ro.indexes(name)).map((i) => ({ name: i.name, key: i.key, unique: Boolean(i.unique), partialFilterExpression: i.partialFilterExpression ?? null })) };
+    }
+
+    // Index compatibility: the indexes each model expects vs. what exists.
+    const indexReport = {};
+    for (const [collection, Model] of Object.entries(modelsByCollection)) {
+      const actual = inventory[collection]?.indexes ?? [];
+      const expected = Model.schema.indexes().map(([key, options]) => ({ key, unique: Boolean(options?.unique), partial: Boolean(options?.partialFilterExpression) }));
+      const sameKey = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+      indexReport[collection] = {
+        collectionExists: existing.has(collection),
+        missing: expected.filter((e) => !actual.some((a) => sameKey(a.key, e.key))).map((e) => ({ key: e.key, unique: e.unique })),
+        uniqueMismatch: expected.filter((e) => actual.some((a) => sameKey(a.key, e.key) && a.unique !== e.unique)).map((e) => e.key),
+        unexpected: actual.filter((a) => a.name !== "_id_" && !expected.some((e) => sameKey(a.key, e.key))).map((a) => a.name),
+      };
+    }
+
+    // Schema compatibility of documents already in the target collections.
+    const schemaReport = {};
+    for (const [collection, Model] of Object.entries(modelsByCollection)) {
+      if (!existing.has(collection)) continue;
+      const docs = await ro.find(collection, {}, { limit: 500 });
+      let invalid = 0;
+      for (const doc of docs) {
+        try {
+          await new Model(doc).validate();
+        } catch {
+          invalid++;
+        }
+      }
+      schemaReport[collection] = { sampled: docs.length, invalid };
+    }
+
+    const results = await applyPlan(plan, createReadOnlyAdapter(ro), { runId, write: false });
+    const counts = countResults(results);
+    const violations = ro.violations();
+    const data = report(`mongodb-preflight-${runId}`, {
+      target: { database: ro.databaseName },
+      access,
+      collections: [...existing].sort(),
+      inventory,
+      indexReport,
+      schemaReport,
+      counts,
+      results,
+      readOnly: { commandsObserved: [...new Set(ro.observedCommands())].sort(), violations },
+    });
+    console.log(JSON.stringify({
+      ...summary,
+      target: data.target,
+      access: { roles: access.roles, privilegeResources: access.privilegeResources },
+      collections: data.collections,
+      documents: Object.fromEntries(Object.entries(inventory).map(([k, v]) => [k, v.documents])),
+      results: counts,
+      readOnly: data.readOnly,
+    }, null, 1));
+    if (violations.length) {
+      console.error(`Read-only violation: non-read commands observed (${violations.join(", ")}).`);
+      process.exitCode = 1;
+    } else if (results.some((r) => PROBLEM_RESULTS.has(r.result))) {
+      process.exitCode = 2;
+    }
+  } catch (error) {
+    console.error(`Preflight failed: ${sanitizeError(error, process.env.MONGODB_URI).message}`);
+    process.exitCode = 1;
+  } finally {
+    await ro.close();
   }
 }

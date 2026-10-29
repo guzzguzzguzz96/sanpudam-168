@@ -29,7 +29,7 @@ const MigrationRunSchema = new Schema(
       default: [],
     },
   },
-  { collection: "migration_runs", timestamps: true },
+  { collection: "migration_runs", timestamps: true, autoCreate: false, autoIndex: false },
 );
 
 export const MigrationRun = defineModel("MigrationRun", MigrationRunSchema);

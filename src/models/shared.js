@@ -125,7 +125,9 @@ export function contentFields() {
   };
 }
 
-export const schemaOptions = (collection) => ({ collection, timestamps: true, optimisticConcurrency: true });
+// autoCreate/autoIndex are off: collections and indexes are created only by
+// an explicit, approved createIndexes() step, never as a side effect of connecting.
+export const schemaOptions = (collection) => ({ collection, timestamps: true, optimisticConcurrency: true, autoCreate: false, autoIndex: false });
 
 // Indexes shared by every collection that receives migrated records.
 export function addMigrationIndexes(schema) {
