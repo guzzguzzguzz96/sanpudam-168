@@ -338,3 +338,17 @@ test("models: a price in inquiryText is preserved and does not block publishing"
   assert.ok(plan.issues.some((i) => i.severity === "info" && /possible price/.test(i.message)));
   await new SacredItem({ ...doc, status: "published", review: { status: "approved" } }).validate();
 });
+
+test("target: error text never contains credentials or cluster host names", async () => {
+  const { sanitizeError } = await import("../../../src/lib/db.js");
+  const uri = "mongodb+srv://alice:s3cr%40t@cluster0.abc123.mongodb.net/?retryWrites=true";
+  const messages = [
+    "querySrv ECONNREFUSED _mongodb._tcp.cluster0.abc123.mongodb.net",
+    "connect to ac-xyz-shard-00-01.abc123.mongodb.net:27017 failed",
+    "authentication failed for alice using s3cr@t",
+  ];
+  for (const message of messages) {
+    const clean = sanitizeError(new Error(message), uri).message;
+    for (const secret of ["alice", "s3cr@t", "abc123", "cluster0"]) assert.ok(!clean.includes(secret), `${secret} leaked: ${clean}`);
+  }
+});

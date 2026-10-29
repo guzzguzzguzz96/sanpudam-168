@@ -16,10 +16,28 @@ export function getDatabaseConfig(env = process.env) {
   return { uri, dbName };
 }
 
-// Removes the connection string from any error text before it is surfaced.
+// Removes the connection string and its parts (user, password, hosts,
+// including SRV/replica host names derived from them) from error text.
 export function sanitizeError(error, uri) {
-  const message = String(error?.message ?? error);
-  return new Error(uri ? message.split(uri).join("[connection string redacted]") : message);
+  let message = String(error?.message ?? error);
+  if (uri) {
+    message = message.split(uri).join("[connection string redacted]");
+    try {
+      const parsed = new URL(uri.replace(/^mongodb(\+srv)?:/, "http:"));
+      const secrets = [parsed.password, parsed.username, decodeURIComponent(parsed.password), decodeURIComponent(parsed.username)].filter(Boolean);
+      for (const secret of secrets) message = message.split(secret).join("[redacted]");
+      for (const host of parsed.host.split(",")) {
+        const name = host.split(":")[0];
+        // Cluster domain without the first label also covers shard host names.
+        const domain = name.split(".").slice(1).join(".");
+        if (name) message = message.split(name).join("[host redacted]");
+        if (domain.includes(".")) message = message.replace(new RegExp(`[A-Za-z0-9_.-]*${domain.replace(/\./g, "\\.")}`, "g"), "[host redacted]");
+      }
+    } catch {
+      // Unparseable URI: the full-string redaction above still applies.
+    }
+  }
+  return new Error(message);
 }
 
 export async function connectToDatabase(env = process.env) {
