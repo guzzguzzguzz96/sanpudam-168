@@ -109,6 +109,16 @@ export function createClient(config, { fetchImpl = fetch, apiBase = CLOUDINARY_A
     }
   }
 
+  // Read-only account settings (used to confirm the folder mode).
+  async function getAccountConfig() {
+    const response = await request(`${apiBase}/${cloudName}/config?settings=true`, () => ({
+      method: "GET",
+      headers: { Authorization: authHeader },
+    }));
+    if (!response.ok) throw new Error(`getAccountConfig: ${await errorText(response)}`);
+    return response.json();
+  }
+
   // Read-only. Returns null when the asset does not exist.
   async function getResource(publicId, deliveryType) {
     const path = publicId.split("/").map(encodeURIComponent).join("/");
@@ -148,5 +158,5 @@ export function createClient(config, { fetchImpl = fetch, apiBase = CLOUDINARY_A
     return response.json();
   }
 
-  return { getResource, upload };
+  return { getAccountConfig, getResource, upload };
 }

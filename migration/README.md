@@ -38,8 +38,19 @@ node migration/scripts/verify-media.mjs
 node migration/scripts/import-cloudinary.mjs                    # offline dry run
 node --env-file=.env.local migration/scripts/import-cloudinary.mjs --preflight   # read-only
 node --env-file=.env.local migration/scripts/import-cloudinary.mjs --apply --plan-hash=<hash>   # approval required
+node --env-file=.env.local migration/scripts/verify-cloudinary.mjs   # read-only post-upload check
+node migration/scripts/build-media-mapping.mjs                  # media_assets mapping (local only)
 node --test migration/scripts/tests/cloudinary.test.mjs         # mock-server tests
 ```
+
+## Status
+
+- 2026-10-29: the 17 originals were imported to Cloudinary staging
+  (`sanpudam168/staging/legacy/`, public `upload` delivery, owner-approved).
+  17 uploaded, 0 conflicts, 0 failures; post-upload verification 17/17; a
+  repeat preflight reports 17 `already_present`. See
+  `docs/cloudinary-import-plan.md` §12.
+- MongoDB has not been written. That step needs separate approval.
 
 ## Safety rules built into the scripts
 

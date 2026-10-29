@@ -149,13 +149,45 @@ if (mode === "apply" && args.values["plan-hash"] !== planHash) {
 }
 
 const client = createClient(config, { apiBase: settings.apiBase });
+
+// The account's folder mode must match the configured one; uploading with
+// the wrong mode would place assets in unexpected folders.
+let remoteFolderMode = null;
+try {
+  remoteFolderMode = (await client.getAccountConfig())?.settings?.folder_mode ?? null;
+} catch (error) {
+  console.error(`Could not read the account folder mode: ${error.message}`);
+  process.exitCode = 1;
+}
+if (process.exitCode === 1) {
+  // already reported
+} else if (remoteFolderMode !== settings.folderMode) {
+  console.error(`Folder mode mismatch: account is "${remoteFolderMode}", configured "${settings.folderMode}". Set CLOUDINARY_FOLDER_MODE and re-run the dry run.`);
+  process.exitCode = 1;
+}
+if (process.exitCode === 1) {
+  // Leave via exitCode (not process.exit) so open HTTP sockets close cleanly.
+  await new Promise((resolve) => setTimeout(resolve, 0));
+} else {
+  await runImport();
+}
+
+async function runImport() {
 const runId = `${new Date().toISOString().replace(/[:.]/g, "-")}-${randomUUID().slice(0, 8)}`;
 const logPath = outPath("reports", `cloudinary-import-${runId}.jsonl`);
 const statePath = outPath("reports", "cloudinary-import-state.json");
 const state = readJson(statePath, { assets: {} });
 const log = (record) => appendFileSync(logPath, `${JSON.stringify({ at: new Date().toISOString(), runId, ...record })}\n`);
 
-const matches = (remote, item) => remote.etag === item.md5 && remote.bytes === item.bytes;
+// Identity check for an existing asset. Upload responses include etag (MD5);
+// the Admin API "get resource" response does not, so there the SHA-256 we
+// stored in the asset's context is used instead, together with size and
+// dimensions.
+const matches = (remote, item) =>
+  remote.bytes === item.bytes &&
+  remote.width === item.width &&
+  remote.height === item.height &&
+  (remote.etag ? remote.etag === item.md5 : remote.context?.custom?.sha256 === item.sha256);
 const results = [];
 
 for (const item of plan) {
@@ -244,7 +276,8 @@ if (mode === "apply") {
 }
 
 const counts = results.reduce((acc, { record }) => ({ ...acc, [record.status]: (acc[record.status] ?? 0) + 1 }), {});
-console.log(JSON.stringify({ ...summaryBase, runId, counts, log: logPath.split(/[\\/]/).slice(-2).join("/") }, null, 1));
+console.log(JSON.stringify({ ...summaryBase, accountFolderMode: remoteFolderMode, runId, counts, log: logPath.split(/[\\/]/).slice(-2).join("/") }, null, 1));
 // exitCode instead of process.exit(): exiting while HTTP keep-alive sockets
 // are open can crash Node on Windows.
 if (results.some(({ record }) => ["conflict", "failed", "verify_failed"].includes(record.status))) process.exitCode = 2;
+}

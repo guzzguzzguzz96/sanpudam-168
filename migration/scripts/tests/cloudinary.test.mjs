@@ -69,9 +69,19 @@ test("client retries 429 and redacts credentials from errors", async () => {
 
 // --- end-to-end against a mock Cloudinary --------------------------------------
 
+// Parses Cloudinary's "key=value|key=value" context with backslash escapes.
+function parseContext(text = "") {
+  const pairs = {};
+  for (const part of text.split(/(?<!\\)\|/)) {
+    const [key, ...rest] = part.split(/(?<!\\)=/);
+    if (key) pairs[key] = rest.join("=").replace(/\\([=|\\])/g, "$1");
+  }
+  return pairs;
+}
+
 function startMockCloudinary() {
   const assets = new Map();
-  const stats = { uploads: 0, rejectedSignatures: 0, overwriteViolations: 0 };
+  const stats = { uploads: 0, rejectedSignatures: 0, overwriteViolations: 0, folderMode: "dynamic" };
   const expectedAuth = `Basic ${Buffer.from(`${FAKE.CLOUDINARY_API_KEY}:${FAKE.CLOUDINARY_API_SECRET}`).toString("base64")}`;
   const server = createServer(async (req, res) => {
     const send = (status, body) => {
@@ -79,11 +89,19 @@ function startMockCloudinary() {
       res.end(JSON.stringify(body));
     };
     const url = new URL(req.url, "http://127.0.0.1");
+    if (req.method === "GET" && url.pathname === "/v1_1/test-cloud/config") {
+      if (req.headers.authorization !== expectedAuth) return send(401, { error: { message: "unauthorized" } });
+      return send(200, { cloud_name: "test-cloud", settings: { folder_mode: stats.folderMode } });
+    }
     const getMatch = url.pathname.match(/^\/v1_1\/test-cloud\/resources\/image\/upload\/(.+)$/);
     if (req.method === "GET" && getMatch) {
       if (req.headers.authorization !== expectedAuth) return send(401, { error: { message: "unauthorized" } });
       const asset = assets.get(decodeURIComponent(getMatch[1]));
-      return asset ? send(200, asset) : send(404, { error: { message: "not found" } });
+      if (!asset) return send(404, { error: { message: "not found" } });
+      // Like the real Admin API: no etag, but tags and context are returned.
+      const { etag, ...withoutEtag } = asset;
+      void etag;
+      return send(200, withoutEtag);
     }
     if (req.method === "POST" && url.pathname === "/v1_1/test-cloud/image/upload") {
       const chunks = [];
@@ -115,6 +133,8 @@ function startMockCloudinary() {
         bytes: file.length,
         etag: createHash("md5").update(file).digest("hex"),
         secure_url: `https://res.cloudinary.com/test-cloud/image/upload/v1/${params.public_id}`,
+        tags: params.tags.split(","),
+        context: { custom: parseContext(params.context) },
         created_at: new Date().toISOString(),
       };
       assets.set(params.public_id, asset);
@@ -154,6 +174,13 @@ test("importer: apply, re-run without duplicates, conflict without overwrite", {
     assert.equal(notStaging.status, 1);
     assert.equal(mock.stats.uploads, 0);
 
+    mock.stats.folderMode = "fixed";
+    const wrongMode = await runImporter(["--apply", `--plan-hash=${planHash}`, `--out=${out}`], env);
+    assert.equal(wrongMode.status, 1, "a folder mode mismatch must stop the import");
+    assert.match(wrongMode.stderr, /Folder mode mismatch/);
+    assert.equal(mock.stats.uploads, 0);
+    mock.stats.folderMode = "dynamic";
+
     const first = await runImporter(["--apply", `--plan-hash=${planHash}`, `--out=${out}`], env);
     assert.equal(first.status, 0, first.stderr + first.stdout);
     assert.equal(mock.stats.uploads, 17);
@@ -169,7 +196,8 @@ test("importer: apply, re-run without duplicates, conflict without overwrite", {
     assert.match(second.stdout, /"already_present": 17/);
 
     const tamperedId = "sanpudam168/staging/legacy/brand/logo-mark";
-    mock.assets.set(tamperedId, { ...mock.assets.get(tamperedId), etag: "0".repeat(32), bytes: 1 });
+    const original = mock.assets.get(tamperedId);
+    mock.assets.set(tamperedId, { ...original, etag: "0".repeat(32), bytes: 1, context: { custom: { ...original.context.custom, sha256: "0".repeat(64) } } });
     const third = await runImporter(["--apply", `--plan-hash=${planHash}`, `--out=${out}`], env);
     assert.equal(third.status, 2, "a conflict must make the run fail");
     assert.match(third.stdout, /"conflict": 1/);
