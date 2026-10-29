@@ -50,11 +50,23 @@ test("boundary: database secrets are read only in the server data layer", () => 
   assert.doesNotMatch(example, /NEXT_PUBLIC_[A-Z_]*(MONGO|SECRET|API_KEY|PASSWORD)/);
 });
 
+test("boundary: session secrets and the preview allowlist are read only by the auth module", () => {
+  for (const file of sourceFiles) {
+    if (/env(\.|\[["'])(AUTH_SECRET|CMS_PREVIEW_ALLOWED_SUBJECTS)/.test(read(file))) assert.equal(rel(file), "src/server/auth/config.js");
+  }
+});
+
+test("boundary: no preview, CMS, or auth route is active", () => {
+  const routeFiles = walk(join(root, "src/app"), /\.(js|jsx)$/).map(rel);
+  for (const file of routeFiles) assert.doesNotMatch(file, /(preview|cms|admin|auth|login|api)/i, file);
+  assert.ok(!existsSync(join(root, "src/proxy.js")) && !existsSync(join(root, "src/middleware.js")));
+});
+
 // Runs after `npm run build`; skipped when no build output exists.
 test("boundary: browser bundles contain no database code or secret names", { skip: !existsSync(join(root, ".next/static")) }, () => {
   for (const file of walk(join(root, ".next/static"), /\.(js|css|json)$/)) {
     const text = read(file);
-    for (const marker of ["MONGODB_URI", "MONGODB_DB_NAME", "CLOUDINARY_API_SECRET", "AUTH_SECRET", "mongodb+srv", "sanpudam168_staging"]) {
+    for (const marker of ["MONGODB_URI", "MONGODB_DB_NAME", "CLOUDINARY_API_SECRET", "AUTH_SECRET", "CMS_PREVIEW_ALLOWED_SUBJECTS", "__Host-sanpudam-cms-session", "mongodb+srv", "sanpudam168_staging"]) {
       assert.ok(!text.includes(marker), `${marker} found in ${rel(file)}`);
     }
   }

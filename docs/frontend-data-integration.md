@@ -1,4 +1,4 @@
-# การเชื่อมข้อมูล Next.js กับ MongoDB (Phase 02.5.6 — Step A)
+# การเชื่อมข้อมูล Next.js กับ MongoDB (Phase 02.5.6 — Step A และ B1)
 
 สถานะ: **โครงสร้างพร้อมแล้ว แต่ยังไม่เชื่อมกับหน้าเว็บ** หน้าแรกยังใช้ `src/data/homepage-preview.js` เหมือนเดิม ไม่มี route ใดเรียกใช้ data layer นี้ และไม่มีการเขียนข้อมูลลง MongoDB
 
@@ -107,9 +107,9 @@ Server Component (อนาคต)
 - `createDraftAccessPolicy({ authorize })` ออก grant เมื่อ `authorize(request)` คืน `{ subject, role }` เท่านั้น
 - grant เก็บใน WeakSet ภายในโมดูล วัตถุที่สร้างเองหรือคัดลอกจาก grant จริงจึงใช้ไม่ได้
 - `getDraftContent(grant)` ตรวจ grant ก่อน query ทุกครั้ง หากไม่ผ่านจะ throw `DraftAccessDeniedError`
-- `defaultDraftAccessPolicy` **ปฏิเสธทุกคำขอ** เพราะยังไม่มีระบบยืนยันตัวตน **ไม่มี route สำหรับ preview**
+- `defaultDraftAccessPolicy` **ปฏิเสธทุกคำขอ** ส่วน `previewAccessPolicy` (Step B1) ออก grant เฉพาะ session ที่ผ่านกฎใน §12.2 ทั้งนี้ **ยังไม่มี route สำหรับ preview**
 
-ข้อกำหนดก่อนเปิด preview:
+ข้อกำหนดก่อนเปิด preview (รายละเอียดใน §12–§15):
 
 1. มีระบบยืนยันตัวตน (Auth.js) ที่ตรวจ session ฝั่ง server และกำหนด role ของผู้แก้ไขแล้ว
 2. route preview ต้องเรียก `authorize` ที่ตรวจ session จริง ห้ามใช้ query string หรือ cookie ที่เดาได้
@@ -141,7 +141,7 @@ Server Component (อนาคต)
 
 ## 10. การทดสอบ
 
-`npm test` (offline ใช้ mock model ไม่เชื่อมต่อ Atlas) มี 31 การทดสอบ ครอบคลุม:
+`npm test` (offline ใช้ mock model ไม่เชื่อมต่อ Atlas) มี 45 การทดสอบ (Step A 31 + Step B1 14) ครอบคลุม:
 
 - filter แบบ published-only และการตรวจซ้ำรายเอกสาร
 - การปฏิเสธเอกสาร pending_review, เอกสารที่มี placeholder ค้าง และเอกสาร draft
@@ -157,8 +157,110 @@ Server Component (อนาคต)
 ## 11. ข้อจำกัดที่ทราบ
 
 - ข้อมูลทั้ง 39 รายการใน staging ยังเป็น draft / pending_review ดังนั้น public scope จะได้ผลว่างทั้งหมดจนกว่าเจ้าของจะอนุมัติ ซึ่งเป็นพฤติกรรมที่ถูกต้อง สื่อทั้ง 17 รายการมี `rights.status = approved` (ใช้ได้ทันทีเมื่อเนื้อหาเผยแพร่) ส่วน `approval.status` ยังเป็น pending ซึ่งตาม spec §6 ไม่ใช่เงื่อนไขการแสดงผล
-- ยังไม่มีเครื่องมือ CMS สำหรับอนุมัติหรือเผยแพร่ และยังไม่มีระบบยืนยันตัวตน draft จึงเข้าถึงไม่ได้
+- ยังไม่มีเครื่องมือ CMS สำหรับอนุมัติหรือเผยแพร่ และยังไม่มีหน้า sign-in หรือ route ของ preview (มีเพียงชั้นตรวจ session และสิทธิ์จาก Step B1) draft จึงยังเข้าถึงไม่ได้
 - โมดูลใน `src/server/cms/` ยังไม่ถูก bundle โดย Next.js เพราะยังไม่มี route ใด import การ build จริงของโมดูลเหล่านี้จะเกิดในขั้นเชื่อมต่อ
 - โครงสร้าง banner ไม่มีหัวเรื่องหรือคำอธิบายของแต่ละ slide หัวเรื่องของ hero จึงมาจาก `site_settings.identity`
 - ข้อมูล `directionsUrl` เดิม (`share.google/...`) ไม่ผ่าน validation ของ Google Maps ต้องให้เจ้าของยืนยันลิงก์ใหม่
 - ยังไม่มีการ cache/revalidate เพราะต้องออกแบบพร้อมกับการเชื่อม route
+
+## 12. ระบบยืนยันตัวตนสำหรับ CMS preview (Step B1)
+
+สถานะ: **โครงสร้างพร้อมแล้ว แต่ยังไม่เปิดใช้** ยังไม่มีหน้า sign-in, route ของ preview หรือ proxy และยังไม่มีบัญชีผู้ใช้หรือรหัสผ่านใด ๆ (ไม่สร้างบัญชีผู้ดูแล ไม่ตั้งรหัสผ่านเริ่มต้น และไม่นำเข้าข้อมูลผู้ใช้จากระบบเดิม)
+
+### 12.1 สถาปัตยกรรม
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `src/server/auth/session-token.js` | ออกและตรวจ session token แบบ stateless ที่ลงลายเซ็น HMAC-SHA256 (`node:crypto`, ไม่เพิ่ม dependency) |
+| `src/server/auth/config.js` | อ่าน `AUTH_SECRET` และ `CMS_PREVIEW_ALLOWED_SUBJECTS` (ไฟล์เดียวที่อ่านค่าเหล่านี้) และกำหนดชื่อกับตัวเลือกของ cookie |
+| `src/server/auth/preview-access.js` | `authorizePreviewSession()` และ `previewAccessPolicy` ที่เชื่อมกับ `createDraftAccessPolicy` ใน `src/server/cms/draft-access.js` |
+| `src/server/auth/request-session.js` | `getPreviewGrant()` อ่าน cookie ด้วย `cookies()` ของ Next.js ฝั่ง server แล้วขอ grant |
+| `src/server/preview/` | loader ของหน้า preview ป้ายสถานะการเผยแพร่ และ `getAuthorizedPreview(section)` |
+
+รูปแบบ token: `v1.<base64url(JSON)>.<base64url(HMAC-SHA256)>`
+
+- payload มีเพียง `sub` (รหัสผู้ใช้แบบ opaque ไม่ใช่อีเมลหรือข้อมูลส่วนบุคคล), `role`, `sid`, `iat` และ `exp`
+- รูปแบบตายตัว ไม่มีช่องเลือก algorithm จึงไม่มีช่องโหว่แบบ `alg: none` หรือ algorithm confusion
+- ตรวจลายเซ็นด้วย `timingSafeEqual`
+- อายุ session สูงสุด 8 ชั่วโมง เผื่อนาฬิกาคลาดเคลื่อนได้ 60 วินาที และปฏิเสธ token ที่ออกในอนาคตหรือมีอายุเกินกำหนด
+
+Cookie: `__Host-sanpudam-cms-session` ใช้ `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/`, ไม่มี `Domain` และ `Max-Age` 8 ชั่วโมง JavaScript ในเบราว์เซอร์อ่าน cookie นี้ไม่ได้ และส่งข้ามเว็บไม่ได้
+
+เหตุผลที่ยังไม่ติดตั้ง Auth.js: ต้องตัดสินใจเรื่องผู้ให้บริการ sign-in (เช่น Google หรือ email magic link), รายชื่อผู้ใช้ และนโยบาย role ก่อน ส่วนนี้จึงทำเฉพาะชั้นตรวจ session และสิทธิ์ ซึ่งเป็นอิสระจากผู้ให้บริการ เมื่อเพิ่ม Auth.js ภายหลัง ให้ callback ของการ sign-in ออก token ผ่าน `signSessionToken()` (หรือแทนที่ `verifySessionToken` ด้วยการตรวจ session ของ Auth.js) โดยใช้ `AUTH_SECRET` ชื่อเดียวกับ Auth.js
+
+### 12.2 กฎสิทธิ์ draft
+
+คำขอจะได้ grant เมื่อผ่าน **ทุกข้อ** และตรวจที่ server ก่อน query draft ทุกครั้ง:
+
+1. ระบบถูกตั้งค่าแล้ว: `AUTH_SECRET` ยาวอย่างน้อย 32 ตัวอักษร **และ** `CMS_PREVIEW_ALLOWED_SUBJECTS` ไม่ว่าง ถ้าไม่ครบ ปฏิเสธทุกคำขอ
+2. มี cookie session และลายเซ็นถูกต้อง
+3. ยังไม่หมดอายุ และไม่ได้ออกในอนาคต
+4. `role` เป็น `owner` หรือ `editor`
+5. `sub` อยู่ใน `CMS_PREVIEW_ALLOWED_SUBJECTS`
+
+สิ่งที่ **ไม่มีผล** ต่อสิทธิ์: query string (`?preview=1`, `?token=`), header (`Authorization`, `x-preview`), ค่าในฟอร์ม และ cookie อื่นรวมถึง cookie draft mode ของ Next.js ระบบอ่านเพียง cookie session ตัวเดียว
+
+grant เป็นวัตถุที่ออกโดย policy และเก็บใน WeakSet (§7) วัตถุที่ปลอมขึ้นหรือคัดลอกมาจึงใช้ไม่ได้ และเมื่อไม่ผ่าน `getPreviewGrant()` คืน `null` โดยไม่บอกเหตุผลกับ client
+
+การเพิกถอน session: ลบ subject ออกจาก allowlist (มีผลทันที) หรือหมุน `AUTH_SECRET` (session ทั้งหมดใช้ไม่ได้) และ session หมดอายุเองภายใน 8 ชั่วโมง
+
+### 12.3 สถานะการเผยแพร่ใน preview
+
+`describePublicationState(doc)` แสดงสถานะแบบอ่านอย่างเดียว:
+
+| stage | เงื่อนไข | ป้าย |
+|---|---|---|
+| `draft` | `status=draft` และยังไม่ส่งตรวจหรือถูกขอแก้ไข | ฉบับร่าง |
+| `pending_review` | `status=draft` และ `review.status=pending_review` | รอตรวจทาน |
+| `approved` | `status=draft` และ `review.status=approved` | อนุมัติแล้ว |
+| `published` | `status=published` | เผยแพร่แล้ว |
+
+ฟิลด์เพิ่มเติม:
+
+- `openPlaceholders`: รายการ path ที่ยังเป็น placeholder
+- `publiclyVisible`: บอกว่าหน้า public จะแสดงจริงหรือไม่ เช่น เผยแพร่แล้วแต่ยังมี placeholder ค้าง จะได้ `false`
+
+preview ใช้ adapter และ media resolver ชุดเดียวกับหน้า public ใน draft scope ซึ่งแสดงสื่อที่สิทธิ์ยังรอยืนยันได้ แต่ไม่แสดงสื่อที่ถูก rejected ส่วนกฎสิทธิ์สื่อของ public scope ไม่เปลี่ยน preview ไม่แก้ `status`, `review` หรือฟิลด์อื่นใด (การทดสอบใช้ model ที่ throw เมื่อมีการเรียกนอกเหนือจาก `find`/`findOne`)
+
+## 13. แผน route ของ preview (ยังไม่สร้าง)
+
+| route (อนาคต) | section | loader |
+|---|---|---|
+| `/cms/preview` | หน้าแรก | `getAuthorizedPreview("homepage")` |
+| `/cms/preview/sakkara` | วัตถุมงคล | `getAuthorizedPreview("sacred-items")` |
+| `/cms/preview/news` | ข่าวสาร | `getAuthorizedPreview("news")` |
+| `/cms/preview/history` | ประวัติ | `getAuthorizedPreview("history")` |
+| `/cms/preview/gallery` | แกลเลอรี | `getAuthorizedPreview("gallery")` |
+
+ข้อกำหนดเมื่อสร้าง route (ต้องได้รับอนุมัติก่อน):
+
+1. แยกเป็น route group ของตัวเอง เช่น `src/app/(cms)/cms/preview/...` พร้อม layout ของตัวเอง และไม่ใช้ layout หรือ cache ร่วมกับหน้า public
+2. หน้าเรียก `getAuthorizedPreview()` ใน component ที่อยู่หลัง `<Suspense>` (Cache Components กำหนดให้อ่าน `cookies()` ภายใน boundary) หากได้ `null` ให้เรียก `notFound()` ทันที
+3. ห้ามใช้ `"use cache"` กับข้อมูล draft ส่วน `metadata.robots` ต้องเป็น `noindex, nofollow` และตั้ง header `Cache-Control: private, no-store`
+4. แสดงแถบ "โหมดตัวอย่าง" พร้อมป้ายสถานะและ placeholder ของแต่ละรายการตาม §12.3
+5. อาจเพิ่ม `proxy.js` สำหรับ optimistic redirect ได้ แต่การตรวจจริงต้องอยู่ที่ `getAuthorizedPreview()` เสมอ
+6. ไม่ต้องใช้ `draftMode()` ของ Next.js เพราะไม่ใช่กลไกยืนยันตัวตน
+7. ทุก route ต้องมีการทดสอบ: ไม่มี session ได้ 404, session ปลอมหรือหมดอายุได้ 404 และไม่มีข้อมูล draft ในหน้า public
+
+## 14. สภาพแวดล้อมสำหรับ CMS preview
+
+| ตัวแปร | Local | Vercel Preview | Production |
+|---|---|---|---|
+| `AUTH_SECRET` | ค่าสุ่มของเครื่อง (`openssl rand -base64 32`) | ค่าสุ่มเฉพาะ Preview | ค่าสุ่มเฉพาะ Production (ห้ามใช้ซ้ำกับ Preview) |
+| `CMS_PREVIEW_ALLOWED_SUBJECTS` | รหัสผู้ใช้ของผู้พัฒนาที่ได้รับอนุญาต | รหัสผู้ใช้ของเจ้าของ/ผู้แก้ไขที่ได้รับอนุมัติ | ว่างไว้จนกว่าจะอนุมัติ CMS บน production |
+| `AUTH_URL` | `http://localhost:3000` | URL ของ Preview | URL ของ production ที่เจ้าของยืนยัน |
+| `MONGODB_URI` / `MONGODB_DB_NAME` | ดู §4 | user แบบ `read` ของฐานข้อมูล staging | user แบบ `read` ของฐานข้อมูล production |
+
+- ค่าว่างหรือ secret ที่สั้นเกินไปทำให้ preview ถูกปิดโดยอัตโนมัติ (fail closed)
+- **ห้ามใช้ credential `atlasAdmin` ในแอปที่ deploy** และ preview อ่านอย่างเดียว ใช้ user ที่มี role `read` ก็พอ
+- ไม่ได้แก้ `.env.local` และตัวแปรใน Vercel ส่วน `.env.example` เพิ่มเฉพาะชื่อตัวแปร `CMS_PREVIEW_ALLOWED_SUBJECTS` (ค่าว่าง)
+- การทดสอบตรวจว่า `AUTH_SECRET` และ `CMS_PREVIEW_ALLOWED_SUBJECTS` ถูกอ่านเฉพาะใน `src/server/auth/config.js` และไม่ปรากฏใน `.next/static`
+
+## 15. งานที่เหลือก่อนเปิด preview
+
+1. เลือกผู้ให้บริการ sign-in และติดตั้ง Auth.js (หรือเทียบเท่า) พร้อมหน้า sign-in/sign-out ซึ่งต้องมี rate limit และ audit log
+2. กำหนดรายชื่อผู้ใช้และ role จริงโดยเจ้าของ (ไม่สร้างบัญชีให้เอง)
+3. ตั้ง `AUTH_SECRET`, `CMS_PREVIEW_ALLOWED_SUBJECTS` และ database user แบบ `read` ใน Vercel Preview (ต้องได้รับอนุมัติ)
+4. สร้าง route ตาม §13 แล้วทดสอบกับฐานข้อมูล staging (ต้องได้รับอนุมัติก่อนเชื่อมข้อมูล draft จริงกับ route ที่เข้าถึงได้)
+5. ทำ UI แถบสถานะ ป้าย stage และ placeholder ของหน้า preview
+6. ทำเครื่องมือตรวจทาน/อนุมัติ/เผยแพร่ใน CMS (phase ถัดไป) โดย preview ยังคงอ่านอย่างเดียว
