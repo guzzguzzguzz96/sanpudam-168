@@ -47,7 +47,24 @@ node migration/scripts/import-mongodb.mjs                       # offline dry ru
 node --env-file=.env.local migration/scripts/import-mongodb.mjs --preflight   # approval required (read-only)
 node --env-file=.env.local migration/scripts/import-mongodb.mjs --apply --plan-hash=<hash> --confirm-db=<db>   # approval required
 node --test migration/scripts/tests/mongodb.test.mjs            # in-memory tests
+node --test migration/scripts/tests/dns-config.test.mjs         # DNS workaround tests
 ```
+
+### Windows: `querySrv ECONNREFUSED`
+
+`mongodb+srv://` needs SRV and TXT lookups, which Node.js performs with its
+own resolver. If that resolver cannot answer SRV queries (Windows DNS works
+but Node fails), set explicit resolvers for the migration CLI only:
+
+```
+# .env.local (local development only; never in production)
+MONGODB_DNS_SERVERS=8.8.8.8,1.1.1.1
+```
+
+IP addresses only (optional `:port`), at most 4. The importer prints which DNS
+it uses before connecting. Remove the line (or leave it empty) to go back to
+the system default. The Next.js app does not use this setting. Details:
+`docs/mongodb-import-plan.md` §14.
 
 ## Status
 

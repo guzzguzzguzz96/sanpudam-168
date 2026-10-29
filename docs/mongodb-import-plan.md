@@ -156,6 +156,7 @@ node --env-file=.env.local migration/scripts/import-mongodb.mjs --preflight
 - collection ที่ยังไม่มีจะรายงานว่าไม่มี (การอ่าน index ของ collection ที่ไม่มีไม่สร้าง collection) ฐานข้อมูลที่ยังว่างจะแสดงเป็นไม่มี collection
 - ไม่สร้าง collection/index ไม่เขียนเอกสาร ไม่เขียน `migration_runs`
 - รายงานเก็บที่ `migration/reports/mongodb-preflight-<runId>.json` (ไม่มี connection string)
+- ถ้า SRV lookup ล้มเหลวบน Windows (`querySrv ECONNREFUSED`) ให้ตั้ง `MONGODB_DNS_SERVERS` ตาม §14
 
 ## 7. Apply กับ staging (อนาคต ต้องได้รับอนุมัติ)
 
@@ -284,3 +285,50 @@ preflight เดิมเชื่อมต่อด้วย `mongoose.connect(
 1. ผู้ดูแลเพิ่ม `MONGODB_DB_NAME=sanpudam168_staging` ใน `.env.local` (ไม่ต้องแก้ `MONGODB_URI`)
 2. แนะนำให้ผู้ใช้ฐานข้อมูลมีสิทธิ์เฉพาะ `sanpudam168_staging` (เช่น `readWrite@sanpudam168_staging`) ไม่ใช่ `readWriteAnyDatabase` หรือ `atlasAdmin` preflight จะรายงาน role และขอบเขตสิทธิ์ให้ตรวจ
 3. รัน preflight ใหม่ (อ่านอย่างเดียว) แล้วตรวจรายงานก่อนขออนุมัติ apply
+
+## 14. ปัญหา DNS บน Windows และ `MONGODB_DNS_SERVERS`
+
+### 14.1 อาการและสาเหตุ
+
+preflight ล้มเหลวด้วย `querySrv ECONNREFUSED` ก่อนส่งคำสั่งใด ๆ ไปยัง Atlas connection string แบบ `mongodb+srv://` ทำให้ driver ต้องค้นระเบียน **SRV** (`_mongodb._tcp.<cluster>`) และ **TXT** ของ cluster ซึ่ง Node.js ค้นด้วย resolver ของตัวเอง (c-ares) โดยอ่านรายชื่อ DNS server จากระบบ ไม่ได้ใช้ระบบค้นหาของ Windows เหมือนการค้นชื่อทั่วไป ในเครื่องนี้ resolver ของ Node ได้รายชื่อ DNS server เป็น `127.0.0.1` ซึ่งปฏิเสธคำค้นแบบ SRV
+
+ผลการวินิจฉัย:
+
+| ทดสอบ | ผล |
+|---|---|
+| DNS ของ Windows (`nslookup -type=SRV`) | สำเร็จ |
+| Node.js ด้วย DNS เริ่มต้น | `ECONNREFUSED` |
+| Node.js ด้วย DNS server ที่กำหนดเอง (8.8.8.8, 1.1.1.1) | สำเร็จ ได้ SRV 3 ระเบียน |
+| `configureMongoDns()` ใน importer (29 ต.ค. 2569) | ก่อนตั้งค่า: SRV ล้มเหลว · หลังตั้งค่า: SRV 3 ระเบียน และ TXT 1 ระเบียน |
+
+นอกจากนี้ sandbox ของ Claude Code บล็อกการเชื่อมต่อไปยัง `*.mongodb.net` ด้วย จึงต้องรัน preflight จริงใน terminal ปกติของผู้ดูแล
+
+### 14.2 การตั้งค่า
+
+ตัวแปร **`MONGODB_DNS_SERVERS`** (ไม่บังคับ) ใน `.env.local` ใช้สำหรับเครื่องพัฒนา Windows ที่มีปัญหานี้เท่านั้น:
+
+```
+MONGODB_DNS_SERVERS=8.8.8.8,1.1.1.1
+```
+
+- รับเฉพาะ IP address (IPv4, IPv6, `IPv4:port`, `[IPv6]:port`) คั่นด้วยจุลภาค สูงสุด 4 รายการ ปฏิเสธชื่อโฮสต์ ค่าว่างระหว่างจุลภาค IP หรือ port ที่ไม่ถูกต้อง
+- ค่าไม่ถูกต้อง: importer หยุดก่อนเชื่อมต่อ (exit 1)
+- ใช้ `dns.setServers()` ของ Node.js เฉพาะใน process ของ migration CLI หลังผ่านการตรวจฐานข้อมูลเป้าหมายแล้ว และก่อน SRV lookup ครั้งแรกของทั้ง preflight และ apply
+- ไม่แก้การตั้งค่าเครือข่ายของ Windows ไม่แก้ connection string และ **ไม่มีผลกับแอป Next.js** (`src/` ไม่ได้ใช้โมดูลนี้ ตรวจด้วยการทดสอบ)
+- ไม่ควรตั้งค่าใน production ค่าใน `.env.example` เว้นว่างไว้
+- importer แสดงบรรทัด `DNS: using MONGODB_DNS_SERVERS (...)` หรือ `DNS: system default (MONGODB_DNS_SERVERS not set)` ทุกครั้งก่อนเชื่อมต่อ
+
+**ปิด workaround:** ลบบรรทัด `MONGODB_DNS_SERVERS` ออกจาก `.env.local` หรือเว้นค่าว่าง (`MONGODB_DNS_SERVERS=`) importer จะกลับไปใช้ DNS เริ่มต้นของระบบ
+
+### 14.3 การรัน preflight (Windows PowerShell)
+
+```powershell
+cd C:\workspace\projects\sanpudam-168
+node --env-file=.env.local migration/scripts/import-mongodb.mjs --preflight
+```
+
+preflight อ่านอย่างเดียว ไม่สร้าง collection, index, เอกสาร หรือ `migration_runs` และไม่แสดง credentials หรือ host ของ cluster รายงานเก็บที่ `migration/reports/mongodb-preflight-<runId>.json`
+
+### 14.4 การทดสอบ
+
+`node --test migration/scripts/tests/dns-config.test.mjs` (10 การทดสอบ): รูปแบบที่ถูกต้อง, ไม่ตั้งค่า = DNS เริ่มต้น, ค่าผิดถูกปฏิเสธก่อนใช้, ตั้งค่าผ่าน `dns.setServers`, ลำดับ (ตรวจเป้าหมาย → ตั้ง DNS → เชื่อมต่อ), ข้อความ error ไม่มี credentials หรือ host, preflight ไม่เปิด Mongoose connection และแอปใน `src/` ไม่แตะ DNS

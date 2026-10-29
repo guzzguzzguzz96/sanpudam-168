@@ -23,6 +23,7 @@ import { PROBLEM_RESULTS, applyPlan, countResults } from "./lib/mongo-apply.mjs"
 import { createMemoryAdapter, createMongooseAdapter } from "./lib/mongo-adapters.mjs";
 import { assertConnectedTarget, resolveStagingTarget } from "./lib/db-target.mjs";
 import { createReadOnlyAdapter, openReadOnlyDatabase } from "./lib/mongo-readonly.mjs";
+import { configureMongoDns } from "./lib/dns-config.mjs";
 import { fromRoot, parseArgs, readJson, writeJson } from "./lib/files.mjs";
 import { modelsByCollection } from "../../src/models/index.js";
 import { sanitizeError } from "../../src/lib/db.js";
@@ -100,6 +101,19 @@ async function runAgainstStaging() {
     process.exitCode = 1;
     return;
   }
+
+  // Optional DNS resolvers (MONGODB_DNS_SERVERS), applied before the first
+  // SRV lookup of either the read-only preflight or apply. Invalid values stop
+  // the run before any connection attempt.
+  try {
+    const dnsConfig = configureMongoDns(process.env);
+    console.error(dnsConfig.applied ? `DNS: using MONGODB_DNS_SERVERS (${dnsConfig.servers.join(", ")})` : "DNS: system default (MONGODB_DNS_SERVERS not set)");
+  } catch (error) {
+    console.error(error.message);
+    process.exitCode = 1;
+    return;
+  }
+
   if (errors.length) {
     console.error(`The plan has ${errors.length} error(s); run the dry run and fix them first.`);
     process.exitCode = 1;
