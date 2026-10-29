@@ -41,6 +41,12 @@ node --env-file=.env.local migration/scripts/import-cloudinary.mjs --apply --pla
 node --env-file=.env.local migration/scripts/verify-cloudinary.mjs   # read-only post-upload check
 node migration/scripts/build-media-mapping.mjs                  # media_assets mapping (local only)
 node --test migration/scripts/tests/cloudinary.test.mjs         # mock-server tests
+
+# 5. MongoDB import (Phase 02.5.5; see docs/mongodb-import-plan.md)
+node migration/scripts/import-mongodb.mjs                       # offline dry run (no connection)
+node --env-file=.env.local migration/scripts/import-mongodb.mjs --preflight   # approval required (read-only)
+node --env-file=.env.local migration/scripts/import-mongodb.mjs --apply --plan-hash=<hash> --confirm-db=<db>   # approval required
+node --test migration/scripts/tests/mongodb.test.mjs            # in-memory tests
 ```
 
 ## Status
@@ -50,7 +56,11 @@ node --test migration/scripts/tests/cloudinary.test.mjs         # mock-server te
   17 uploaded, 0 conflicts, 0 failures; post-upload verification 17/17; a
   repeat preflight reports 17 `already_present`. See
   `docs/cloudinary-import-plan.md` §12.
-- MongoDB has not been written. That step needs separate approval.
+- 2026-10-29: Mongoose models (`src/models/`) and the MongoDB importer are
+  ready. Offline dry run: 56 records (17 media + 39 content), 31 media usages
+  resolved, 32 placeholder flags, plan hash
+  `3525e33166360a3b45362b17c0095eb4a2e62363f424c4171c17bfc37f8f29a4`.
+- MongoDB has not been connected to or written. That step needs separate approval.
 
 ## Safety rules built into the scripts
 

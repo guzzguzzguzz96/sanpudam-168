@@ -30,7 +30,7 @@ src/
   components/   ส่วนประกอบ UI ที่ใช้ซ้ำ
   config/       การตั้งค่าเว็บไซต์
   lib/          utilities และโค้ดฝั่งเซิร์ฟเวอร์ที่ใช้ร่วมกัน
-  models/       พื้นที่สำหรับ Mongoose models ในอนาคต
+  models/       Mongoose models (ยังไม่มีการเชื่อมต่อฐานข้อมูลจากหน้าเว็บ)
   services/     ขอบเขตการเชื่อมต่อบริการและ business logic ในอนาคต
 ```
 
@@ -46,7 +46,7 @@ src/
 
 ## ขอบเขตระยะนี้
 
-หน้า `/` เป็น homepage prototype แบบ responsive ภาษาไทย ส่วนหน้า `/history`, `/sakkara`, `/news` และ `/visit` ในเมนูยังอยู่ระหว่างการพัฒนา ลิงก์เหล่านี้จึงยังไม่ใช่หน้าที่พร้อมใช้งาน ขณะนี้ยังไม่มี MongoDB Atlas/Mongoose connection, Cloudinary uploads, Auth.js, ระบบ Admin, Contact Form หรือ public registration และ metadata ของ prototype ตั้งค่าไม่ให้เครื่องมือค้นหาจัดทำดัชนี
+หน้า `/` เป็น homepage prototype แบบ responsive ภาษาไทย ส่วนหน้า `/history`, `/sakkara`, `/news` และ `/visit` ในเมนูยังอยู่ระหว่างการพัฒนา ลิงก์เหล่านี้จึงยังไม่ใช่หน้าที่พร้อมใช้งาน ขณะนี้มี Mongoose models และเครื่องมือย้ายข้อมูลใน `migration/` แล้ว แต่หน้าเว็บยังไม่เชื่อมต่อ MongoDB Atlas และยังไม่มีการเขียนข้อมูลลงฐานข้อมูล ส่วนสื่อเดิมถูกนำเข้า Cloudinary staging แล้ว (ดู `docs/mongodb-import-plan.md` และ `docs/cloudinary-import-plan.md`) ยังไม่มี Auth.js, ระบบ Admin, Contact Form หรือ public registration และ metadata ของ prototype ตั้งค่าไม่ให้เครื่องมือค้นหาจัดทำดัชนี
 
 ## Git branching
 
