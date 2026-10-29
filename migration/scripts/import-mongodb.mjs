@@ -3,9 +3,10 @@
 // Offline dry run (default; no credentials, no network):
 //   node migration/scripts/import-mongodb.mjs
 // Read-only staging preflight (native driver, read commands only; no
-// collections, indexes, documents, or migration_runs are created):
+// collections, indexes, documents, or migration_runs are created). After an
+// import it doubles as the post-import verification and idempotency check:
 //   node --env-file=.env.local migration/scripts/import-mongodb.mjs --preflight
-// Apply to staging (future; needs explicit approval):
+// Apply to staging (needs explicit approval):
 //   node --env-file=.env.local migration/scripts/import-mongodb.mjs --apply \
 //     --plan-hash=<full hash> --confirm-db=<exact MONGODB_DB_NAME>
 //
@@ -24,6 +25,7 @@ import { createMemoryAdapter, createMongooseAdapter } from "./lib/mongo-adapters
 import { assertConnectedTarget, resolveStagingTarget } from "./lib/db-target.mjs";
 import { createReadOnlyAdapter, openReadOnlyDatabase } from "./lib/mongo-readonly.mjs";
 import { configureMongoDns } from "./lib/dns-config.mjs";
+import { verifyStoredState } from "./lib/mongo-verify.mjs";
 import { fromRoot, parseArgs, readJson, writeJson } from "./lib/files.mjs";
 import { modelsByCollection } from "../../src/models/index.js";
 import { sanitizeError } from "../../src/lib/db.js";
@@ -221,6 +223,9 @@ async function runReadOnlyPreflight(target) {
 
     const results = await applyPlan(plan, createReadOnlyAdapter(ro), { runId, write: false });
     const counts = countResults(results);
+    // Post-import integrity check (only meaningful once records exist).
+    const postImport = existing.size ? await verifyStoredState(plan, ro) : null;
+    const missingIndexes = Object.values(indexReport).filter((r) => r.collectionExists).reduce((n, r) => n + r.missing.length + r.uniqueMismatch.length, 0);
     const violations = ro.violations();
     const data = report(`mongodb-preflight-${runId}`, {
       target: { database: ro.databaseName },
@@ -229,6 +234,7 @@ async function runReadOnlyPreflight(target) {
       inventory,
       indexReport,
       schemaReport,
+      postImport,
       counts,
       results,
       readOnly: { commandsObserved: [...new Set(ro.observedCommands())].sort(), violations },
@@ -240,12 +246,14 @@ async function runReadOnlyPreflight(target) {
       collections: data.collections,
       documents: Object.fromEntries(Object.entries(inventory).map(([k, v]) => [k, v.documents])),
       results: counts,
+      indexes: { missingOrMismatched: missingIndexes, unexpected: Object.values(indexReport).reduce((n, r) => n + r.unexpected.length, 0) },
+      postImport: postImport && { imported: postImport.imported, passed: postImport.passed, checks: postImport.checks, mediaReferences: postImport.media, categoryReferences: postImport.categories, content: postImport.content, cloudinary: postImport.cloudinary },
       readOnly: data.readOnly,
     }, null, 1));
     if (violations.length) {
       console.error(`Read-only violation: non-read commands observed (${violations.join(", ")}).`);
       process.exitCode = 1;
-    } else if (results.some((r) => PROBLEM_RESULTS.has(r.result))) {
+    } else if (results.some((r) => PROBLEM_RESULTS.has(r.result)) || (postImport?.imported && !postImport.passed)) {
       process.exitCode = 2;
     }
   } catch (error) {

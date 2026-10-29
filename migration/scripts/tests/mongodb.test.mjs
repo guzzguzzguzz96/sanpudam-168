@@ -352,3 +352,36 @@ test("target: error text never contains credentials or cluster host names", asyn
     for (const secret of ["alice", "s3cr@t", "abc123", "cluster0"]) assert.ok(!clean.includes(secret), `${secret} leaked: ${clean}`);
   }
 });
+
+test("verify: post-import check passes after apply and catches drift", async () => {
+  const { verifyStoredState } = await import("../lib/mongo-verify.mjs");
+  const plan = await buildMigrationPlan(makeFixture());
+  const memory = createMemoryAdapter();
+  const reader = { find: async (collection) => [...(memory.store.get(collection)?.values() ?? [])].map((d) => structuredClone(d)) };
+  assert.equal((await verifyStoredState(plan, reader)).imported, false, "empty target is not reported as imported");
+
+  await applyPlan(plan, memory, { runId: "verify" });
+  const ok = await verifyStoredState(plan, reader);
+  for (const check of ["allPlannedRecordsPresent", "noUnexpectedRecords", "mediaReferencesResolve", "categoryReferencesResolve", "placeholdersPreserved", "allContentDraft", "allContentPendingReview", "cloudinaryPreserved"]) assert.equal(ok.checks[check], true, check);
+
+  const news = memory.store.get("news");
+  const [id, doc] = [...news.entries()][0];
+  news.set(id, { ...doc, status: "published" });
+  news.set("bbbbbbbbbbbbbbbbbbbbbbb1", { ...doc, _id: "bbbbbbbbbbbbbbbbbbbbbbb1" });
+  const drifted = await verifyStoredState(plan, reader);
+  assert.equal(drifted.passed, false);
+  assert.equal(drifted.checks.allContentDraft, false);
+  assert.equal(drifted.checks.noUnexpectedRecords, false);
+});
+
+test("verify: real local plan passes the post-import check after an in-memory apply", { skip: !existsSync(fromRoot("migration/manifests/media-assets-mapping.json")) }, async () => {
+  const { verifyStoredState } = await import("../lib/mongo-verify.mjs");
+  const plan = await buildMigrationPlan(loadPlanInputs(readJson, fromRoot));
+  const memory = createMemoryAdapter();
+  await applyPlan(plan, memory, { runId: "verify-real" });
+  const result = await verifyStoredState(plan, { find: async (c) => [...(memory.store.get(c)?.values() ?? [])] });
+  assert.equal(result.passed, true, JSON.stringify(result.checks));
+  assert.equal(result.media.resolved, 31);
+  assert.equal(result.categories.resolved, 5);
+  assert.equal(result.content.placeholderFields, 32);
+});

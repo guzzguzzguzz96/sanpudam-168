@@ -44,7 +44,7 @@ node --test migration/scripts/tests/cloudinary.test.mjs         # mock-server te
 
 # 5. MongoDB import (Phase 02.5.5; see docs/mongodb-import-plan.md)
 node migration/scripts/import-mongodb.mjs                       # offline dry run (no connection)
-node --env-file=.env.local migration/scripts/import-mongodb.mjs --preflight   # approval required (read-only)
+node --env-file=.env.local migration/scripts/import-mongodb.mjs --preflight   # read-only; after import = post-import verification + idempotency check
 node --env-file=.env.local migration/scripts/import-mongodb.mjs --apply --plan-hash=<hash> --confirm-db=<db>   # approval required
 node --test migration/scripts/tests/mongodb.test.mjs            # in-memory tests
 node --test migration/scripts/tests/dns-config.test.mjs         # DNS workaround tests
@@ -77,11 +77,16 @@ the system default. The Next.js app does not use this setting. Details:
   ready. Offline dry run: 56 records (17 media + 39 content), 31 media usages
   resolved, 32 placeholder flags, plan hash
   `3525e33166360a3b45362b17c0095eb4a2e62363f424c4171c17bfc37f8f29a4`.
-- 2026-10-29: read-only staging preflight was approved but not run, because
-  `MONGODB_DB_NAME` is not set in `.env.local`. The preflight now uses a
-  read-only driver connection with command monitoring; schemas disable
-  autoCreate/autoIndex. See `docs/mongodb-import-plan.md` §13.
-- MongoDB has not been connected to or written. Apply needs separate approval.
+- 2026-10-29: read-only preflight uses a native driver connection with
+  command monitoring; schemas disable autoCreate/autoIndex. See
+  `docs/mongodb-import-plan.md` §13–14.
+- 2026-10-29: owner-approved import into `sanpudam168_staging` (staging only).
+  56 created (17 media + 39 content), 0 conflicts, 0 failures; run record
+  `completed`. Post-import verification passed (31/31 media refs, 5/5 category
+  refs, 32 placeholder flags, 39/39 draft + pending_review, 17/17 Cloudinary
+  IDs/URLs, no unexpected records, no missing indexes). A repeat preflight
+  reports 56 `unchanged`. See `docs/mongodb-import-plan.md` §15.
+- The Next.js app does not read MongoDB yet; nothing is published.
 
 ## Safety rules built into the scripts
 

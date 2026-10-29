@@ -332,3 +332,37 @@ preflight อ่านอย่างเดียว ไม่สร้าง co
 ### 14.4 การทดสอบ
 
 `node --test migration/scripts/tests/dns-config.test.mjs` (10 การทดสอบ): รูปแบบที่ถูกต้อง, ไม่ตั้งค่า = DNS เริ่มต้น, ค่าผิดถูกปฏิเสธก่อนใช้, ตั้งค่าผ่าน `dns.setServers`, ลำดับ (ตรวจเป้าหมาย → ตั้ง DNS → เชื่อมต่อ), ข้อความ error ไม่มี credentials หรือ host, preflight ไม่เปิด Mongoose connection และแอปใน `src/` ไม่แตะ DNS
+
+## 15. ผลการนำเข้า staging (29 ตุลาคม 2569)
+
+ผู้ดูแลอนุมัติให้นำเข้าเฉพาะ `sanpudam168_staging` ด้วย plan hash `3525e33166360a3b45362b17c0095eb4a2e62363f424c4171c17bfc37f8f29a4`
+
+| ขั้นตอน | ผล |
+|---|---|
+| preflight ก่อนนำเข้า (read-only) | collection 0, `would_create` 56, conflict 0, read-only violation 0 |
+| apply (`--apply --plan-hash=… --confirm-db=sanpudam168_staging`) | `created` 56, conflict 0, failure 0, exit 0 |
+| migration run record | 1 รายการ สถานะ `completed` นับ `created: 56` และ items 56 |
+| preflight หลังนำเข้า (idempotency) | `unchanged` 56, conflict 0, index ขาด/ไม่ตรง 0, schema invalid 0 |
+
+จำนวนเอกสาร: media_assets 17, categories 3, site_settings 1, pages 1, sacred_items 5, news 3, banners 4, gallery_items 10, faqs 6, videos 1, reviews 3, team_members 2, migration_runs 1
+
+### 15.1 การตรวจหลังนำเข้า (`lib/mongo-verify.mjs`)
+
+preflight เรียก `verifyStoredState()` เมื่อ collection ใดมีอยู่แล้ว (อ่านอย่างเดียว ใช้ `find` เท่านั้น) ผลอยู่ในฟิลด์ `postImport` ของรายงาน preflight และ exit code เป็น 2 หากการตรวจไม่ผ่าน
+
+| ตรวจ | ผล |
+|---|---|
+| เอกสารตามแผนครบ / ไม่มีเอกสารที่ไม่คาดหมาย | ผ่าน / ผ่าน |
+| การอ้างอิง media | 31/31 |
+| การอ้างอิง category ของ sacred_items | 5/5 |
+| placeholder flags | 32 (ยังเปิดอยู่ทั้ง 32) |
+| content เป็น `draft` และ `pending_review` | 39/39 |
+| Cloudinary publicId / secureUrl / assetId ตรงกับ manifest | 17/17 |
+| โลโก้ใน site_settings ชี้ไป media_assets | ผ่าน |
+| วิดีโอที่ไม่มีไฟล์ถูกระบุไว้ (`videoAssetId` ว่าง) | ผ่าน |
+
+### 15.2 ข้อจำกัดที่ยังเหลือ
+
+- เนื้อหาทั้งหมดยังเป็น draft ยังไม่เชื่อมกับเว็บไซต์ ต้องรอผู้ดูแลตรวจและอนุมัติก่อนเผยแพร่
+- placeholder 32 จุดและไฟล์วิดีโอ 1 รายการยังรอข้อมูลจริงจากเจ้าของ
+- ยังไม่มีการนำเข้า production
