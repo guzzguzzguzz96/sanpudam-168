@@ -1,6 +1,6 @@
 # Client Review Mode (Phase 02.5.6 — Step C1.1)
 
-Status: **code complete; live staging verification is blocked by Atlas Network Access** (see §10, Step C1.1b). Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting has been changed.
+Status: **code complete; live staging verification is blocked: the configured review account is an Atlas administrator, so the app refuses it** (see §10, Step C1.1b round 2). Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting has been changed.
 
 Client Review Mode renders the migrated draft content from `sanpudam168_staging` and its Cloudinary media on the existing homepage, so the owner can check it before anything is approved. It is a separate read-only path. It does not use the public publication rules or authenticated draft preview (Step B1), and it does not change either of them.
 
@@ -137,8 +137,8 @@ Newly found in migrated data:
 
 ## 9. Remaining blockers
 
-1. **Add this machine's public IP (or the Vercel egress range for Preview) to Atlas Network Access** for the cluster that hosts `sanpudam168_staging`. This requires Atlas project access and is not something the app can do.
-2. Re-run §10 steps 2–5 once the network refusal is resolved: the role check, live counts and references, homepage rendering with real images, and visual QA.
+1. **Replace `CLIENT_REVIEW_MONGODB_URI` with a dedicated user that has only the built-in `read` role on `sanpudam168_staging`** (§3). The value currently configured authenticates with `atlasAdmin@admin`. Rotate that admin password if the string was shared beyond the migration operator.
+2. Re-run the §10 verification: live counts and references, homepage rendering with real images, and visual QA. Atlas Network Access for the local host is now working. Preview (Vercel) connectivity is still unverified.
 3. Set the `CLIENT_REVIEW_*` variables in Vercel Preview (`dev`). This needs approval.
 4. Verify Vercel Deployment Protection on Preview (§6) before sharing any deployed review URL.
 5. Collect the owner content listed in §7 and fix the routes in §8 (C2).
@@ -160,3 +160,20 @@ Starting commit `2ff07df`. All checks used only `CLIENT_REVIEW_MONGODB_*`. The v
 | Simulated Vercel production build (`VERCEL=1`, `VERCEL_ENV=production`, `VERCEL_TARGET_ENV=production`, `CLIENT_REVIEW_ENABLED=true`, plus `CLIENT_REVIEW_LOCAL` and review credentials from `.env.local`) | Pass: `/` fully static; routes-manifest has no headers; `images.remotePatterns` is empty |
 | Build output scan (review build) | Pass: no migrated text, staging URLs, contact values, or `CLIENT_REVIEW_*` names in `.next/server/app` or `.next/static` |
 | Vercel Deployment Protection | **NOT VERIFIED** |
+
+### Round 2 (2026-10-31, from `10130eb`, after the owner updated Atlas Network Access)
+
+Execution environment: the local Windows host, with Node v24 running as a Claude Code child process and no proxy variables set. Two independent services reported the same public egress address, and that address is the one that has to be on the Atlas list. One verification attempt was made, using only `CLIENT_REVIEW_MONGODB_*`.
+
+| Check | Result |
+|---|---|
+| DNS (with `CLIENT_REVIEW_DNS_SERVERS`), TLS, authentication | **Pass.** The earlier TLS refusal is gone |
+| Connected database | `sanpudam168_staging` (pass) |
+| Read-only role check | **Refused (correctly).** The authenticated user holds `atlasAdmin@admin`, not `read@sanpudam168_staging`. `connectReviewDatabase` rejected it before any content query, and the running app showed the unavailable state with the sanitized message `Review connection user must hold only read@sanpudam168_staging.` |
+| Live counts, references, ordering, placeholders | **Not run.** Reading content with an admin account would break §3; the enforcement was not relaxed |
+| Real homepage, Cloudinary images, visual QA at 390/768/1440 | **Not run** (blocked by the item above) |
+| Local review build (`CLIENT_REVIEW_LOCAL=true`) + `next start` | Pass: `/` is Partial Prerender; HTML and RSC responses carry `noindex, nofollow` and `private, no-store, max-age=0`; no staging content in the response |
+| Public build (local review disabled: `CLIENT_REVIEW_LOCAL` empty) | Pass: `/` static, no review headers, no remote image patterns |
+| Simulated Vercel production (`VERCEL=1`, `VERCEL_ENV=production`, `VERCEL_TARGET_ENV=production`, `CLIENT_REVIEW_ENABLED=true`, plus the review credentials and local flag present) | Pass: `/` static, no review headers, no remote image patterns |
+| Lint / tests | Pass / 77 of 77 |
+| Vercel Deployment Protection, Preview connectivity | **NOT VERIFIED** |
