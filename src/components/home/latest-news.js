@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { MediaFrame } from "@/components/home/media-frame";
 import { SectionIntro } from "@/components/home/section-intro";
+import { ReviewStatus } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
 
 function NewsCard({ article, featured = false }) {
@@ -35,6 +36,7 @@ function NewsCard({ article, featured = false }) {
       </p>
       <h3 className="home-news-card__title">{title}</h3>
       <p className="home-news-card__description">{article.description}</p>
+      <ReviewStatus status={article.reviewStatus} />
       {article.href ? (
         <Link
           className="home-news-card__link"

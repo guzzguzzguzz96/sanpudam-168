@@ -1,6 +1,8 @@
 # การเชื่อมข้อมูล Next.js กับ MongoDB (Phase 02.5.6 — Step A และ B1)
 
-สถานะ: **โครงสร้างพร้อมแล้ว แต่ยังไม่เชื่อมกับหน้าเว็บ** หน้าแรกยังใช้ `src/data/homepage-preview.js` เหมือนเดิม ไม่มี route ใดเรียกใช้ data layer นี้ และไม่มีการเขียนข้อมูลลง MongoDB
+สถานะ: **โครงสร้างพร้อมแล้ว แต่ยังไม่เชื่อมกับหน้าเว็บสาธารณะ** หน้าแรกปกติยังใช้ `src/data/homepage-preview.js` เหมือนเดิม และไม่มีการเขียนข้อมูลลง MongoDB
+
+> Step C1.1: หน้าแรกอ่านเนื้อหาที่นำเข้า (draft) ได้เฉพาะใน **Client Review Mode** ซึ่งปิดเป็นค่าเริ่มต้นและเปิดไม่ได้ใน production ใช้ connection และ user แบบอ่านอย่างเดียวแยกต่างหาก ดู [client-review-mode.md](client-review-mode.md) กฎ public scope ในเอกสารนี้ไม่เปลี่ยน
 
 ## 1. สถาปัตยกรรม data access
 

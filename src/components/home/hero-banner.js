@@ -34,7 +34,9 @@ export function HeroBanner({ data }) {
             <ThaiPhrases text={data.title} />
           </h1>
           <span aria-hidden="true" className="home-hero__rule" />
-          <p className="home-hero__description">{data.description}</p>
+          {data.description ? (
+            <p className="home-hero__description">{data.description}</p>
+          ) : null}
           <div className="home-hero__actions">
             <Button href={data.primaryCta.href} variant="gold">
               {data.primaryCta.label}

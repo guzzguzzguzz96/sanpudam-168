@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { SectionIntro } from "@/components/home/section-intro";
+import { ReviewStatus } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
 
-export function WorshipGuide({ data }) {
+export function WorshipGuide({ data, reviewStatus = null }) {
   return (
     <Section
       id="worship-guide"
@@ -16,6 +17,7 @@ export function WorshipGuide({ data }) {
           eyebrow="คำแนะนำ"
           title="เตรียมข้อมูลการสักการะ"
         />
+        <ReviewStatus className="review-section-status" status={reviewStatus} />
         <ol className="home-worship-guide__steps">
           {data.map((step, index) => (
             <li key={step.id} className="home-worship-guide__step">
@@ -23,7 +25,7 @@ export function WorshipGuide({ data }) {
                 {String(index + 1).padStart(2, "0")}
               </span>
               <h3>{step.title}</h3>
-              <p>{step.description}</p>
+              {step.description ? <p>{step.description}</p> : null}
             </li>
           ))}
         </ol>

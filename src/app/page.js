@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { ReviewHomepage, ReviewHomepageFallback } from "@/app/_review/review-homepage";
 import { AboutSanpudam } from "@/components/home/about-sanpudam";
 import { Faq } from "@/components/home/faq";
 import { FeaturedSacredItems } from "@/components/home/featured-sacred-items";
@@ -9,8 +11,19 @@ import { QuickInformation } from "@/components/home/quick-information";
 import { VisitUs } from "@/components/home/visit-us";
 import { WorshipGuide } from "@/components/home/worship-guide";
 import { homepagePreviewData } from "@/data/homepage-preview";
+import { isClientReviewEnabled } from "@/server/review";
 
 export default function HomePage() {
+  // Client Review Mode (environment-only policy, off by default and always
+  // off in production): migrated draft content, rendered per request.
+  if (isClientReviewEnabled()) {
+    return (
+      <Suspense fallback={<ReviewHomepageFallback />}>
+        <ReviewHomepage />
+      </Suspense>
+    );
+  }
+
   const preview = homepagePreviewData;
 
   return (

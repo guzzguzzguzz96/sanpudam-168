@@ -2,10 +2,13 @@ import { Container } from "@/components/ui/container";
 import { ContactActions } from "@/components/ui/contact-actions";
 import { Icon } from "@/components/ui/icons";
 import { SectionIntro } from "@/components/home/section-intro";
+import { ReviewNote } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
 import { getContactActions } from "@/lib/contact-actions";
 
-export function VisitUs({ data }) {
+// directions (Client Review only): { status: "valid" | "invalid", href, note }
+// for an imported, unverified map link. Without it the section is unchanged.
+export function VisitUs({ data, directions = null }) {
   const actions = getContactActions(["maps", "line", "phone"]);
   const hasDirections = actions.some((action) => action.id === "maps");
 
@@ -27,7 +30,10 @@ export function VisitUs({ data }) {
                   </span>
                   {detail.label}
                 </dt>
-                <dd>{detail.value}</dd>
+                <dd>
+                  {detail.value}
+                  <ReviewNote note={detail.note} />
+                </dd>
               </div>
             ))}
           </dl>
@@ -43,11 +49,21 @@ export function VisitUs({ data }) {
           <span aria-hidden="true" className="home-visit__map-pin">
             <Icon name="mapPin" size={32} />
           </span>
-          <p>
-            {hasDirections
-              ? "เปิดเส้นทางไปยังศาลได้จากปุ่ม “นำทางด้วย Google Maps”"
-              : "แผนที่จะแสดงเมื่อได้รับตำแหน่งที่ยืนยันแล้ว"}
-          </p>
+          {directions?.status === "valid" ? (
+            <p>
+              <a href={directions.href} rel="noopener noreferrer" target="_blank">
+                เปิดลิงก์แผนที่ที่นำเข้า
+                <span className="sr-only">(เปิดในหน้าต่างใหม่)</span>
+              </a>
+            </p>
+          ) : (
+            <p>
+              {hasDirections
+                ? "เปิดเส้นทางไปยังศาลได้จากปุ่ม “นำทางด้วย Google Maps”"
+                : "แผนที่จะแสดงเมื่อได้รับตำแหน่งที่ยืนยันแล้ว"}
+            </p>
+          )}
+          <ReviewNote note={directions?.note} />
         </div>
       </Container>
     </Section>

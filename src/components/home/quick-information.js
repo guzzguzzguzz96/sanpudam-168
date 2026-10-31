@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { Icon } from "@/components/ui/icons";
+import { ReviewNote } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
 
 export function QuickInformation({ data }) {
@@ -31,6 +32,7 @@ export function QuickInformation({ data }) {
                 <div>
                   <h3>{item.label}</h3>
                   <p>{item.value}</p>
+                  <ReviewNote note={item.note} />
                 </div>
               </li>
             ))}

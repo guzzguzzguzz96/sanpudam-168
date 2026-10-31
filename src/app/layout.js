@@ -1,10 +1,15 @@
 import { Noto_Sans_Thai, Noto_Sans_Thai_Looped } from "next/font/google";
+import { Suspense } from "react";
+import { ReviewSiteFooter, ReviewSiteHeader } from "@/app/_review/review-chrome";
 import { PreviewNotice } from "@/components/preview-notice";
+import { ReviewBanner } from "@/components/review/review-banner";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { siteConfig } from "@/config/site";
+import { isClientReviewEnabled } from "@/server/review";
 import "./globals.css";
 import "@/components/home/home.css";
+import "@/components/review/review.css";
 import "@/components/sacred-items/sacred-items.css";
 
 const bodyFont = Noto_Sans_Thai_Looped({
@@ -44,6 +49,11 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  // Environment-only decision (src/lib/review-mode.js). In review mode the
+  // header and footer stream per request; their fallbacks are the public
+  // versions, so the static shell holds no migrated content.
+  const reviewMode = isClientReviewEnabled();
+
   return (
     <html
       lang="th"
@@ -56,10 +66,26 @@ export default function RootLayout({ children }) {
         >
           ข้ามไปยังเนื้อหาหลัก
         </a>
-        {siteConfig.isPreview ? <PreviewNotice /> : null}
-        <SiteHeader />
+        {reviewMode ? (
+          <ReviewBanner />
+        ) : siteConfig.isPreview ? (
+          <PreviewNotice />
+        ) : null}
+        {reviewMode ? (
+          <Suspense fallback={<SiteHeader />}>
+            <ReviewSiteHeader />
+          </Suspense>
+        ) : (
+          <SiteHeader />
+        )}
         {children}
-        <SiteFooter />
+        {reviewMode ? (
+          <Suspense fallback={<SiteFooter />}>
+            <ReviewSiteFooter />
+          </Suspense>
+        ) : (
+          <SiteFooter />
+        )}
       </body>
     </html>
   );

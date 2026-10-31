@@ -2,21 +2,28 @@ import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { ContactActions } from "@/components/ui/contact-actions";
 import { siteConfig } from "@/config/site";
+import { ReviewNote } from "@/components/review/review-status";
 import { ThaiPhrases } from "@/components/ui/thai-phrases";
 import { getContactActions } from "@/lib/contact-actions";
 
 const contactActions = getContactActions(["line", "phone", "maps"]);
 
-export function SiteFooter() {
+// brand and reviewDetails are Client Review only. reviewDetails lists
+// imported contact values as text with their verification note; they are
+// never turned into links. Without them the footer is unchanged.
+export function SiteFooter({ brand = null, reviewDetails = null }) {
+  const name = brand?.name ?? siteConfig.localName;
+  const descriptor = brand?.descriptor ?? siteConfig.name;
+
   return (
     <footer className="site-footer">
       <Container>
         <div className="site-footer__grid">
           <div className="site-footer__brand">
             <Link href="/" className="site-footer__brand-name" prefetch={false}>
-              <ThaiPhrases text={siteConfig.localName} />
+              <ThaiPhrases text={name} />
             </Link>
-            <p>{siteConfig.name}</p>
+            <p>{descriptor}</p>
           </div>
 
           <nav aria-label="เมนูหลักท้ายเว็บไซต์">
@@ -36,12 +43,26 @@ export function SiteFooter() {
             <h2 id="footer-contact-title" className="site-footer__heading">
               ติดต่อและการเดินทาง
             </h2>
-            <ContactActions
-              actions={contactActions}
-              emptyMessage="ช่องทางติดต่อจะแสดงเมื่อได้รับการยืนยัน"
-              layout="stack"
-              tone="dark"
-            />
+            {reviewDetails?.length ? (
+              <dl className="site-footer__review-details">
+                {reviewDetails.map((detail) => (
+                  <div key={detail.id}>
+                    <dt>{detail.label}</dt>
+                    <dd>
+                      {detail.value}
+                      <ReviewNote note={detail.note} />
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <ContactActions
+                actions={contactActions}
+                emptyMessage="ช่องทางติดต่อจะแสดงเมื่อได้รับการยืนยัน"
+                layout="stack"
+                tone="dark"
+              />
+            )}
           </section>
 
           <section aria-labelledby="footer-privacy-title">

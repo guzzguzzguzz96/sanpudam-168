@@ -1,11 +1,13 @@
 import "server-only";
 import { assertDraftGrant } from "./draft-access.js";
 import { collectAssetIds, createMediaResolver } from "./media.js";
+import { assertReviewGrant } from "./review-access.js";
 import {
   CONTENT_PROJECTION,
   DRAFT_SCOPE,
   MEDIA_PROJECTION,
   PUBLIC_SCOPE,
+  REVIEW_SCOPE,
   draftContentFilter,
   draftMediaFilter,
   isPubliclyVisible,
@@ -64,8 +66,8 @@ export function createContentService({ models, connect, sanitize = (error) => er
     return createMediaResolver(assets, { scope: scope.name });
   }
 
-  // Wraps a loader so public reads degrade to "unavailable" instead of
-  // throwing. Draft reads throw: an editor must see real failures.
+  // Wraps a loader so public and review reads degrade to "unavailable"
+  // instead of throwing. Draft reads throw: an editor must see real failures.
   function guarded(scope, empty, loader) {
     return async (...args) => {
       try {
@@ -73,7 +75,7 @@ export function createContentService({ models, connect, sanitize = (error) => er
         const isEmpty = data === null || (Array.isArray(data) && data.length === 0);
         return { status: isEmpty ? "empty" : "ok", data: isEmpty ? empty() : data, ...rest };
       } catch (error) {
-        if (scope.name !== PUBLIC_SCOPE) throw sanitize(error);
+        if (scope.name === DRAFT_SCOPE) throw sanitize(error);
         logger.error(`[cms] content unavailable: ${sanitize(error).message}`);
         return { status: "unavailable", data: empty(), media: createMediaResolver([], { scope: scope.name }) };
       }
@@ -127,6 +129,11 @@ export function createContentService({ models, connect, sanitize = (error) => er
     // one this throws DraftAccessDeniedError before any query runs.
     withDraftAccess(grant) {
       return repositories(createScope(DRAFT_SCOPE, assertDraftGrant(grant)));
+    },
+    // Requires a grant from the client review policy (review-access.js).
+    // Without one this throws ReviewAccessDeniedError before any query runs.
+    withReviewAccess(grant) {
+      return repositories(createScope(REVIEW_SCOPE, assertReviewGrant(grant)));
     },
   };
 }

@@ -12,6 +12,9 @@ import "server-only";
 
 export const PUBLIC_SCOPE = "public";
 export const DRAFT_SCOPE = "draft";
+// Client Review (review-access.js): same content and media rules as draft,
+// but opened by the review policy and degraded to "unavailable" on errors.
+export const REVIEW_SCOPE = "review";
 
 export function publicContentFilter(extra = {}) {
   return {

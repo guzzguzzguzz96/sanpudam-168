@@ -1,0 +1,79 @@
+/* Client Review Mode labels (docs/client-review-mode.md). Restrained:
+   deep gold on light surfaces (>= 4.8:1), royal gold on deep navy. */
+
+.review-status {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-1);
+  max-width: 100%;
+  margin: 0;
+  padding: 0.125rem var(--space-2);
+  border: 1px solid currentColor;
+  border-radius: var(--control-radius);
+  background: var(--warm-ivory);
+  color: var(--deep-gold);
+  font-size: var(--type-small);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-small);
+}
+
+.review-status--pending {
+  border-style: dashed;
+  color: var(--muted-text);
+}
+
+.review-status__fields {
+  font-weight: var(--weight-regular);
+}
+
+.review-note {
+  margin: var(--space-1) 0 0;
+  color: var(--deep-gold);
+  font-size: var(--type-small);
+  line-height: var(--leading-small);
+}
+
+.site-footer .review-note {
+  color: var(--royal-gold);
+}
+
+.review-section-status {
+  margin-top: var(--space-3);
+}
+
+.review-unavailable--section {
+  padding-block: var(--space-12);
+}
+
+.site-brand--with-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.site-brand__logo {
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+}
+
+.site-brand__text {
+  display: grid;
+  min-width: 0;
+}
+
+.site-footer__review-details {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.site-footer__review-details dt {
+  font-weight: var(--weight-semibold);
+}
+
+.site-footer__review-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

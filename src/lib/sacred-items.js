@@ -9,6 +9,7 @@
 //   category: { id: string, label: string } | null,
 //   image: { src, alt, width, height, focalPoint } | null,
 //   href: string | null,   // detail route, only when it exists
+//   reviewStatus: { tone, label, fields } | null,   // Client Review only
 // }
 //
 // No price, stock, or availability fields are part of this model.
@@ -26,6 +27,7 @@ export function normalizeSacredItem(raw) {
     category,
     image: raw.image?.src ? raw.image : null,
     href: raw.href ?? null,
+    ...(raw.reviewStatus ? { reviewStatus: raw.reviewStatus } : {}),
   };
 }
 
