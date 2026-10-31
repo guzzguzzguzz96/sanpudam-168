@@ -1,6 +1,6 @@
 # Client Review Mode (Phase 02.5.6 — Step C1.1)
 
-Status: **code complete; live staging verification is blocked: the configured review account is an Atlas administrator, so the app refuses it** (see §10, Step C1.1b round 2). Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting has been changed.
+Status: **verified locally against live staging data** (§10, Step C1.1b round 3). Vercel Preview connectivity and Deployment Protection are **not verified**. Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting has been changed.
 
 Client Review Mode renders the migrated draft content from `sanpudam168_staging` and its Cloudinary media on the existing homepage, so the owner can check it before anything is approved. It is a separate read-only path. It does not use the public publication rules or authenticated draft preview (Step B1), and it does not change either of them.
 
@@ -99,7 +99,7 @@ An environment flag cannot prove who can open a deployment. Deployed draft revie
 
 ## 7. Homepage coverage
 
-The figures below are expected values from the migration source (`migration/content/*.json`, imported 1:1 per the import report). They have **not** been confirmed with a live read, because review credentials do not exist yet.
+The figures below were confirmed with a live read of `sanpudam168_staging` on 2026-10-31 (§10, round 3).
 
 | Section | Source | Available | Shown on homepage | Notes |
 |---|---|---|---|---|
@@ -137,9 +137,9 @@ Newly found in migrated data:
 
 ## 9. Remaining blockers
 
-1. **Replace `CLIENT_REVIEW_MONGODB_URI` with a dedicated user that has only the built-in `read` role on `sanpudam168_staging`** (§3). The value currently configured authenticates with `atlasAdmin@admin`. Rotate that admin password if the string was shared beyond the migration operator.
-2. Re-run the §10 verification: live counts and references, homepage rendering with real images, and visual QA. Atlas Network Access for the local host is now working. Preview (Vercel) connectivity is still unverified.
-3. Set the `CLIENT_REVIEW_*` variables in Vercel Preview (`dev`). This needs approval.
+1. Set the `CLIENT_REVIEW_*` variables in Vercel Preview (`dev`) and allow Vercel's egress in Atlas Network Access. This needs approval. Preview connectivity is unverified.
+2. If the admin connection string used in round 2 was shared beyond the migration operator, rotate that password.
+3. Design decision: the approved 5-tile gallery mosaic leaves empty cells at 768 px and 1440 px with real photos (round 3). The same geometry applies to the prototype placeholders.
 4. Verify Vercel Deployment Protection on Preview (§6) before sharing any deployed review URL.
 5. Collect the owner content listed in §7 and fix the routes in §8 (C2).
 
@@ -177,3 +177,41 @@ Execution environment: the local Windows host, with Node v24 running as a Claude
 | Simulated Vercel production (`VERCEL=1`, `VERCEL_ENV=production`, `VERCEL_TARGET_ENV=production`, `CLIENT_REVIEW_ENABLED=true`, plus the review credentials and local flag present) | Pass: `/` static, no review headers, no remote image patterns |
 | Lint / tests | Pass / 77 of 77 |
 | Vercel Deployment Protection, Preview connectivity | **NOT VERIFIED** |
+
+### Round 3 (2026-10-31, from `c464a99`, after the owner replaced the review account)
+
+Same local host and egress address as round 2. Only `CLIENT_REVIEW_MONGODB_*` was used; the verification script removed `MONGODB_URI` from its process. The intermediate account (`readAnyDatabase@admin`) was also refused by the role check before this round.
+
+**Connection and safeguards:** pass. Database `sanpudam168_staging`; roles exactly `[{ role: "read", db: "sanpudam168_staging" }]`; connection and schemas have `autoCreate`/`autoIndex` off. The collection list was identical before and after, and only read commands were issued.
+
+**Live data vs. the migration baseline:** all 12 collection counts match (56 records; `migration_runs` excluded): media_assets 17, categories 3, site_settings 1, pages 1, sacred_items 5, news 3, banners 4, gallery_items 10, faqs 6, videos 1, reviews 3, team_members 2.
+
+- All 39 content records are `draft` / `pending_review`, with 32 open placeholder flags across 16 records.
+- Media: 17 assets with rights `approved`, none deleted, all delivered from `res.cloudinary.com/lov36obu/.../sanpudam168/staging/`.
+- References: 31/31 image references and 5/5 sacred-item categories resolve. `sortOrder` is contiguous (banners 1–4, items 1–5, gallery 1–10).
+- News dates: 2026-03-20, 2026-03-16, 2026-03-16. FAQ `showOnHome`: 1–3 true, 4–6 false.
+- Site settings: logo `brand-logo-mark` (192×192), `contact.verified=false`, directions host `share.google`. The video has no asset (`videoAssetId` null).
+- **No discrepancies found.**
+
+**Real homepage** (local `next build` + `next start` with `CLIENT_REVIEW_LOCAL=true`):
+
+| Check | Result |
+|---|---|
+| Content | Hero (`identity.name` + tagline) over banner 1 at focal point 55% 50%; about (`ศรัทธาที่อยู่คู่ใจ` + statue image); sacred items 3 of 5 with category `สถานที่ศักดิ์สิทธิ์`; worship steps 4 of 4; news 3 of 3; gallery 5 of 10; home FAQs 3 of 6; footer identity and contacts |
+| Labels | Sample label on หลวงปู่ศิลา (คำอธิบายย่อ), on the news item with placeholder title/date, on the worship steps section, and on opening hours (quick info and visit). Pending label on องค์ปู่ดำ (รายละเอียด, ของไหว้) and on the about section (เนื้อหาประวัติ). Ten "imported, unverified" contact labels (location, contact ×2, address, phone, LINE, 3 social) |
+| Not rendered (correct) | No `tel:` or LINE links, no `share.google`, no iframe or video, no testimonials, no team members, no non-home FAQs. The map area shows the invalid-link note |
+| Images | 14 per page, 0 broken, 0 incomplete after scrolling; served through `/_next/image` from Cloudinary; the logo renders at 40 px. Content-to-image mapping matches the records |
+| Headers (HTML and RSC) | `X-Robots-Tag: noindex, nofollow`, `Cache-Control: private, no-store, max-age=0` |
+| Leak check | Real content appears only in request-time HTML/RSC. Prerendered output and browser bundles contain none of the content markers, staging paths, or Cloudinary hosts |
+
+**Visual QA** (headless Chrome via CDP device emulation, full page and per section):
+
+| Width | Result |
+|---|---|
+| 390 | No horizontal overflow; Thai text wraps inside cards; labels stay within cards; footer contacts wrap; keyboard focus visible (3 px outline) |
+| 768 | No overflow; gallery mosaic leaves an empty column and cell |
+| 1440 | No overflow. Gallery mosaic leaves an empty cell in row 2, and the "wide" tile stays square because only the feature tile overrides `aspect-ratio`. The featured news card stretches to the height of the two supporting cards, leaving white space below its text (existing layout) |
+
+Fixes: none. The observed layout points come from the approved mosaic and news layout and also apply to the public prototype, so they are recorded for design review rather than changed here.
+
+Builds: the local review build is Partial Prerender; the public build (`CLIENT_REVIEW_LOCAL` empty) and the simulated Vercel production build are fully static with no review headers or image hosts (round 2, no code change since). Lint passes; 77 of 77 tests pass.
