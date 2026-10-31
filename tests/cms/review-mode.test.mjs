@@ -225,7 +225,31 @@ test("config: review credentials never fall back to MONGODB_URI", () => {
   assert.equal(readReviewDatabaseConfig({ ...REVIEW_DB, CLIENT_REVIEW_MONGODB_DB_NAME: "sanpudam168_production" }).uri, null);
   assert.equal(readReviewDatabaseConfig({ ...REVIEW_DB, CLIENT_REVIEW_MONGODB_DB_NAME: "sanpudam168_staging2" }).uri, null);
   assert.equal(readReviewDatabaseConfig({ ...REVIEW_DB, CLIENT_REVIEW_MONGODB_URI: "https://example.com" }).uri, null);
-  assert.deepEqual(readReviewDatabaseConfig(REVIEW_DB), { uri: SECRET_URI, dbName: "sanpudam168_staging", problems: [] });
+  assert.deepEqual(readReviewDatabaseConfig(REVIEW_DB), { uri: SECRET_URI, dbName: "sanpudam168_staging", dnsServers: null, problems: [] });
+});
+
+test("config: optional local DNS resolvers accept IP addresses only", () => {
+  assert.deepEqual(readReviewDatabaseConfig({ ...REVIEW_DB, CLIENT_REVIEW_DNS_SERVERS: "8.8.8.8, 1.1.1.1" }).dnsServers, ["8.8.8.8", "1.1.1.1"]);
+  for (const value of ["dns.google", "8.8.8.8,", "1.1.1.1,2.2.2.2,3.3.3.3,4.4.4.4,5.5.5.5", "999.1.1.1"]) {
+    const config = readReviewDatabaseConfig({ ...REVIEW_DB, CLIENT_REVIEW_DNS_SERVERS: value });
+    assert.equal(config.uri, null, value);
+    assert.ok(config.problems.some((p) => p.includes("CLIENT_REVIEW_DNS_SERVERS")), value);
+  }
+});
+
+test("loader: custom DNS resolvers are used for local review only", async () => {
+  const seen = [];
+  const connect = async (config) => (seen.push(config.dnsServers), { models: mockModels(migratedSite()) });
+  const dnsEnv = { ...REVIEW_DB, CLIENT_REVIEW_DNS_SERVERS: "8.8.8.8" };
+  await loadReviewHomepage({ env: { ...LOCAL, ...dnsEnv }, connect, logger: silent });
+  await loadReviewHomepage({ env: { ...PREVIEW, ...dnsEnv }, connect, logger: silent });
+  assert.deepEqual(seen, [["8.8.8.8"], null]);
+
+  resetReviewConnectionCache();
+  const applied = [];
+  await connectReviewDatabase({ uri: SECRET_URI, dbName: "sanpudam168_staging", dnsServers: ["8.8.8.8"] }, { mongooseInstance: fakeMongoose(), dnsModule: { setServers: (s) => applied.push(s) } });
+  assert.deepEqual(applied, [["8.8.8.8"]]);
+  resetReviewConnectionCache();
 });
 
 test("connection: only read@sanpudam168_staging is accepted", () => {

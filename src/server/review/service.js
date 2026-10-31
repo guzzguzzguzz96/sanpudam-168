@@ -35,7 +35,8 @@ export async function loadReviewHomepage({ env = process.env, connect = connectR
 
   const sanitize = (error) => sanitizeError(error, config.uri);
   try {
-    const { models } = await connect(config);
+    // Custom DNS resolvers are a local-machine workaround only.
+    const { models } = await connect({ ...config, dnsServers: grant.mode === "local" ? config.dnsServers : null });
     const service = createContentService({ models, connect: async () => {}, sanitize, logger });
     const view = buildReviewHomepage(await loadReviewHomepageContent(service.withReviewAccess(grant)));
     return view.status === "ok" ? view : { status: "unavailable", reason: "query_failed" };

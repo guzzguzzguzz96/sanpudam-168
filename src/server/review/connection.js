@@ -1,4 +1,5 @@
 import "server-only";
+import dns from "node:dns";
 import mongoose from "mongoose";
 import { sanitizeError } from "../../lib/db.js";
 import { Banner, Category, Faq, GalleryItem, MediaAsset, News, Page, SacredItem, SiteSettings } from "../../models/index.js";
@@ -59,11 +60,18 @@ export function registerReviewModels(connection) {
 
 const cache = (globalThis.__sanpudamReviewMongo ??= { promise: null });
 
-// config: { uri, dbName } from readReviewDatabaseConfig(). Returns
-// { models } once every safeguard has passed.
-export function connectReviewDatabase(config, { mongooseInstance = mongoose } = {}) {
+// config: { uri, dbName, dnsServers } from readReviewDatabaseConfig().
+// dnsServers (local review only, see service.js) replaces this process's
+// resolvers for the mongodb+srv lookup. Returns { models } once every
+// safeguard has passed.
+export function connectReviewDatabase(config, { mongooseInstance = mongoose, dnsModule = dns } = {}) {
   if (!config?.uri || config.dbName !== REVIEW_DATABASE_NAME) return Promise.reject(new Error("Client review database is not configured."));
   if (!cache.promise) {
+    if (config.dnsServers?.length) {
+      // Callback and promise APIs keep separate default resolvers.
+      dnsModule.setServers(config.dnsServers);
+      dnsModule.promises?.setServers(config.dnsServers);
+    }
     const connection = mongooseInstance.createConnection(config.uri, { ...REVIEW_CONNECTION_OPTIONS, dbName: config.dbName });
     cache.promise = connection
       .asPromise()

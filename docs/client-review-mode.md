@@ -1,6 +1,6 @@
 # Client Review Mode (Phase 02.5.6 — Step C1.1)
 
-Status: **code complete, not yet verified against live staging data.** Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting was changed in this step.
+Status: **code complete; live staging verification is blocked by Atlas Network Access** (see §10, Step C1.1b). Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting has been changed.
 
 Client Review Mode renders the migrated draft content from `sanpudam168_staging` and its Cloudinary media on the existing homepage, so the owner can check it before anything is approved. It is a separate read-only path. It does not use the public publication rules or authenticated draft preview (Step B1), and it does not change either of them.
 
@@ -42,6 +42,7 @@ None of these has a value in the repository. `.env.example` lists the names only
 | `CLIENT_REVIEW_LOCAL` | local `.env.local` only; never set on Vercel (that denies review) | local opt-in |
 | `CLIENT_REVIEW_MONGODB_URI` | Preview (dev) and local; **never Production** | dedicated read-only user (§3) |
 | `CLIENT_REVIEW_MONGODB_DB_NAME` | same | must be exactly `sanpudam168_staging` |
+| `CLIENT_REVIEW_DNS_SERVERS` | local only, optional (ignored outside local review mode) | up to 4 resolver IPs, e.g. `8.8.8.8,1.1.1.1`, for machines whose system resolver refuses the SRV lookup that `mongodb+srv://` needs. Applied process-wide to the local server only |
 
 Only `src/server/review/config.js` reads `CLIENT_REVIEW_MONGODB_*`, and there is **no fallback** to `MONGODB_URI` or `MONGODB_DB_NAME`. Tests check both points.
 
@@ -136,7 +137,26 @@ Newly found in migrated data:
 
 ## 9. Remaining blockers
 
-1. Create the `read@sanpudam168_staging` user and set the `CLIENT_REVIEW_*` variables (Preview `dev` and local). This needs owner/admin approval.
-2. Verify the live staging read and rendering: record counts, image loading, and responsive layout with real content.
-3. Verify Vercel Deployment Protection on Preview (§6) before sharing any deployed review URL.
-4. Collect the owner content listed in §7 and fix the routes in §8 (C2).
+1. **Add this machine's public IP (or the Vercel egress range for Preview) to Atlas Network Access** for the cluster that hosts `sanpudam168_staging`. This requires Atlas project access and is not something the app can do.
+2. Re-run §10 steps 2–5 once the network refusal is resolved: the role check, live counts and references, homepage rendering with real images, and visual QA.
+3. Set the `CLIENT_REVIEW_*` variables in Vercel Preview (`dev`). This needs approval.
+4. Verify Vercel Deployment Protection on Preview (§6) before sharing any deployed review URL.
+5. Collect the owner content listed in §7 and fix the routes in §8 (C2).
+
+## 10. Step C1.1b — live staging verification (2026-10-31)
+
+Starting commit `2ff07df`. All checks used only `CLIENT_REVIEW_MONGODB_*`. The verification script removed `MONGODB_URI` and `MONGODB_DB_NAME` from its own process, so the admin/migration credentials could not be used even by accident. Only read commands were attempted.
+
+| Check | Result |
+|---|---|
+| Review variables present locally | `CLIENT_REVIEW_LOCAL`, `CLIENT_REVIEW_MONGODB_URI`, `CLIENT_REVIEW_MONGODB_DB_NAME` set (values not printed) |
+| SRV DNS lookup | **Failed** on this Windows machine with the system resolver (`querySrv ECONNREFUSED`; Node's resolver is `127.0.0.1`). Fixed for local review with the optional `CLIENT_REVIEW_DNS_SERVERS`; resolution then succeeds on every request |
+| TLS connection to Atlas | **Refused by all 3 replica-set members**: `tlsv1 alert internal error` (SSL alert 80), topology `ReplicaSetNoPrimary`. This is Atlas's response to a client IP that is not on the project's Network Access list, and it happens before authentication. Outbound TCP 27017 and 443 to other hosts work. Running outside the command sandbox was not permitted |
+| Database name / `read@staging` role check | **Not run**: blocked before authentication. The checks remain enforced in code (`connectReviewDatabase`) and covered by tests |
+| Live counts, media/category references, ordering, `showOnHome`, status, placeholders | **Not run** (blocked). The baseline in §7 is still unconfirmed |
+| Homepage with real content and images; Cloudinary / `next/image` delivery | **Not run** (blocked) |
+| Visual QA with real content (390 / 768 / 1440) | **Not run** (blocked). Only the unavailable state was inspected (C1.1) |
+| Local `next build` + `next start` with `CLIENT_REVIEW_LOCAL=true` | Pass: `/` is Partial Prerender; HTML and RSC responses carry `X-Robots-Tag: noindex, nofollow` and `Cache-Control: private, no-store, max-age=0`; the page shows the honest unavailable state; logs are sanitized (no host or credentials) |
+| Simulated Vercel production build (`VERCEL=1`, `VERCEL_ENV=production`, `VERCEL_TARGET_ENV=production`, `CLIENT_REVIEW_ENABLED=true`, plus `CLIENT_REVIEW_LOCAL` and review credentials from `.env.local`) | Pass: `/` fully static; routes-manifest has no headers; `images.remotePatterns` is empty |
+| Build output scan (review build) | Pass: no migrated text, staging URLs, contact values, or `CLIENT_REVIEW_*` names in `.next/server/app` or `.next/static` |
+| Vercel Deployment Protection | **NOT VERIFIED** |
