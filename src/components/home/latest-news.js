@@ -6,7 +6,10 @@ import { SectionIntro } from "@/components/home/section-intro";
 import { ReviewStatus } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
 
-export function NewsCard({ article, featured = false, headingLevel: Heading = "h3" }) {
+// Thumbnail in a consistent 16:9 frame. Posters and newsletters are shown
+// whole (fit "contain" on a neutral matte); the full image stays on the
+// article page.
+export function NewsCard({ article, headingLevel: Heading = "h3" }) {
   const title = article.href ? (
     <Link href={article.href} prefetch={false}>
       {article.title}
@@ -16,20 +19,15 @@ export function NewsCard({ article, featured = false, headingLevel: Heading = "h
   );
 
   return (
-    <Card
-      as="article"
-      className={`home-news-card${featured ? " home-news-card--featured" : ""}`}
-    >
+    <Card as="article" className="home-news-card">
       <MediaFrame
         alt={article.image?.alt}
         className="home-news-card__media"
         desktopImage={article.image}
+        fit={article.image?.fit}
+        matte={article.image?.matte}
         placeholderLabel="พื้นที่ภาพข่าวตัวอย่าง · ไม่มีภาพข่าวจริง"
-        sizes={
-          featured
-            ? "(max-width: 767px) 100vw, 60vw"
-            : "(max-width: 767px) 100vw, 30vw"
-        }
+        sizes="(max-width: 767px) 100vw, (max-width: 1023px) 40vw, 30vw"
       />
       <p className="home-news-card__date">
         {article.publicationDate ?? "วันที่เผยแพร่รอการยืนยัน"}
@@ -50,9 +48,8 @@ export function NewsCard({ article, featured = false, headingLevel: Heading = "h
   );
 }
 
+// Equal cards in reading order; each keeps its natural height.
 export function LatestNews({ data }) {
-  const [featuredArticle, ...supportingArticles] = data;
-
   return (
     <Section aria-labelledby="latest-news-title" className="home-latest-news">
       <Container>
@@ -61,16 +58,13 @@ export function LatestNews({ data }) {
           eyebrow="ข่าวสาร"
           title="ข่าวสารล่าสุด"
         />
-        <div className="home-news-grid">
-          {featuredArticle ? (
-            <NewsCard article={featuredArticle} featured />
-          ) : null}
-          <div className="home-news-grid__supporting">
-            {supportingArticles.map((article) => (
-              <NewsCard key={article.id} article={article} />
-            ))}
-          </div>
-        </div>
+        <ul className="home-news-grid">
+          {data.map((article) => (
+            <li key={article.id}>
+              <NewsCard article={article} />
+            </li>
+          ))}
+        </ul>
         <div className="home-section-action">
           <Link className="home-text-link" href="/news" prefetch={false}>
             ดูข่าวสารทั้งหมด

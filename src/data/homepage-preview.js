@@ -188,7 +188,7 @@ export const homepagePreviewData = {
       label: "พื้นที่สำหรับภาพที่ได้รับอนุมัติ 05",
       image: null,
       alt: "",
-      layout: "home-gallery__item--wide",
+      layout: "",
     },
   ],
   // Ordered by visitor priority: hours, location, then contact.

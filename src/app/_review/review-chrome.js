@@ -31,7 +31,7 @@ export async function ReviewSiteFooter() {
     <SiteFooter
       brand={brandOf(review)}
       reviewActions={confirmedActionsOf(review)}
-      reviewDetails={review.status === "ok" ? review.footer?.details : null}
+      reviewContact={review.status === "ok" ? review.footer : null}
     />
   );
 }

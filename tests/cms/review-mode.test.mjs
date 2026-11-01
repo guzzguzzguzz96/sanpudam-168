@@ -439,12 +439,18 @@ test("dto: imported contacts are labeled unverified; invalid links are not used"
   assert.equal(contact.note, REVIEW_LABELS.unverifiedContact);
   assert.ok(view.visit.details.every((d) => d.note));
   assert.deepEqual(view.visit.directions, { status: "confirmed", confirmed: true, href: CONFIRMED_MAPS, note: null }, "the owner-confirmed link replaces share.google");
+  // Compact footer summary (Step G): full values, no raw URLs, one shared note.
   const footer = Object.fromEntries(view.footer.details.map((d) => [d.id, d]));
-  assert.equal(footer.phone.note, REVIEW_LABELS.unverifiedContact);
-  assert.equal(footer.line.value, "@sanpudam168");
-  assert.equal(footer["social-facebook"].value, "www.facebook.com/share/19YGRfMnnS");
-  assert.equal(footer["social-youtube"], undefined, "a social link on an unexpected host is dropped");
+  assert.equal(footer.location.value, "ถนนมหาราช", "the short location field, not a cut address");
+  assert.equal(footer.contact.value, "0823686168 · @sanpudam168", "phone and LINE in full");
+  assert.equal(footer.social.value, "Facebook", "platform names only; the unexpected-host link is dropped");
+  assert.equal(view.footer.note, REVIEW_LABELS.unverifiedContact);
+  assert.equal(view.footer.moreHref, "/visit");
+  assert.ok(!JSON.stringify(view.footer).includes("facebook.com"), "no raw social URLs in the footer");
   assert.equal(view.brand.logoIsLowResolution, true, "the 192x192 logo is icon-size only");
+  // Presentation hints: unknown assets default to cover.
+  assert.equal(view.gallery[0].image.fit, "cover");
+  assert.equal(view.gallery[0].image.matte, null);
   assert.equal(view.brand.logo.width, 192);
 });
 
@@ -536,4 +542,15 @@ test("boundary: the confirmed link is review-only and never an embed", () => {
   for (const p of ["src/server/review/overrides.js", "src/components/home/visit-us.js", "src/app/_review/review-homepage.js", "src/app/_review/review-chrome.js"]) {
     assert.doesNotMatch(read(p), /<iframe|maps\/embed|output=embed/i, p);
   }
+});
+
+test("presentation: hints match by asset identity in any environment, default cover", async () => {
+  const { mediaPresentation } = await import("../../src/server/cms/media-presentation.js");
+  assert.deepEqual(mediaPresentation("sanpudam168/staging/legacy/shrine/sacred-objects/pu-dam-168-statue"), { fit: "contain", matte: "white" });
+  assert.deepEqual(mediaPresentation("sanpudam168/production/legacy/shrine/sacred-objects/pu-dam-168-statue"), { fit: "contain", matte: "white" });
+  assert.deepEqual(mediaPresentation("sanpudam168/staging/legacy/events/2569-03-16-tra-phaendin-ceremony-newsletter-a"), { fit: "contain", matte: "neutral" });
+  assert.deepEqual(mediaPresentation("sanpudam168/staging/legacy/shrine/sacred-objects/tra-phaendin-coat-of-arms"), { fit: "cover", matte: null }, "a photographed object is not a cutout");
+  assert.deepEqual(mediaPresentation("sanpudam168/staging/legacy/events/monks-holy-water-coat-of-arms"), { fit: "cover", matte: null });
+  assert.deepEqual(mediaPresentation(undefined), { fit: "cover", matte: null });
+  assert.deepEqual(mediaPresentation("other/pu-dam-168-statue"), { fit: "cover", matte: null });
 });

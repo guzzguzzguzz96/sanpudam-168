@@ -1,5 +1,6 @@
 import "server-only";
 import { formatThaiDate, lineUrlFromId } from "../cms/adapters.js";
+import { mediaPresentation } from "../cms/media-presentation.js";
 import { isValidSlug } from "../cms/policy.js";
 import { REVIEW_LABELS, describeReviewStatus, reviewMapsUrl, reviewSocialLink } from "../review/homepage.js";
 import { getPhoneHref } from "../../lib/contact-actions.js";
@@ -45,7 +46,7 @@ export function parseLegacyText(value) {
 
 function image(media, ref) {
   const resolved = media?.resolve(ref) ?? null;
-  return resolved ? { src: resolved.src, width: resolved.width, height: resolved.height, alt: resolved.alt, focalPoint: resolved.focalPoint } : null;
+  return resolved ? { src: resolved.src, width: resolved.width, height: resolved.height, alt: resolved.alt, focalPoint: resolved.focalPoint, ...mediaPresentation(resolved.publicId) } : null;
 }
 
 function categoryView(category) {

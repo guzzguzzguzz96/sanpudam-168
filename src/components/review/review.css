@@ -77,17 +77,30 @@
   margin-bottom: var(--space-4);
 }
 
+/* Compact contact summary: label above value, small type, tight rhythm. */
 .site-footer__review-details {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
   margin: 0;
 }
 
 .site-footer__review-details dt {
+  font-size: var(--type-small);
   font-weight: var(--weight-semibold);
+  line-height: var(--leading-small);
 }
 
 .site-footer__review-details dd {
   margin: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+}
+
+.site-footer__review-more {
+  margin: var(--space-3) 0 0;
+}
+
+.site-footer__review-more a {
+  color: var(--royal-gold);
+  font-weight: var(--weight-semibold);
+  text-underline-offset: 0.2em;
 }

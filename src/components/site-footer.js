@@ -8,11 +8,12 @@ import { getContactActions } from "@/lib/contact-actions";
 
 const contactActions = getContactActions(["line", "phone", "maps"]);
 
-// brand, reviewDetails, and reviewActions are Client Review only.
-// reviewDetails lists imported contact values as text with their
-// verification note; they are never turned into links. reviewActions holds
-// owner-confirmed actions only. Without them the footer is unchanged.
-export function SiteFooter({ brand = null, reviewDetails = null, reviewActions = null }) {
+// brand, reviewContact, and reviewActions are Client Review only.
+// reviewContact: { details, note, moreHref } - a compact summary of imported
+// contact values (text, never links) with one shared verification note and
+// a link to the full details on /visit. reviewActions holds owner-confirmed
+// actions only. Without them the footer is unchanged.
+export function SiteFooter({ brand = null, reviewContact = null, reviewActions = null }) {
   const name = brand?.name ?? siteConfig.localName;
   const descriptor = brand?.descriptor ?? siteConfig.name;
 
@@ -52,18 +53,25 @@ export function SiteFooter({ brand = null, reviewDetails = null, reviewActions =
                 tone="dark"
               />
             ) : null}
-            {reviewDetails?.length ? (
-              <dl className="site-footer__review-details">
-                {reviewDetails.map((detail) => (
-                  <div key={detail.id}>
-                    <dt>{detail.label}</dt>
-                    <dd>
-                      {detail.value}
-                      <ReviewNote note={detail.note} />
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+            {reviewContact?.details?.length ? (
+              <>
+                <dl className="site-footer__review-details">
+                  {reviewContact.details.map((detail) => (
+                    <div key={detail.id}>
+                      <dt>{detail.label}</dt>
+                      <dd>{detail.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <ReviewNote note={reviewContact.note} />
+                {reviewContact.moreHref ? (
+                  <p className="site-footer__review-more">
+                    <Link href={reviewContact.moreHref} prefetch={false}>
+                      ที่อยู่เต็มและช่องทางติดต่อทั้งหมด
+                    </Link>
+                  </p>
+                ) : null}
+              </>
             ) : (
               <ContactActions
                 actions={contactActions}

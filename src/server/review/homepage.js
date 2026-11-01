@@ -1,5 +1,6 @@
 import "server-only";
 import { formatThaiDate, lineUrlFromId } from "../cms/adapters.js";
+import { mediaPresentation } from "../cms/media-presentation.js";
 import { isValidSlug } from "../cms/policy.js";
 import { getPhoneHref } from "../../lib/contact-actions.js";
 import { normalizeSacredItem } from "../../lib/sacred-items.js";
@@ -49,8 +50,9 @@ const FIELD_LABELS = {
   contactTopics: "หัวข้อการติดต่อ",
 };
 
-// Same-section image layouts as the approved gallery mosaic.
-const GALLERY_LAYOUTS = ["home-gallery__item--feature", "", "", "", "home-gallery__item--wide"];
+// Gallery composition (Step G): the first image is the feature tile; the
+// other four fill the grid in DOM order.
+const GALLERY_LAYOUTS = ["home-gallery__item--feature", "", "", "", ""];
 
 // Approved shortcuts (history and sacred items open their pages since C2.1);
 // each appears only when its section renders.
@@ -123,7 +125,7 @@ export function reviewSocialLink(link) {
 
 function image(media, ref) {
   const resolved = media?.resolve(ref) ?? null;
-  return resolved ? { src: resolved.src, width: resolved.width, height: resolved.height, alt: resolved.alt, caption: resolved.caption, focalPoint: resolved.focalPoint } : null;
+  return resolved ? { src: resolved.src, width: resolved.width, height: resolved.height, alt: resolved.alt, caption: resolved.caption, focalPoint: resolved.focalPoint, ...mediaPresentation(resolved.publicId) } : null;
 }
 
 function brandView(result) {
@@ -229,13 +231,20 @@ function visitorViews(result, overrides) {
   return {
     quickInformation: quickInformation.length ? quickInformation : null,
     visit: details.length || contact.directions ? { details, directions: contact.directions } : null,
+    // Compact summary (Step G): full values, including the full address and
+    // social URLs, are on /visit. Short values come from their own fields
+    // (locationShort, platform names), never by cutting a longer value. One
+    // shared note marks the group while any value is unverified.
     footer: {
       details: [
-        contact.address ? { id: "address", label: "ที่อยู่", ...contact.address } : null,
-        contact.phone ? { id: "phone", label: "โทรศัพท์", value: contact.phone, note: contact.channels.note } : null,
-        contact.lineId ? { id: "line", label: "LINE", value: contact.lineId, note: contact.channels.note } : null,
-        ...social.map((link) => ({ id: `social-${link.platform}`, label: link.label, value: link.value, note: link.note })),
+        (contact.locationShort ?? contact.address) ? { id: "location", label: "ที่ตั้ง", value: (contact.locationShort ?? contact.address).value } : null,
+        contact.phone || contact.lineId
+          ? { id: "contact", label: "โทรศัพท์ / LINE", value: [contact.phone, contact.lineId].filter(Boolean).join(" · ") }
+          : null,
+        social.length ? { id: "social", label: "โซเชียลมีเดีย", value: social.map((link) => link.label).join(" · ") } : null,
       ].filter(Boolean),
+      note: !contact.verified || social.some((link) => !link.verified) ? REVIEW_LABELS.unverifiedContact : null,
+      moreHref: "/visit",
     },
   };
 }

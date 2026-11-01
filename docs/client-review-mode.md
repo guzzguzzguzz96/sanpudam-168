@@ -434,11 +434,62 @@ One fix came from that QA: on linked news cards the review label shared a line w
 
 ### Remaining
 
-- **Visual refinement:**
-  - the gallery mosaic gaps (§10 round 3);
-  - the featured news card's empty space on the homepage;
-  - news list thumbnails crop portrait newsletters to 16:9, as on the homepage.
+- **Visual refinement:** gallery gaps, the featured news card's empty space, and cropped poster thumbnails are addressed in §14 (Step G).
 - **Soft 404:** a design decision, see above.
 - **Preview and production:**
   - verify the C2 routes on Vercel Preview, Atlas Network Access for Vercel, and Deployment Protection (all **NOT VERIFIED**);
   - create a read-only production database user for public mode.
+
+## 14. Homepage visual refinement (Phase 02.4 Step G, 2026-11-01)
+
+Started from `79ea6ee`, which the owner had pushed and reviewed on Vercel Preview. The goal was to fix four issues visible in the owner's screenshots: the gallery's unused space, the stretched featured news card, the lone fourth worship step, and the tall footer. Branding, colours, typography, section order, content, labels, and access boundaries are unchanged.
+
+### Changes
+
+| Area | Before | After |
+|---|---|---|
+| Gallery | 12-column mosaic with a "wide" last tile: empty cells at 768 and 1440 px | **Desktop:** 4 columns; image 1 spans 2 columns × 2 rows on the left, images 2–5 fill a 2×2 on the right by normal grid flow (DOM order = reading order, no visual reordering). The small tiles are square, so the feature tile covers exactly 2×2 cells plus the gap: no empty cells. **Tablet and mobile:** 2 columns, image 1 across both (3:2), the other four as squares in two rows. The ≤375 px single-column override was removed. Sizes are reserved by `aspect-ratio`, so there is no layout shift |
+| Homepage news | One featured card stretched beside two stacked cards | One flat list in reading order. **Desktop:** 3 equal columns, `align-items: start`, so each card keeps its natural height. **Tablet:** one card per row with the image beside the text. **Mobile:** stacked. Titles, dates, excerpts, sample labels, and article links unchanged. `/news` keeps its own grid; article pages are unchanged |
+| Worship guide | Fixed 3 columns at desktop; step 4 alone on row 2 | Columns follow the step count: `min(steps, 4)` on desktop, `min(steps, 2)` on tablet, 1 on mobile (CSS variables set by the component). 4 steps → 4 columns. `/history` uses the same component and shows the same result |
+| Footer (review mode) | Address, phone, LINE, and 3 raw social URLs, each with its own note (~765 px tall at 1440, ~1236 px at 390) | The confirmed "นำทางด้วย Google Maps" action (unchanged URL and `target="_blank" rel="noopener noreferrer"`), then a summary: ที่ตั้ง (the record's own `locationShort` field, not a cut address), โทรศัพท์ / LINE (both values in full), โซเชียลมีเดีย (platform names, no URLs). One shared note "นำเข้าจากระบบเดิม · ยังไม่ยืนยัน" covers the group, followed by a link to `/visit`, which keeps every value in full. Nothing is clickable except the Maps action and the `/visit` link. About 430 px at 1440 and 920 px at 390. The public footer is unchanged |
+
+### Image-fit decisions
+
+- **Why hints:** the CMS has no fit field, and media categories cannot separate a cutout from a photograph (the statue and the coat-of-arms photo are both `shrine-sacred-object`).
+- **How the cutout was identified:** the source files were checked first.
+  - None of them has an alpha channel (all lossy WebP), so there is no true transparency.
+  - The border pixels were then measured. Only `pu-dam-168-statue` has a uniform near-white border (standard deviation 2.4); every other image is ≥25.
+- **Where the hints live:** `src/server/cms/media-presentation.js` keys each hint by Cloudinary public id without the `sanpudam168/<env>/legacy/` prefix. No CMS record or asset was changed.
+- **The hints:**
+  - `contain` on a white matte: the statue cutout (the whole figure stays visible);
+  - `contain` on a neutral matte (warm ivory with a faint border): the newsletters A and B, the infographic, and the coin poster;
+  - everything else: `cover` (scene photography, existing focal points).
+- **Where they apply:** only the gallery and news cards opt in (`MediaFrame` `fit`/`matte` props). Other cards, the hero, and the article page's full uncropped images are unchanged.
+
+### QA (local review build, live staging, read-only account)
+
+- **Screenshots:** before and after section screenshots at 390, 768, and 1440 px (headless Chrome via CDP) were kept in the session scratchpad, not in git.
+
+| Check | Result |
+|---|---|
+| Gallery | 5 images, 1 feature tile, a complete composition at all widths. Statue contained on white; scene photos cropped sensibly |
+| News | 3 equal cards with natural heights; newsletters and infographic shown whole on the neutral matte; sample label and links present |
+| Worship | 4 columns at 1440, 2 at 768, 1 at 390; sample label present |
+| Footer | Compact; shared unverified note; `/visit` link; no raw URLs; no `tel:` or LINE links |
+| Homepage overall | No horizontal overflow, 14 images, 0 broken or incomplete, visible keyboard focus. 5 Maps links all exact with safe attributes. Review headers unchanged |
+| `/news` | Same cards, posters now whole |
+| `/history` | Worship guide in 4 columns |
+| Public prototype homepage (review off, no database) | Gallery placeholders form the same complete composition; no overflow |
+
+**Automated:** lint passes; 100 of 100 tests pass. They now cover the footer summary (no raw URLs, full values, shared note) and the presentation-hint lookup (environment-independent, cover by default). No CSS-duplicating tests were added.
+
+### Remaining before client presentation
+
+- **Owner content:** the content gaps in §12 and §13.
+- **Gallery source:** the owner may want a different first gallery image. The order follows `sortOrder`, and image 1 is the interior altar.
+- **Release blockers:**
+  - the soft 404 (§13);
+  - the C2 routes on Vercel Preview, Atlas Network Access for Vercel, and Deployment Protection (all **NOT VERIFIED**);
+  - a read-only production database user.
+
+Step H and production readiness are **not** complete.

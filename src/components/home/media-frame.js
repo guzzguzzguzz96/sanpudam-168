@@ -1,10 +1,15 @@
 import Image, { getImageProps } from "next/image";
 
+// fit: "cover" (default, scene photography) or "contain" (whole image
+// visible, for cutouts and posters). matte: background behind a contained
+// image, "white" or "neutral". Both come from server presentation hints.
 export function MediaFrame({
   alt,
   className = "",
   desktopFocalPoint = "50% 50%",
   desktopImage,
+  fit = "cover",
+  matte = null,
   mobileFocalPoint,
   mobileImage,
   placeholderLabel,
@@ -43,7 +48,7 @@ export function MediaFrame({
 
   return (
     <div
-      className={`home-media ${className}`.trim()}
+      className={`home-media${fit === "contain" ? " home-media--contain" : ""}${matte ? ` home-media--matte-${matte}` : ""} ${className}`.trim()}
       style={{
         "--home-media-focal-desktop": desktopPosition,
         "--home-media-focal-mobile": mobilePosition,

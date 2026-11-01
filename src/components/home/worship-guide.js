@@ -18,7 +18,15 @@ export function WorshipGuide({ data, reviewStatus = null }) {
           title="เตรียมข้อมูลการสักการะ"
         />
         <ReviewStatus className="review-section-status" status={reviewStatus} />
-        <ol className="home-worship-guide__steps">
+        {/* Columns follow the step count (at most 4 desktop / 2 tablet), so
+            fewer steps never leave empty columns. */}
+        <ol
+          className="home-worship-guide__steps"
+          style={{
+            "--worship-columns": Math.min(Math.max(data.length, 1), 4),
+            "--worship-columns-tablet": Math.min(Math.max(data.length, 1), 2),
+          }}
+        >
           {data.map((step, index) => (
             <li key={step.id} className="home-worship-guide__step">
               <span className="home-worship-guide__number" aria-hidden="true">
