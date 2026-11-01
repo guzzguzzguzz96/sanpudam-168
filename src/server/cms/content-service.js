@@ -114,6 +114,12 @@ export function createContentService({ models, connect, sanitize = (error) => er
         return { ...(await withMedia(item)), category };
       }),
 
+      // One news article by its slug; same literal-match rule as above.
+      newsBySlug: guarded(scope, none, async (slug) => {
+        if (!isValidSlug(slug)) return { data: null, media: createMediaResolver([], { scope: scope.name }) };
+        return withMedia(await findOne(scope, models.News, { slug: String(slug) }));
+      }),
+
       news: guarded(scope, list, async ({ limit = 3 } = {}) => withMedia(await find(scope, models.News, {}, { sort: { date: -1, _id: 1 }, limit }))),
 
       gallery: guarded(scope, list, async ({ galleryKey = "shrine-main", limit = 12 } = {}) => withMedia(await find(scope, models.GalleryItem, { galleryKey }, { sort: { sortOrder: 1, _id: 1 }, limit }))),

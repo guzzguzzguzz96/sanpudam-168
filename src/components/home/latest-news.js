@@ -6,7 +6,7 @@ import { SectionIntro } from "@/components/home/section-intro";
 import { ReviewStatus } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
 
-function NewsCard({ article, featured = false }) {
+export function NewsCard({ article, featured = false, headingLevel: Heading = "h3" }) {
   const title = article.href ? (
     <Link href={article.href} prefetch={false}>
       {article.title}
@@ -34,7 +34,7 @@ function NewsCard({ article, featured = false }) {
       <p className="home-news-card__date">
         {article.publicationDate ?? "วันที่เผยแพร่รอการยืนยัน"}
       </p>
-      <h3 className="home-news-card__title">{title}</h3>
+      <Heading className="home-news-card__title">{title}</Heading>
       <p className="home-news-card__description">{article.description}</p>
       <ReviewStatus status={article.reviewStatus} />
       {article.href ? (

@@ -298,7 +298,8 @@ function newsView(result) {
     publicationDate: formatThaiDate(doc.date),
     description: text(doc.excerpt) ?? "",
     image: image(result.media, doc.coverImage),
-    href: null,
+    // Article pages exist (C2.2); slugs come from the record.
+    href: isValidSlug(doc.slug) ? `/news/${doc.slug}` : null,
     reviewStatus: describeReviewStatus(doc, ["title", "date", "excerpt", "coverImage"]),
   }));
 }

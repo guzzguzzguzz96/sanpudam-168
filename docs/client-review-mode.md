@@ -1,6 +1,6 @@
 # Client Review Mode (Phase 02.5.6 — Step C1.1)
 
-Status: **verified locally against live staging data** (§10, Step C1.1b round 3). Vercel Preview connectivity and Deployment Protection are **not verified**. Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting has been changed.
+Status: **verified locally against live staging data** (§10, §12, §13). The owner has demonstrated the real homepage and its images working on a Vercel Preview deployment. That demonstration does **not** verify the C2 routes, the current Atlas Network Access configuration for Vercel, or Vercel Deployment Protection, and none of those has been checked here. Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting has been changed.
 
 Client Review Mode renders the migrated draft content from `sanpudam168_staging` and its Cloudinary media on the existing homepage, so the owner can check it before anything is approved. It is a separate read-only path. It does not use the public publication rules or authenticated draft preview (Step B1), and it does not change either of them.
 
@@ -123,10 +123,13 @@ Missing source content: an owner-confirmed Google Maps link, a high-resolution l
 
 ## 8. Broken links (for C2)
 
-`/history`, `/sakkara`, and `/sakkara/[slug]` exist since C2.1 (§12). These links still lead to routes that do not exist yet (they return 404) and are pending C2.2:
+`/history`, `/sakkara`, and `/sakkara/[slug]` exist since C2.1 (§12); `/news`, `/news/[slug]`, and `/visit` exist since C2.2 (§13). A crawl of a local review build (2026-11-01) followed every internal link from `/`:
 
-- `/news`: navigation, footer, and "ดูข่าวสารทั้งหมด"
-- `/visit`: navigation, footer, and the worship-guide "ข้อมูลการเยี่ยมชม" button (on the homepage and on `/history`)
+- it reached 13 pages, all rendering content (no not-found UI);
+- all 17 in-page anchors resolve;
+- the only external link is the owner-confirmed Maps URL.
+
+The crawl did not cover public mode or a deployed environment.
 
 Newly found in migrated data:
 
@@ -135,7 +138,7 @@ Newly found in migrated data:
 
 ## 9. Remaining blockers
 
-1. Set the `CLIENT_REVIEW_*` variables in Vercel Preview (`dev`) and allow Vercel's egress in Atlas Network Access. This needs approval. Preview connectivity is unverified.
+1. Confirm the `CLIENT_REVIEW_*` variables in Vercel Preview (`dev`) and Atlas Network Access for Vercel. The owner showed the homepage working on Preview; the C2 routes there and the current Atlas configuration are unverified.
 2. If the admin connection string used in round 2 was shared beyond the migration operator, rotate that password.
 3. Design decision: the approved 5-tile gallery mosaic leaves empty cells at 768 px and 1440 px with real photos (round 3). The same geometry applies to the prototype placeholders.
 4. Verify Vercel Deployment Protection on Preview (§6) before sharing any deployed review URL.
@@ -270,7 +273,7 @@ How the directions link works:
 - **Build output:** a scan of the review, public, and simulated-production builds found no titles, body text, slugs, variant names, or Cloudinary URLs in `.next/server/app` or `.next/static`.
 - **Metadata:** generic titles only ("ประวัติ", "วัตถุมงคล"), with no CMS content in `<head>`, Open Graph, or structured data. No sitemap, robots file, feed, or API route exists.
 - **Review headers:** `X-Robots-Tag: noindex, nofollow` and `Cache-Control: private, no-store, max-age=0` on HTML and RSC responses of every route, including the not-found UI (via `next.config.mjs`).
-- **Not-found status:** `notFound()` runs after streaming starts (runtime params inside Suspense). Next.js therefore renders the not-found UI with HTTP 200 and injects `noindex`. Unmatched routes such as `/news` return a real 404.
+- **Not-found status:** `notFound()` runs after streaming starts (runtime params inside Suspense). Next.js therefore renders the not-found UI with HTTP 200 and injects `noindex`. Unmatched routes such as `/does-not-exist` return a real 404. See §13 for why a pre-stream 404 is not available in this architecture.
 
 ### Navigation
 
@@ -323,6 +326,119 @@ Two fixes came from that QA:
 
 ### Remaining
 
-- **C2.2:** `/news`, `/news/[slug]`, and `/visit`.
-- **Preview:** Vercel Preview connectivity and Deployment Protection are still **NOT VERIFIED**.
+- **C2.2:** done (§13).
+- **Preview:** the C2 routes on Vercel Preview, Atlas Network Access for Vercel, and Deployment Protection are **NOT VERIFIED** (the owner verified only the homepage on Preview).
 - **Production:** public mode needs a read-only production database user before any public page reads MongoDB in production.
+
+## 13. News and visit pages: /news, /news/[slug], /visit (C2.2, 2026-11-01)
+
+### Routes and data
+
+| Route | Source | Loader |
+|---|---|---|
+| `/news` | `news`, sorted `date` descending then `_id` (the documented news order; `date` is the article's own `YYYY-MM-DD` field, never a migration or `createdAt` timestamp) | `getNewsPage()` |
+| `/news/[slug]` | one `news` record by `slug`: `title`, `date`, `coverImage`, `excerpt`, `body` (`legacy-text-v1`), `images[]` | `getNewsArticlePage(slug)` |
+| `/visit` | `site_settings`: `openingHours`, `contact.address`, `contact.locationShort`, `contact.phoneNumber`, `contact.lineId`, `socialLinks`; directions from the review override (§11) in review mode only | `getVisitPage()` |
+
+- **Conventions from §12:** the same scope selection, slug validation, literal lookup, page states, request-time loading, generic metadata, and safe text rendering apply. The news list reuses the approved `NewsCard`.
+- **Article images:** shown uncropped (each frame takes the image's own aspect ratio), because they include portrait newsletters and an infographic. There is no author, no captions (none stored), and no invented dates.
+- **`/visit` scopes:**
+  - **Review mode:**
+    - hours, address, and landmark are shown with labels (hours carry the sample label for `openingHours.daysText`);
+    - phone, LINE, and social links appear as text labeled "imported, unverified", never as links;
+    - the only action is "นำทางด้วย Google Maps", built from the owner-confirmed override with `target="_blank" rel="noopener noreferrer"`.
+  - **Public mode:**
+    - only the published, approved, placeholder-free record is used, and the review override is never read;
+    - phone, LINE, and directions become actions only when `contact.verified` is true, and only verified social links appear;
+    - if no eligible record exists, the page shows "ข้อมูลการเยี่ยมชมยังไม่เผยแพร่" (not a 404).
+- **Not used on `/visit`:**
+  - `mapEmbedQuery`: no embed; using it would invent a destination;
+  - `contactTopics`: a placeholder, and there is no contact form;
+  - transport routes, parking, and coordinates: none exist in the source.
+- **Navigation:**
+  - review homepage news cards link to `/news/<slug>`;
+  - "ดูข่าวสารทั้งหมด" goes to `/news`;
+  - the header, mobile menu, footer, and worship-guide button already linked `/news` and `/visit`;
+  - the five homepage/header/footer directions links are unchanged.
+
+### HTTP status of not-found pages
+
+The pre-stream 404 was attempted and is **not feasible** in this architecture:
+
+- **What was tried:** `/news/[slug]` was changed to look up the article before any Suspense boundary, with `instant = false` to pass static-shell validation.
+- **Why it fails:** with Cache Components, a dynamic route without `generateStaticParams` gets a prerendered App Shell (`renderingMode: PARTIALLY_STATIC`, response header `x-nextjs-postponed: 1`). Next.js sends that shell before the page code runs, so the status is already 200 when `notFound()` fires.
+- **Decision:** the attempt was reverted to the §12 pattern.
+
+| Request | Status | Rendered UI |
+|---|---|---|
+| Unknown or ineligible `/news/[slug]` or `/sakkara/[slug]` | **200** | Not-found UI ("ไม่พบข่าวนี้" / "ไม่พบรายการนี้") with `<meta name="robots" content="noindex">`, plus `X-Robots-Tag` in review mode |
+| `/history` with no eligible page | **200** | Site not-found UI |
+| An unmatched path | **404** | Site not-found UI |
+
+**Production-readiness issue (soft 404):** a real 404 for unknown slugs needs either:
+
+- `generateStaticParams` with `dynamicParams = false`, built from **public, published** slugs only (never in review builds); or
+- a `proxy.js` existence check.
+
+Both are design decisions for the owner and were not implemented.
+
+### Verification (local, live staging, read-only account only)
+
+**Review build:**
+
+| Check | Result |
+|---|---|
+| `/news` | All 3 articles in order with dates 20 / 16 / 16 มีนาคม 2569. Slugs: `know-tra-phaendin-siam`, `tra-phaendin-ceremony-2569`, `monks-blessing-ceremony`. The placeholder article's card shows the sample label (หัวข้อ, วันที่) |
+| `know-tra-phaendin-siam` | Matching title and date; cover is the infographic; 1 article image (coat of arms); bold segments preserved |
+| `tra-phaendin-ceremony-2569` | Cover is newsletter A; images are newsletter B and the officer photo; bold names preserved |
+| `monks-blessing-ceremony` | Cover is the monks/holy-water photo; 2 article images; sample labels on title, date, and body |
+| Unknown slugs | `not-a-real-article`, `KNOW-TRA-PHAENDIN-SIAM`, and `%24ne` render "ไม่พบข่าวนี้" |
+| `/visit` | Real hours with the sample label, full address, landmark; phone, LINE, and 3 social links as labeled text. 4 Maps anchors on the page (header ×2, footer, visit action), all exact and opening in a new tab. No `tel:`, LINE link, `share.google`, iframe, embed query, or contact topics |
+| Regression | The homepage links all 3 news cards, `/news`, `/visit`, and the sakkara cards; all 5 homepage Maps links remain; the C2.1 pages unchanged |
+
+**Public build** (review off; public path pointed at the read-only account, never the admin URI):
+
+| Check | Result |
+|---|---|
+| `/news` | Empty state "ยังไม่มีข่าวสารที่เผยแพร่" |
+| All 3 article slugs | "ไม่พบข่าวนี้" |
+| `/visit` | Empty state |
+| Draft content | No draft title, contact value, opening hours, Maps override, `share.google`, or Cloudinary URL in any HTML or RSC payload (the requested slug itself appears only as the echoed URL, same as for a made-up slug) |
+| No database configured | All three routes show "ยังโหลดเนื้อหาไม่ได้ในขณะนี้" |
+
+**Simulated Vercel production** (`VERCEL_ENV=production` with review flags set): `/` static; no review headers; no remote image patterns.
+
+**Headers:** in review mode, every HTML and RSC response of the new routes has `X-Robots-Tag: noindex, nofollow` and `Cache-Control: private, no-store, max-age=0`. In public mode, the dynamic routes send Next.js's `private, no-cache, no-store, max-age=0, must-revalidate`.
+
+**Build output:** in the review, public, and simulated-production builds, `.next/server/app` and `.next/static` contain no article titles, slugs, contact values, address, Maps override URL, or Cloudinary URLs.
+
+**Automated:** lint passes; 99 of 99 tests pass. The tests cover:
+
+- news ordering and `date` (no migration timestamps);
+- slug validation and literal lookup;
+- labels, uncropped images, and unresolvable images dropped;
+- public isolation for news and visit;
+- the review-only override never reaching public pages, with verified-only public channels;
+- unavailable vs. not found vs. empty;
+- DTO safety and boundaries.
+
+**Visual QA:** headless Chrome via CDP at 390, 768, and 1440 px on `/news`, two articles, and `/visit`. No horizontal overflow, no broken images, visible focus, Thai titles wrap at phrases.
+
+One fix came from that QA: on linked news cards the review label shared a line with "อ่านข่าวสาร". It is now on its own line, which also applies to the homepage news cards.
+
+### Content gaps (owner)
+
+- `monks-blessing-ceremony`: the title, date, and body are placeholders (event name, date, and the names of the monks).
+- `openingHours.daysText` (opening days) is a placeholder. All contact values (address, phone, LINE, social links) are unverified; only the directions link is confirmed.
+- `tra-phaendin-ceremony-2569` uses two near-identical newsletter images (A as cover, B in the article). That is the real data; the owner may want to choose one.
+
+### Remaining
+
+- **Visual refinement:**
+  - the gallery mosaic gaps (§10 round 3);
+  - the featured news card's empty space on the homepage;
+  - news list thumbnails crop portrait newsletters to 16:9, as on the homepage.
+- **Soft 404:** a design decision, see above.
+- **Preview and production:**
+  - verify the C2 routes on Vercel Preview, Atlas Network Access for Vercel, and Deployment Protection (all **NOT VERIFIED**);
+  - create a read-only production database user for public mode.

@@ -1,8 +1,11 @@
 import "server-only";
-import { describeReviewStatus } from "../review/homepage.js";
+import { formatThaiDate, lineUrlFromId } from "../cms/adapters.js";
+import { isValidSlug } from "../cms/policy.js";
+import { REVIEW_LABELS, describeReviewStatus, reviewMapsUrl, reviewSocialLink } from "../review/homepage.js";
+import { getPhoneHref } from "../../lib/contact-actions.js";
 
-// View data for /history, /sakkara, and /sakkara/[slug]
-// (docs/client-review-mode.md §12). The same builders serve both scopes:
+// View data for /history, /sakkara, /sakkara/[slug], /news, /news/[slug],
+// and /visit (docs/client-review-mode.md §12–§13). The same builders serve both scopes:
 // public repositories only return published, approved, placeholder-free
 // records (so no labels appear), and review repositories return the
 // migrated drafts with their placeholder labels.
@@ -140,5 +143,98 @@ export function buildSacredItemPage(result) {
       prayerTopics: shown("prayerTopics"),
       offerings: shown("offerings"),
     },
+  };
+}
+
+// --- /news ---------------------------------------------------------------
+
+// Ordering comes from the repository: `date` descending, then `_id`
+// (docs/frontend-data-integration.md §5). `date` is the article's own
+// date-only field, never a migration or createdAt timestamp.
+export function buildNewsListPage(result) {
+  return result.data.map((doc) => ({
+    id: String(doc._id),
+    title: doc.title,
+    publicationDate: formatThaiDate(doc.date),
+    description: text(doc.excerpt) ?? "",
+    image: image(result.media, doc.coverImage),
+    href: isValidSlug(doc.slug) ? `/news/${doc.slug}` : null,
+    reviewStatus: describeReviewStatus(doc, ["title", "date", "excerpt", "coverImage"]),
+  }));
+}
+
+// --- /news/[slug] --------------------------------------------------------
+
+export function buildNewsArticlePage(result) {
+  const doc = result.data;
+  const shown = (path) => onlyShown(describeReviewStatus(doc, [path]));
+  return {
+    title: doc.title,
+    slug: doc.slug,
+    publicationDate: formatThaiDate(doc.date),
+    image: image(result.media, doc.coverImage),
+    summary: text(doc.excerpt),
+    body: parseLegacyText(doc.body),
+    // Article images in stored order; no captions exist, none are added.
+    images: (doc.images ?? []).map((ref) => image(result.media, ref)).filter(Boolean),
+    status: {
+      title: shown("title"),
+      date: shown("date"),
+      summary: shown("excerpt"),
+      body: shown("body"),
+    },
+  };
+}
+
+// --- /visit --------------------------------------------------------------
+
+// scope "review": imported values are shown as text with their labels;
+// only an owner-confirmed directions override becomes an action (an
+// imported link that passes validation is shown labeled).
+// scope "public": the published record only. Phone, LINE, directions, and
+// social links appear only when the owner has verified them; the
+// review-only override is never used.
+export function buildVisitPage(result, { scope, overrides = null }) {
+  const settings = result.data;
+  const contact = settings.contact ?? {};
+  const isReview = scope === "review";
+  const verified = contact.verified === true;
+  const unverifiedNote = isReview && !verified ? REVIEW_LABELS.unverifiedContact : null;
+
+  const hoursValue = [text(settings.openingHours?.daysText), text(settings.openingHours?.displayText)].filter(Boolean).join(" ") || null;
+  const hoursStatus = isReview ? onlyShown(describeReviewStatus(settings, ["openingHours"])) : null;
+  const phone = getPhoneHref(contact.phoneNumber) ? contact.phoneNumber.trim() : null;
+  const lineId = lineUrlFromId(contact.lineId) && !text(contact.lineId)?.startsWith("https://") ? text(contact.lineId) : null;
+  const showContacts = isReview || verified;
+
+  let directions = null;
+  if (isReview) {
+    const confirmed = reviewMapsUrl(overrides?.directionsUrl);
+    const imported = reviewMapsUrl(contact.directionsUrl);
+    if (confirmed) directions = { href: confirmed, confirmed: true, note: null };
+    else if (imported) directions = { href: imported, confirmed: false, note: unverifiedNote };
+    else if (text(contact.directionsUrl)) directions = { href: null, confirmed: false, note: REVIEW_LABELS.invalidDirections };
+  } else if (verified && reviewMapsUrl(contact.directionsUrl)) {
+    directions = { href: reviewMapsUrl(contact.directionsUrl), confirmed: true, note: null };
+  }
+
+  return {
+    name: text(settings.identity?.name),
+    hours: hoursValue ? { value: hoursValue, note: hoursStatus ? `${hoursStatus.label} (${hoursStatus.fields.join(", ")})` : unverifiedNote } : null,
+    address: text(contact.address) ? { value: text(contact.address), note: unverifiedNote } : null,
+    locationShort: text(contact.locationShort) ? { value: text(contact.locationShort), note: unverifiedNote } : null,
+    contacts: showContacts
+      ? [
+          phone ? { id: "phone", label: "โทรศัพท์", value: phone, note: unverifiedNote } : null,
+          lineId ? { id: "line", label: "LINE", value: lineId, note: unverifiedNote } : null,
+        ].filter(Boolean)
+      : [],
+    social: (settings.socialLinks ?? [])
+      .map(reviewSocialLink)
+      .filter((link) => link && (isReview || link.verified))
+      .map((link) => ({ id: `social-${link.platform}`, label: link.label, value: link.value, note: isReview && !link.verified ? REVIEW_LABELS.unverifiedContact : null })),
+    directions,
+    // Clickable phone/LINE actions: public and owner-verified only.
+    verifiedContact: !isReview && verified ? { phoneNumber: phone, lineInquiryUrl: lineUrlFromId(contact.lineId) } : null,
   };
 }

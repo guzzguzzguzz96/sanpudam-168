@@ -46,7 +46,11 @@ const SERVER_WIRING = new Map([
   ["src/app/history/page.js", "@/server/site"],
   ["src/app/sakkara/page.js", "@/server/site"],
   ["src/app/sakkara/[slug]/page.js", "@/server/site"],
+  ["src/app/news/page.js", "@/server/site"],
+  ["src/app/news/[slug]/page.js", "@/server/site"],
+  ["src/app/visit/page.js", "@/server/site"],
 ]);
+const CONTENT_ROUTES = ["src/app/history/page.js", "src/app/sakkara/page.js", "src/app/sakkara/[slug]/page.js", "src/app/news/page.js", "src/app/news/[slug]/page.js", "src/app/visit/page.js"];
 
 test("boundary: UI components never use the data layer; routes use only their entry point", () => {
   const uiFiles = sourceFiles.filter((file) => /src[\\/](app|components|data)[\\/]/.test(file));
@@ -73,19 +77,19 @@ test("boundary: review mode is decided from the environment only, never from req
     const text = read(file);
     assert.doesNotMatch(text, /next\/headers|cookies\(|headers\(\)|searchParams|draftMode|NEXT_PUBLIC_/, rel(file));
   }
-  for (const route of ["src/app/page.js", "src/app/history/page.js", "src/app/sakkara/page.js", "src/app/sakkara/[slug]/page.js"]) {
+  for (const route of ["src/app/page.js", ...CONTENT_ROUTES]) {
     assert.doesNotMatch(read(join(root, route)), /searchParams|cookies|headers|draftMode/, route);
   }
 });
 
 test("boundary: content routes are never prerendered from CMS data", () => {
-  for (const route of ["src/app/history/page.js", "src/app/sakkara/page.js", "src/app/sakkara/[slug]/page.js"]) {
+  for (const route of CONTENT_ROUTES) {
     const text = read(join(root, route));
-    assert.doesNotMatch(text, /generateStaticParams|generateMetadata|"use cache"/, route);
+    assert.doesNotMatch(text, /generateStaticParams|generateMetadata|"use cache"|dynamicParams/, route);
     assert.match(text, /<Suspense/, `${route} reads data inside Suspense`);
   }
   const entry = read(join(root, "src/server/site/index.js"));
-  for (const loader of ["getHistoryPage", "getSacredItemsPage", "getSacredItemPage"]) {
+  for (const loader of ["getHistoryPage", "getSacredItemsPage", "getSacredItemPage", "getNewsPage", "getNewsArticlePage", "getVisitPage"]) {
     assert.match(entry, new RegExp(`export async function ${loader}\\([^)]*\\) \\{\\s*await connection\\(\\);`), `${loader} waits for the request`);
   }
   for (const file of sourceFiles) assert.doesNotMatch(read(file), /dangerouslySetInnerHTML/, rel(file));

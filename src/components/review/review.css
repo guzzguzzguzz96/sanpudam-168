@@ -20,6 +20,13 @@
   line-height: var(--leading-small);
 }
 
+/* News cards mix block and inline children: keep the label on its own line. */
+.home-news-card .review-status {
+  display: flex;
+  width: fit-content;
+  margin-block: var(--space-2);
+}
+
 .review-status--pending {
   border-style: dashed;
   color: var(--muted-text);
