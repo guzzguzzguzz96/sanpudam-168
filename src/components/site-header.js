@@ -10,10 +10,11 @@ import { ThaiPhrases } from "@/components/ui/thai-phrases";
 // Only owner-verified destinations become header actions.
 const contactActions = getContactActions(["line", "maps"]);
 
-// brand (Client Review only): { name, descriptor, logo } from the review
-// view data. logo is the legacy 192x192 mark, so it is shown at icon size
-// only. Without brand the header uses siteConfig as before.
-export function SiteHeader({ brand = null }) {
+// brand and reviewActions are Client Review only. brand: { name, descriptor,
+// logo } from the review view data; logo is the legacy 192x192 mark, so it
+// is shown at icon size only. reviewActions: owner-confirmed actions built
+// with getContactActions. Without them the header uses siteConfig as before.
+export function SiteHeader({ brand = null, reviewActions = null }) {
   const name = brand?.name ?? siteConfig.localName;
   const descriptor = brand?.descriptor ?? siteConfig.name;
   const logo = brand?.logo?.src ? brand.logo : null;
@@ -54,7 +55,7 @@ export function SiteHeader({ brand = null }) {
         <Suspense fallback={null}>
           <SiteNavigation
             navigation={siteConfig.navigation}
-            contactActions={contactActions}
+            contactActions={reviewActions ?? contactActions}
           />
         </Suspense>
       </Container>

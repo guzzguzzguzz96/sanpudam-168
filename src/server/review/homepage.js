@@ -2,6 +2,7 @@ import "server-only";
 import { formatThaiDate, lineUrlFromId } from "../cms/adapters.js";
 import { getPhoneHref } from "../../lib/contact-actions.js";
 import { normalizeSacredItem } from "../../lib/sacred-items.js";
+import { REVIEW_CONFIRMED_OVERRIDES } from "./overrides.js";
 
 // Client Review homepage: migrated MongoDB content -> plain view data for
 // the existing homepage components (docs/client-review-mode.md).
@@ -83,10 +84,10 @@ export function describeReviewStatus(doc, shown) {
     : { tone: "pending", label: REVIEW_LABELS.pending, fields };
 }
 
-// Google Maps link with exact host matching (no suffix matching); share.google
-// and other short-link services are rejected.
-const MAPS_HOSTS = new Set(["maps.app.goo.gl", "maps.google.com", "www.google.com", "google.com", "www.google.co.th", "google.co.th"]);
-const MAPS_PATH_REQUIRED = new Set(["www.google.com", "google.com", "www.google.co.th", "google.co.th"]);
+// Google Maps share links only: HTTPS and exactly maps.app.goo.gl (no
+// suffix matching, no other Google hosts). share.google and other
+// short-link services are rejected.
+const MAPS_HOST = "maps.app.goo.gl";
 
 function parseHttps(value) {
   if (typeof value !== "string") return null;
@@ -101,8 +102,7 @@ function parseHttps(value) {
 
 export function reviewMapsUrl(value) {
   const url = parseHttps(value);
-  if (!url || !MAPS_HOSTS.has(url.hostname)) return null;
-  if (MAPS_PATH_REQUIRED.has(url.hostname) && !url.pathname.startsWith("/maps")) return null;
+  if (!url || url.hostname !== MAPS_HOST || !/^\/[A-Za-z0-9]+$/.test(url.pathname)) return null;
   return url.href;
 }
 
@@ -164,16 +164,26 @@ function heroView(siteSettings, banners) {
   };
 }
 
+// Directions: an owner-confirmed override (overrides.js) wins; otherwise the
+// imported link is used only if it passes validation and stays labeled.
+// An invalid override is ignored (never silently swapped for the import).
+function directionsView(contact, overrides, note) {
+  const confirmedHref = reviewMapsUrl(overrides?.directionsUrl);
+  if (confirmedHref) return { status: "confirmed", confirmed: true, href: confirmedHref, note: null };
+  const importedHref = reviewMapsUrl(contact.directionsUrl);
+  if (importedHref) return { status: "imported", confirmed: false, href: importedHref, note };
+  return text(contact.directionsUrl) ? { status: "invalid", confirmed: false, href: null, note: REVIEW_LABELS.invalidDirections } : null;
+}
+
 // Contact values: validated, displayed as text, and labeled unless the
 // owner has verified the contact block.
-function contactView(settings) {
+function contactView(settings, overrides) {
   const contact = settings?.contact ?? {};
   const verified = contact.verified === true;
   const note = verified ? null : REVIEW_LABELS.unverifiedContact;
   const phone = getPhoneHref(contact.phoneNumber) ? contact.phoneNumber.trim() : null;
   const lineId = lineUrlFromId(contact.lineId) && !text(contact.lineId)?.startsWith("https://") ? text(contact.lineId) : null;
   const parts = [phone ? `โทร ${phone}` : null, lineId ? `LINE ${lineId}` : null].filter(Boolean);
-  const directionsHref = reviewMapsUrl(contact.directionsUrl);
   return {
     verified,
     address: text(contact.address) ? { value: text(contact.address), note } : null,
@@ -181,11 +191,7 @@ function contactView(settings) {
     channels: parts.length ? { value: parts.join(" · "), note } : null,
     phone,
     lineId,
-    directions: directionsHref
-      ? { status: "valid", href: directionsHref, note }
-      : text(contact.directionsUrl)
-        ? { status: "invalid", href: null, note: REVIEW_LABELS.invalidDirections }
-        : null,
+    directions: directionsView(contact, overrides, note),
   };
 }
 
@@ -198,11 +204,11 @@ function hoursView(settings) {
   return { value, note: status?.tone === "sample" ? `${REVIEW_LABELS.sample} (${status.fields.join(", ")})` : REVIEW_LABELS.unverifiedContact };
 }
 
-function visitorViews(result) {
+function visitorViews(result, overrides) {
   if (!isOk(result)) return { quickInformation: null, visit: null, footer: null };
   const settings = result.data;
   const hours = hoursView(settings);
-  const contact = contactView(settings);
+  const contact = contactView(settings, overrides);
 
   const quickInformation = [
     hours ? { id: "hours", icon: "clock", label: "เวลาเปิดทำการ", ...hours } : null,
@@ -332,9 +338,10 @@ export async function loadReviewHomepageContent(repositories) {
   return { siteSettings, banners, sacredItems, news, gallery, faqs, historyPage };
 }
 
-// content: result of loadReviewHomepageContent(). Returns the view data.
-export function buildReviewHomepage(content) {
-  const visitor = visitorViews(content.siteSettings);
+// content: result of loadReviewHomepageContent(). overrides: owner-confirmed
+// values (overrides.js). Returns the view data.
+export function buildReviewHomepage(content, { overrides = REVIEW_CONFIRMED_OVERRIDES } = {}) {
+  const visitor = visitorViews(content.siteSettings, overrides);
   const view = {
     brand: brandView(content.siteSettings),
     banner: heroView(content.siteSettings, content.banners),
@@ -366,7 +373,12 @@ export function buildReviewHomepage(content) {
     faqs: { available: listOf(content.faqs).length, rendered: view.faq?.length ?? 0 },
     worshipSteps: { available: view.worshipGuide?.steps.length ?? 0, rendered: view.worshipGuide?.steps.length ?? 0 },
   };
-  const quickActions = QUICK_ACTIONS.filter((action) => view[action.section]).map(({ section: _section, ...action }) => action);
+  // Owner-confirmed directions do not depend on the database read.
+  const confirmedDirectionsHref = reviewMapsUrl(overrides?.directionsUrl);
+  const quickActions = QUICK_ACTIONS.filter((action) => view[action.section] || (action.id === "directions" && confirmedDirectionsHref))
+    .map(({ section: _section, ...action }) =>
+      action.id === "directions" && confirmedDirectionsHref ? { id: "directions", href: confirmedDirectionsHref, icon: "route", label: "นำทางไปศาล", external: true } : action,
+    );
   const allUnavailable = Object.values(sections).every((status) => status === "unavailable");
-  return { status: allUnavailable ? "unavailable" : "ok", ...view, quickActions, sections, coverage };
+  return { status: allUnavailable ? "unavailable" : "ok", ...view, confirmedDirectionsHref, quickActions, sections, coverage };
 }

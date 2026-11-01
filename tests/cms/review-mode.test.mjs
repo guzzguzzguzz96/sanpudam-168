@@ -5,6 +5,7 @@
 //   npm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import mongoose from "mongoose";
 import { evaluateReviewMode, reviewResponseHeaders } from "../../src/lib/review-mode.js";
 import { createContentService } from "../../src/server/cms/content-service.js";
@@ -21,9 +22,11 @@ import {
   resetReviewConnectionCache,
 } from "../../src/server/review/connection.js";
 import { REVIEW_LABELS, buildReviewHomepage, describeReviewStatus, loadReviewHomepageContent, reviewMapsUrl, reviewSocialLink } from "../../src/server/review/homepage.js";
+import { REVIEW_CONFIRMED_OVERRIDES } from "../../src/server/review/overrides.js";
 import { loadReviewHomepage } from "../../src/server/review/service.js";
 import { SECRET_URI, asset, draft, ids, imageRef, mockModels, published } from "./fixtures.mjs";
 
+const CONFIRMED_MAPS = "https://maps.app.goo.gl/xTiyZjWJcKTH3sHR7";
 const PREVIEW = { VERCEL: "1", VERCEL_ENV: "preview", VERCEL_GIT_COMMIT_REF: "dev", CLIENT_REVIEW_ENABLED: "true" };
 const LOCAL = { CLIENT_REVIEW_LOCAL: "true" };
 const REVIEW_DB = { CLIENT_REVIEW_MONGODB_URI: SECRET_URI, CLIENT_REVIEW_MONGODB_DB_NAME: "sanpudam168_staging" };
@@ -410,7 +413,8 @@ test("dto: hero, ordering, limits, and coverage", async () => {
     faqs: { available: 2, rendered: 1 },
     worshipSteps: { available: 2, rendered: 2 },
   });
-  assert.deepEqual(view.quickActions.map((a) => a.href), ["#about", "#worship-guide", "#featured-items", "#visit"]);
+  assert.deepEqual(view.quickActions.map((a) => a.href), ["#about", "#worship-guide", "#featured-items", CONFIRMED_MAPS]);
+  assert.equal(view.quickActions.at(-1).external, true);
 });
 
 test("dto: placeholder metadata becomes visible labels next to the content", async () => {
@@ -433,7 +437,7 @@ test("dto: imported contacts are labeled unverified; invalid links are not used"
   assert.equal(contact.value, "โทร 0823686168 · LINE @sanpudam168");
   assert.equal(contact.note, REVIEW_LABELS.unverifiedContact);
   assert.ok(view.visit.details.every((d) => d.note));
-  assert.deepEqual(view.visit.directions, { status: "invalid", href: null, note: REVIEW_LABELS.invalidDirections }, "share.google is never used");
+  assert.deepEqual(view.visit.directions, { status: "confirmed", confirmed: true, href: CONFIRMED_MAPS, note: null }, "the owner-confirmed link replaces share.google");
   const footer = Object.fromEntries(view.footer.details.map((d) => [d.id, d]));
   assert.equal(footer.phone.note, REVIEW_LABELS.unverifiedContact);
   assert.equal(footer.line.value, "@sanpudam168");
@@ -452,7 +456,12 @@ test("dto: maps and social links use exact HTTPS hosts", () => {
   assert.equal(reviewMapsUrl("https://www.google.com/search?q=x"), null);
   assert.equal(reviewMapsUrl("javascript:alert(1)"), null);
   assert.equal(reviewMapsUrl("https://maps.app.goo.gl/abc123"), "https://maps.app.goo.gl/abc123");
-  assert.equal(reviewMapsUrl("https://www.google.com/maps/place/x"), "https://www.google.com/maps/place/x");
+  assert.equal(reviewMapsUrl("https://www.google.com/maps/place/x"), null, "only maps.app.goo.gl is accepted");
+  assert.equal(reviewMapsUrl("https://maps.google.com/?q=x"), null);
+  assert.equal(reviewMapsUrl("https://goo.gl/maps/abc"), null);
+  assert.equal(reviewMapsUrl("https://maps.app.goo.gl/"), null);
+  assert.equal(reviewMapsUrl("https://maps.app.goo.gl:8443/abc"), null);
+  assert.equal(reviewMapsUrl(CONFIRMED_MAPS), CONFIRMED_MAPS);
   assert.equal(reviewSocialLink({ platform: "tiktok", url: "https://tiktok.com.evil.io/@a" }), null);
   assert.equal(reviewSocialLink({ platform: "unknown", url: "https://www.tiktok.com/@a" }), null);
   assert.equal(reviewSocialLink({ platform: "tiktok", url: "https://www.tiktok.com/@a.190162_" }).value, "www.tiktok.com/@a.190162_");
@@ -462,7 +471,8 @@ test("dto: missing and failing sections are omitted or marked unavailable, never
   const empty = await reviewView({ ...Object.fromEntries(Object.keys(migratedSite()).map((k) => [k, []])) });
   assert.equal(empty.status, "ok");
   for (const key of ["banner", "quickInformation", "about", "featuredItems", "worshipGuide", "news", "gallery", "visit", "faq", "brand"]) assert.equal(empty[key], null, key);
-  assert.deepEqual(empty.quickActions, []);
+  assert.deepEqual(empty.quickActions.map((a) => a.href), [CONFIRMED_MAPS], "the confirmed link does not depend on the database");
+  assert.deepEqual(buildReviewHomepage(await loadReviewHomepageContent(reviewService(Object.fromEntries(Object.keys(migratedSite()).map((k) => [k, []]))).service.withReviewAccess(reviewGrant())), { overrides: {} }).quickActions, []);
 
   const collections = migratedSite();
   const models = mockModels(collections);
@@ -488,4 +498,41 @@ test("dto: published records keep working in the review scope", async () => {
   collections.Faq = [published({ _id: "fp", question: "เผยแพร่แล้ว", answer: "คำตอบ", showOnHome: true, sortOrder: 1 })];
   const view = await reviewView(collections);
   assert.deepEqual(view.faq.map((f) => f.question), ["เผยแพร่แล้ว"]);
+});
+
+test("dto: owner-confirmed directions override", async () => {
+  assert.equal(REVIEW_CONFIRMED_OVERRIDES.directionsUrl, CONFIRMED_MAPS, "the exact supplied URL");
+  const content = await loadReviewHomepageContent(reviewService().service.withReviewAccess(reviewGrant()));
+
+  const confirmed = buildReviewHomepage(content);
+  assert.equal(confirmed.confirmedDirectionsHref, CONFIRMED_MAPS);
+  assert.ok(!JSON.stringify(confirmed).includes("share.google"), "the imported link is never passed on");
+
+  // Without an override the imported share.google link stays unusable.
+  const none = buildReviewHomepage(content, { overrides: {} });
+  assert.deepEqual(none.visit.directions, { status: "invalid", confirmed: false, href: null, note: REVIEW_LABELS.invalidDirections });
+  assert.equal(none.confirmedDirectionsHref, null);
+  assert.equal(none.quickActions.at(-1).href, "#visit");
+
+  // An invalid override is ignored, never swapped for the imported value.
+  for (const directionsUrl of ["https://share.google/abc", "http://maps.app.goo.gl/abc", "https://www.google.com/maps/@13.7,100.5,17z", "javascript:alert(1)"]) {
+    const view = buildReviewHomepage(content, { overrides: { directionsUrl } });
+    assert.equal(view.confirmedDirectionsHref, null, directionsUrl);
+    assert.equal(view.visit.directions.status, "invalid", directionsUrl);
+  }
+
+  // A valid imported link (if it existed) is usable but stays labeled.
+  const collections = migratedSite();
+  collections.SiteSettings[0].contact.directionsUrl = "https://maps.app.goo.gl/importedLink1";
+  const imported = buildReviewHomepage(await loadReviewHomepageContent(reviewService(collections).service.withReviewAccess(reviewGrant())), { overrides: {} });
+  assert.deepEqual(imported.visit.directions, { status: "imported", confirmed: false, href: "https://maps.app.goo.gl/importedLink1", note: REVIEW_LABELS.unverifiedContact });
+  assert.equal(imported.confirmedDirectionsHref, null, "imported links never become header/footer/quick actions");
+});
+
+test("boundary: the confirmed link is review-only and never an embed", () => {
+  const read = (p) => readFileSync(new URL(`../../${p}`, import.meta.url), "utf8");
+  assert.equal(read("src/config/site.js").includes("maps.app.goo.gl/xTiyZjWJcKTH3sHR7"), false, "the public siteConfig is unchanged");
+  for (const p of ["src/server/review/overrides.js", "src/components/home/visit-us.js", "src/app/_review/review-homepage.js", "src/app/_review/review-chrome.js"]) {
+    assert.doesNotMatch(read(p), /<iframe|maps\/embed|output=embed/i, p);
+  }
 });

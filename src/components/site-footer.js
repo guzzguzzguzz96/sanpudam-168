@@ -8,10 +8,11 @@ import { getContactActions } from "@/lib/contact-actions";
 
 const contactActions = getContactActions(["line", "phone", "maps"]);
 
-// brand and reviewDetails are Client Review only. reviewDetails lists
-// imported contact values as text with their verification note; they are
-// never turned into links. Without them the footer is unchanged.
-export function SiteFooter({ brand = null, reviewDetails = null }) {
+// brand, reviewDetails, and reviewActions are Client Review only.
+// reviewDetails lists imported contact values as text with their
+// verification note; they are never turned into links. reviewActions holds
+// owner-confirmed actions only. Without them the footer is unchanged.
+export function SiteFooter({ brand = null, reviewDetails = null, reviewActions = null }) {
   const name = brand?.name ?? siteConfig.localName;
   const descriptor = brand?.descriptor ?? siteConfig.name;
 
@@ -43,6 +44,14 @@ export function SiteFooter({ brand = null, reviewDetails = null }) {
             <h2 id="footer-contact-title" className="site-footer__heading">
               ติดต่อและการเดินทาง
             </h2>
+            {reviewActions?.length ? (
+              <ContactActions
+                actions={reviewActions}
+                className="site-footer__review-actions"
+                layout="stack"
+                tone="dark"
+              />
+            ) : null}
             {reviewDetails?.length ? (
               <dl className="site-footer__review-details">
                 {reviewDetails.map((detail) => (

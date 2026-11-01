@@ -6,10 +6,11 @@ import { ReviewNote } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
 import { getContactActions } from "@/lib/contact-actions";
 
-// directions (Client Review only): { status: "valid" | "invalid", href, note }
-// for an imported, unverified map link. Without it the section is unchanged.
-export function VisitUs({ data, directions = null }) {
-  const actions = getContactActions(["maps", "line", "phone"]);
+// Client Review only: actions replaces the siteConfig contact actions (built
+// with getContactActions from review data), and directionsNote labels an
+// unverified or unusable map link. Without them the section is unchanged.
+export function VisitUs({ data, actions: reviewActions = null, directionsNote = null }) {
+  const actions = reviewActions ?? getContactActions(["maps", "line", "phone"]);
   const hasDirections = actions.some((action) => action.id === "maps");
 
   return (
@@ -49,21 +50,12 @@ export function VisitUs({ data, directions = null }) {
           <span aria-hidden="true" className="home-visit__map-pin">
             <Icon name="mapPin" size={32} />
           </span>
-          {directions?.status === "valid" ? (
-            <p>
-              <a href={directions.href} rel="noopener noreferrer" target="_blank">
-                เปิดลิงก์แผนที่ที่นำเข้า
-                <span className="sr-only">(เปิดในหน้าต่างใหม่)</span>
-              </a>
-            </p>
-          ) : (
-            <p>
-              {hasDirections
-                ? "เปิดเส้นทางไปยังศาลได้จากปุ่ม “นำทางด้วย Google Maps”"
-                : "แผนที่จะแสดงเมื่อได้รับตำแหน่งที่ยืนยันแล้ว"}
-            </p>
-          )}
-          <ReviewNote note={directions?.note} />
+          <p>
+            {hasDirections
+              ? "เปิดเส้นทางไปยังศาลได้จากปุ่ม “นำทางด้วย Google Maps”"
+              : "แผนที่จะแสดงเมื่อได้รับตำแหน่งที่ยืนยันแล้ว"}
+          </p>
+          <ReviewNote note={directionsNote} />
         </div>
       </Container>
     </Section>

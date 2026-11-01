@@ -112,7 +112,7 @@ The figures below were confirmed with a live read of `sanpudam168_staging` on 20
 | Worship guidance | `pages.worshipSteps` | 4 steps | 4 | The whole `worshipSteps` field is flagged placeholder, so the section is labeled sample |
 | News | `news` (date desc) | 3 | 3 | One item has a sample title and date |
 | Gallery | `gallery_items` (shrine-main) | 10 | 5 | Mosaic layout preserved |
-| Visit | `site_settings.contact`, `openingHours` | — | 3 details | `directionsUrl` is a `share.google` link, rejected (not embedded, not linked) |
+| Visit | `site_settings.contact`, `openingHours` + review override | — | 3 details + directions button | Directions use the owner-confirmed link (§11). The imported `share.google` value is still rejected and never shown |
 | FAQ | `faqs` with `showOnHome=true` | 6 | 3 | The 3 home FAQs have no placeholders |
 | Footer | `site_settings` identity, contact, `socialLinks` | 3 social links | text only | All labeled unverified, none clickable |
 | Reviews | `reviews` | 3 samples | **omitted** | Sample testimonials; consent pending |
@@ -132,7 +132,7 @@ The homepage links to routes that do not exist yet (they return 404):
 
 Newly found in migrated data:
 
-- `site_settings.contact.directionsUrl = https://share.google/…` is not a Google Maps URL and is rejected.
+- `site_settings.contact.directionsUrl = https://share.google/…` is not a Google Maps URL and is rejected. In review mode it is superseded by the owner-confirmed link (§11); the staging record is unchanged.
 - Social links (Facebook share link, TikTok, YouTube) are unverified. They are displayed as text only and have not been visited.
 
 ## 9. Remaining blockers
@@ -215,3 +215,29 @@ Same local host and egress address as round 2. Only `CLIENT_REVIEW_MONGODB_*` wa
 Fixes: none. The observed layout points come from the approved mosaic and news layout and also apply to the public prototype, so they are recorded for design review rather than changed here.
 
 Builds: the local review build is Partial Prerender; the public build (`CLIENT_REVIEW_LOCAL` empty) and the simulated Vercel production build are fully static with no review headers or image hosts (round 2, no code change since). Lint passes; 77 of 77 tests pass.
+
+## 11. Owner-confirmed review overrides
+
+`src/server/review/overrides.js` holds values the owner has confirmed. They take precedence over the migrated staging record in Client Review Mode only:
+
+- The staging record is never modified.
+- The public `siteConfig` and the public homepage do not read this file.
+- It is server-only.
+
+| Field | Value | Confirmed | Replaces |
+|---|---|---|---|
+| `directionsUrl` | `https://maps.app.goo.gl/xTiyZjWJcKTH3sHR7` | 2026-11-01 | the imported `share.google` link |
+
+How the directions link works:
+
+- **Validation:** HTTPS, hostname exactly `maps.app.goo.gl` (no suffix matching, no other Google hosts), no credentials or port, and a non-empty path. An override that fails validation is ignored; the imported value is never used in its place.
+- **Where it appears:**
+  - the "นำทางด้วย Google Maps" button in Visit;
+  - the "นำทาง" action in the header and mobile menu;
+  - the footer contact section;
+  - the "นำทางไปศาล" quick action.
+- **How it opens:** every placement uses `getContactActions`, so links open in a new tab with `rel="noopener noreferrer"`.
+- **No embed:** there is no iframe and no embed URL. The map area keeps its placeholder and points to the button.
+- **Scope:** only the directions link is confirmed. Address, phone, LINE, and social links stay labeled "imported, unverified" and are not clickable.
+- **Imported links:** a valid imported link (none exists today) would show only in Visit, labeled unverified, and never in the header, footer, or quick actions.
+- **Verified on 2026-11-01:** the short link redirects (302) to `www.google.com/maps/place/…`. In a local review build all 5 anchors carry the exact URL with the external-link attributes, and there is no layout overflow at 390, 768, or 1440 px. The public build contains no copy of the link.

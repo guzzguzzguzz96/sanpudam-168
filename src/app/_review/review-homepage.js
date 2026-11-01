@@ -11,6 +11,7 @@ import { WorshipGuide } from "@/components/home/worship-guide";
 import { ReviewSectionUnavailable, ReviewUnavailable } from "@/components/review/review-unavailable";
 import { siteConfig } from "@/config/site";
 import { homepagePreviewData } from "@/data/homepage-preview";
+import { getContactActions } from "@/lib/contact-actions";
 import { getReviewHomepage } from "@/server/review";
 
 // Client Review homepage (docs/client-review-mode.md). Rendered only when
@@ -75,7 +76,13 @@ export async function ReviewHomepage() {
         {review.gallery ? <PhotoGallery data={review.gallery} /> : null}
       </SectionOrNotice>
       <SectionOrNotice status={sections.siteSettings} id="review-visit" title="การเยี่ยมชมและการเดินทาง">
-        {review.visit ? <VisitUs data={review.visit.details} directions={review.visit.directions} /> : null}
+        {review.visit ? (
+          <VisitUs
+            data={review.visit.details}
+            actions={review.visit.directions?.href ? getContactActions(["maps"], { directionsUrl: review.visit.directions.href }) : []}
+            directionsNote={review.visit.directions?.note}
+          />
+        ) : null}
       </SectionOrNotice>
       <SectionOrNotice status={sections.faq} id="review-faq" title="คำถามที่พบบ่อย">
         {review.faq ? <Faq data={review.faq} /> : null}
