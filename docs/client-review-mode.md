@@ -1,6 +1,6 @@
 # Client Review Mode (Phase 02.5.6 — Step C1.1)
 
-Status: **verified locally against live staging data** (§10, §12, §13). The owner has demonstrated the real homepage and its images working on a Vercel Preview deployment. That demonstration does **not** verify the C2 routes, the current Atlas Network Access configuration for Vercel, or Vercel Deployment Protection, and none of those has been checked here. Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting has been changed.
+Status: **verified locally against live staging data** (§10, §12–§15). The owner has demonstrated the real homepage on a Vercel Preview deployment and later reported that the Preview route checks passed (§15). Those are owner reports: the Atlas Network Access configuration for Vercel and Vercel Deployment Protection have **not** been independently inspected, and no deployed URL has been checked from here. Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting has been changed.
 
 Client Review Mode renders the migrated draft content from `sanpudam168_staging` and its Cloudinary media on the existing homepage, so the owner can check it before anything is approved. It is a separate read-only path. It does not use the public publication rules or authenticated draft preview (Step B1), and it does not change either of them.
 
@@ -492,4 +492,113 @@ Started from `79ea6ee`, which the owner had pushed and reviewed on Vercel Previe
   - the C2 routes on Vercel Preview, Atlas Network Access for Vercel, and Deployment Protection (all **NOT VERIFIED**);
   - a read-only production database user.
 
-Step H and production readiness are **not** complete.
+Production readiness is **not** complete. Step H follows in §15.
+
+## 15. Final client-review QA and handoff (Phase 02.4 Step H, 2026-11-01)
+
+### Tested build and environment
+
+- **Code:** `7736e7e` (Step G, pushed by the owner), plus the one fix below, committed with this section.
+- **Where:** the local Windows host (Node v24, Next.js 16.4.2). `next build` and `next start` with `CLIENT_REVIEW_LOCAL=true`, reading live `sanpudam168_staging` through the dedicated read-only account (`CLIENT_REVIEW_MONGODB_*` only).
+- **Browser:** headless Chrome via CDP device emulation at 390, 768, and 1440 px. Screenshots stayed in the session scratchpad, not in git.
+- **Routes:** `/`, `/history`, `/sakkara`, the five `/sakkara/[slug]` items, `/news`, the three `/news/[slug]` articles, `/visit`, and one unknown slug under each of `/sakkara` and `/news`.
+
+### Evidence levels
+
+| Level | What it covers |
+|---|---|
+| **Verified locally** (this step and §12–§14) | Everything in the QA table below |
+| **Owner-reported, Preview** | The owner showed the real homepage on Vercel Preview (after C1.1b) and later reported that the Preview route checks passed. The owner also supplied the Step G desktop and mobile screenshots of the deployed Preview. These results are recorded as reported; they were not reproduced here |
+| **Independently verified, deployed** | **None.** No authorized Preview session was available, so no deployed URL was opened, and Deployment Protection was not tested or bypassed |
+| **Not inspected** | Vercel Deployment Protection settings; Atlas Network Access entries for Vercel, including whether any entry is temporary and when it expires; the `CLIENT_REVIEW_*` values set in Vercel. No evidence about Atlas access expiry was supplied. If an entry is temporary, Preview will show the unavailable state when it lapses. The local host's entry also depends on its current public IP |
+
+### Mobile screenshot anomaly
+
+The owner's full-page mobile capture showed the hero near the bottom and a long blank tail. **It did not reproduce in the browser**, so the section order was not changed.
+
+| Check (390 × 844, mobile emulation) | Result |
+|---|---|
+| DOM order | Review banner → sticky header → `main` (hero, quick information, quick actions, about, featured items, worship, news, gallery, visit, FAQ) → footer. One `header`, one `main`, one hero, one footer |
+| First viewport, no scrolling | Banner, header, then the hero immediately (title, tagline, both buttons) |
+| Normal scrolling, 15 viewport captures | Sections appear in DOM order. The last capture ends on the footer's privacy text |
+| Page height | 11,110 px. The footer bottom equals the document height; nothing renders after the footer (only hidden framework containers, which have zero height) |
+| Full-page capture, DevTools-style (`captureBeyondViewport`) | Hero at the top, footer at the bottom, no blank tail |
+| Full-page capture by resizing the viewport to the page height | Same order. The hero `min-height` stays clamped (540 → 544 px), so a tall capture viewport does not inflate it |
+| Full-page capture without scrolling first | Same 11,110 px height. Lazy images below the fold are empty reserved boxes (no layout shift) |
+| Overflow, fixed and sticky elements | No horizontal overflow. Only the sticky header and the off-screen skip link are positioned |
+
+**Conclusion:** most likely a capture artifact. Scrolling-screenshot tools stitch viewport frames, and a sticky header plus late-loading lazy images can make them mis-align or pad frames. A device screenshot of the deployed Preview (individual viewports, not stitched) would confirm this.
+
+### Fix
+
+- **Visit page title at 390 px:** "การเยี่ยมชมและการเดินทาง" wrapped inside the word เดินทาง ("…การเดิน / ทาง"), because the whole title was one unbreakable phrase that was wider than the screen.
+  - `ThaiPhrases` now also accepts a zero-width space (U+200B) as a phrase boundary, which allows a break with no visible gap.
+  - The `/visit` title marks the break: "การเยี่ยมชม / และการเดินทาง".
+  - At 768 and 1440 px it stays on one line. Every other `ThaiPhrases` text (brand, banner, hero, history title) breaks exactly as before.
+
+### QA results (after the fix)
+
+| Check | Result |
+|---|---|
+| Layout, 45 page loads (15 routes × 3 widths) | No horizontal overflow, 0 broken images, nothing below the footer, no unexplained gaps (largest vertical gap between content blocks: 176 px, section padding at 1440). The 390 px first viewports were reviewed visually |
+| Images and record mapping | Each item and article shows its own record's image. Homepage 13 content images plus the logo; item pages 1 each; articles 2–3 each. Identical across widths |
+| Navigation | The mobile menu opens (`aria-expanded`), lists the 5 pages plus the confirmed Maps link, closes on Escape, and returns focus to the button. The active section is highlighted, with `aria-current="page"` on exact matches |
+| Breadcrumbs | Present on every content page: หน้าแรก › section › page. Unknown slugs show the parent section's not-found page |
+| In-page anchors | Every `#` link on the homepage resolves to an element on the page |
+| Confirmed Maps actions | 5 on `/`, 4 on `/visit`, and 3 on the other pages (header, mobile menu, footer). All exactly `https://maps.app.goo.gl/xTiyZjWJcKTH3sHR7` with `target="_blank" rel="noopener noreferrer"` |
+| Labels | Review banner on every page. Sample and pending labels and unverified notes as in §12–§14 (for example `/visit`: 9 unverified notes; `/sakkara`: 1 sample, 3 pending) |
+| Contact safety | No `tel:` links, no LINE links, no iframe, no raw URLs in page text |
+| Keyboard focus | Visible on the first 6 tab stops of every page. Catalog cards draw the ring on the whole card (`:has(:focus-visible)`), which was confirmed visually |
+| Thai text | Titles wrap between phrases; the one exception is fixed above |
+| Headers | HTML and RSC responses: `X-Robots-Tag: noindex, nofollow`, `Cache-Control: private, no-store, max-age=0`; `meta robots` noindex on every page |
+| Earlier route checks (C2.1 and C2.2 scripts) | Re-run: status, headers, list order, links, dates, article images, and visit rules unchanged |
+| Automated | Lint passes; 100 of 100 tests pass; production build passes |
+
+Publication rules, the read-only connection, review headers, caching, and indexing are unchanged. No database writes or uploads were made, and no infrastructure was changed.
+
+### Known limitations for the client review
+
+- **Sample and placeholder content:**
+  - history body and worship steps;
+  - item details (องค์ปู่ดำ, หลวงปู่ศิลา, shrine gate) and offerings;
+  - the `monks-blessing-ceremony` title, date, and body;
+  - opening days.
+
+  All of these are labeled on the pages (§12, §13).
+- **Unverified contacts:** address, phone, LINE, and social links are text only, labeled "นำเข้าจากระบบเดิม · ยังไม่ยืนยัน". Only the Maps link is confirmed.
+- **Missing media:**
+  - no video file (the video section is omitted);
+  - one image per item (หลวงปู่ศิลา uses the shared altar photo);
+  - no mobile banner crop;
+  - the logo is 192 px only;
+  - testimonials and team members are omitted (consent pending).
+- **Map:** no embedded map. The visit area is a placeholder with the confirmed Google Maps button.
+- **Soft 404:** unknown `/sakkara/[slug]` and `/news/[slug]` pages show the not-found content with `noindex`, but return HTTP 200 (streamed App Shell, §13). This is a release blocker for production, not for the client review.
+
+### Thai checklist for the owner and client
+
+**ข้อมูลที่เจ้าของ/ลูกค้าต้องยืนยันก่อนเผยแพร่**
+
+- [ ] ประวัติศาล: ที่มาของชื่อ "ปู่ดำ 168" ปีที่ก่อตั้ง และเรื่องเล่า (ปัจจุบันเป็นข้อความตัวอย่าง)
+- [ ] ขั้นตอนการสักการะทั้ง 4 ขั้น
+- [ ] รายละเอียดวัตถุมงคล: องค์ปู่ดำ (รายละเอียดและของไหว้), หลวงปู่ศิลา (คำอธิบายย่อและเรื่องที่ขอพร), ซุ้มประตูศาล และข้อความติดต่อสอบถามของเหรียญรุ่นเจริญลาภ เจริญยศ
+- [ ] ข่าว "พระสงฆ์ประพรมน้ำพระพุทธมนต์": ชื่อพิธี วันที่ และรายนามพระสงฆ์
+- [ ] วันเปิดทำการ (เวลา 08:00–20:00 น. ต้องยืนยันด้วย)
+- [ ] ที่อยู่ เบอร์โทรศัพท์ LINE และลิงก์ Facebook / TikTok / YouTube
+- [ ] ภาพ: ภาพแรกของแกลเลอรี, ภาพเฉพาะของหลวงปู่ศิลา, ภาพข่าวพิธีบวงสรวง (เลือกภาพจดหมายข่าว A หรือ B), ภาพแบนเนอร์สำหรับมือถือ และโลโก้ความละเอียดสูง
+- [ ] ไฟล์วิดีโอ (ถ้าต้องการแสดง)
+- [ ] รีวิวและข้อมูลทีมงาน พร้อมความยินยอมของผู้ที่ปรากฏ (ถ้าต้องการแสดง)
+- [ ] ลิงก์ Google Maps ที่ยืนยันแล้ว: ตรวจว่าเปิดถึงศาลถูกต้อง
+
+### Remaining blockers
+
+- **Before sharing a deployed review link:**
+  - someone with Vercel access confirms that Deployment Protection is on for Preview and that an unauthenticated request is refused (§6);
+  - confirm whether Atlas Network Access for Vercel has an expiry.
+- **Before production:**
+  - owner content (checklist above);
+  - the soft-404 status;
+  - a read-only production database user;
+  - production readiness work (not started).
+
+Step H is complete. Production readiness is **not** complete.

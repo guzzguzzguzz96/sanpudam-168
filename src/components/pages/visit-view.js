@@ -24,7 +24,7 @@ export function VisitView({ view }) {
 
   return (
     <>
-      <PageHeader current="เยี่ยมชม" eyebrow="วางแผนการเดินทาง" title="การเยี่ยมชมและการเดินทาง" />
+      <PageHeader current="เยี่ยมชม" eyebrow="วางแผนการเดินทาง" title={"การเยี่ยมชม\u200Bและการเดินทาง"} />
 
       <Section aria-label="ข้อมูลการเยี่ยมชม" className="home-visit content-page__section content-page__section--first">
         <Container className="home-visit__layout">

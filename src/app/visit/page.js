@@ -11,7 +11,7 @@ export const metadata = {
   title: "เยี่ยมชม",
 };
 
-const header = <PageHeader current="เยี่ยมชม" eyebrow="วางแผนการเดินทาง" title="การเยี่ยมชมและการเดินทาง" />;
+const header = <PageHeader current="เยี่ยมชม" eyebrow="วางแผนการเดินทาง" title={"การเยี่ยมชม\u200Bและการเดินทาง"} />;
 
 async function VisitContent() {
   const page = await getVisitPage();
