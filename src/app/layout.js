@@ -9,6 +9,7 @@ import { siteConfig } from "@/config/site";
 import { isClientReviewEnabled } from "@/server/review";
 import "./globals.css";
 import "@/components/home/home.css";
+import "@/components/pages/pages.css";
 import "@/components/review/review.css";
 import "@/components/sacred-items/sacred-items.css";
 

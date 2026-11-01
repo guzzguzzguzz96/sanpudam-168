@@ -82,8 +82,8 @@ export const homepagePreviewData = {
   // Placeholder records in the normalized shape (src/lib/sacred-items.js).
   // No prices, stock, or availability.
   featuredItems: {
-    // Set to "/sakkara" once the catalog route exists.
-    catalogHref: null,
+    // The catalog route exists (C2.1); it lists published items only.
+    catalogHref: "/sakkara",
     items: [
       {
         id: "preview-item-01",

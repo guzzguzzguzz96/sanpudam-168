@@ -1,5 +1,6 @@
 import "server-only";
 import { formatThaiDate, lineUrlFromId } from "../cms/adapters.js";
+import { isValidSlug } from "../cms/policy.js";
 import { getPhoneHref } from "../../lib/contact-actions.js";
 import { normalizeSacredItem } from "../../lib/sacred-items.js";
 import { REVIEW_CONFIRMED_OVERRIDES } from "./overrides.js";
@@ -51,11 +52,12 @@ const FIELD_LABELS = {
 // Same-section image layouts as the approved gallery mosaic.
 const GALLERY_LAYOUTS = ["home-gallery__item--feature", "", "", "", "home-gallery__item--wide"];
 
-// Approved in-page shortcuts; each appears only when its section renders.
+// Approved shortcuts (history and sacred items open their pages since C2.1);
+// each appears only when its section renders.
 const QUICK_ACTIONS = [
-  { id: "history", href: "#about", icon: "book", label: "ประวัติศาล", section: "about" },
+  { id: "history", href: "/history", icon: "book", label: "ประวัติศาล", section: "about" },
   { id: "worship", href: "#worship-guide", icon: "lotus", label: "การสักการะ", section: "worshipGuide" },
-  { id: "sacred-items", href: "#featured-items", icon: "gem", label: "วัตถุมงคล", section: "featuredItems" },
+  { id: "sacred-items", href: "/sakkara", icon: "gem", label: "วัตถุมงคล", section: "featuredItems" },
   { id: "directions", href: "#visit", icon: "route", label: "การเดินทาง", section: "visit" },
 ];
 
@@ -278,12 +280,13 @@ function featuredView(result) {
         summary: text(doc.excerpt),
         category: category ? { id: category.slug, label: category.name } : null,
         image: image(result.media, doc.primaryImage),
-        href: null,
+        // Detail pages exist (C2.1); slugs come from the record.
+        href: isValidSlug(doc.slug) ? `/sakkara/${doc.slug}` : null,
       }),
       reviewStatus: describeReviewStatus(doc, ["name", "excerpt", "primaryImage", "categoryId"]),
     };
   });
-  return { catalogHref: null, items };
+  return { catalogHref: "/sakkara", items };
 }
 
 function newsView(result) {

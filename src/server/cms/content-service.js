@@ -11,6 +11,7 @@ import {
   draftContentFilter,
   draftMediaFilter,
   isPubliclyVisible,
+  isValidSlug,
   publicContentFilter,
   publicMediaFilter,
 } from "./policy.js";
@@ -101,6 +102,16 @@ export function createContentService({ models, connect, sanitize = (error) => er
         const categoryIds = [...new Set(items.map((item) => item.categoryId).filter(Boolean).map(String))];
         const categories = categoryIds.length ? await find(scope, models.Category, { _id: { $in: categoryIds } }, { sort: { sortOrder: 1 } }) : [];
         return { ...(await withMedia(items)), categories: new Map(categories.map((c) => [String(c._id), c])) };
+      }),
+
+      // One sacred item by its slug: a validated string used as a literal
+      // equality match (never an operator or a field name). An invalid slug
+      // returns "empty" without a query.
+      sacredItemBySlug: guarded(scope, none, async (slug) => {
+        if (!isValidSlug(slug)) return { data: null, media: createMediaResolver([], { scope: scope.name }), category: null };
+        const item = await findOne(scope, models.SacredItem, { slug: String(slug) });
+        const category = item?.categoryId ? await findOne(scope, models.Category, { _id: item.categoryId }) : null;
+        return { ...(await withMedia(item)), category };
       }),
 
       news: guarded(scope, list, async ({ limit = 3 } = {}) => withMedia(await find(scope, models.News, {}, { sort: { date: -1, _id: 1 }, limit }))),

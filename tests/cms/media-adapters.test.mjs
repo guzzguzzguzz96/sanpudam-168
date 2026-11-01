@@ -89,7 +89,7 @@ test("adapters: published content maps to the expected values", async () => {
   assert.equal(data.featuredItems.items[1].category, null);
   assert.equal(data.featuredItems.items[1].image, null);
   assert.equal(data.featuredItems.items[0].href, null, "no link until the detail route exists");
-  assert.equal(data.featuredItems.catalogHref, null);
+  assert.equal(data.featuredItems.catalogHref, "/sakkara", "the catalog route exists (C2.1)");
   // News: Thai date, no link yet.
   assert.equal(data.news[0].publicationDate, "29 ตุลาคม 2569");
   assert.equal(data.news[0].href, null);

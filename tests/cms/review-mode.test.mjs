@@ -399,7 +399,8 @@ test("dto: hero, ordering, limits, and coverage", async () => {
   assert.equal(view.banner.description, "แท็กไลน์ที่นำเข้า");
   assert.deepEqual(view.featuredItems.items.map((i) => i.name), ["องค์ปู่ดำ 168", "ตราแผ่นดินสยาม", "หลวงปู่ศิลา"]);
   assert.equal(view.featuredItems.items[0].category.label, "สถานที่ศักดิ์สิทธิ์");
-  assert.equal(view.featuredItems.items[0].href, null, "no detail routes in this step");
+  assert.equal(view.featuredItems.items[0].href, "/sakkara/pu-dam-168", "cards link to their detail page (C2.1)");
+  assert.equal(view.featuredItems.catalogHref, "/sakkara");
   assert.equal(view.gallery.length, 5);
   assert.equal(view.gallery[0].layout, "home-gallery__item--feature");
   assert.deepEqual(view.faq.map((f) => f.question), ["อยู่ที่ไหน"], "showOnHome is respected");
@@ -413,7 +414,7 @@ test("dto: hero, ordering, limits, and coverage", async () => {
     faqs: { available: 2, rendered: 1 },
     worshipSteps: { available: 2, rendered: 2 },
   });
-  assert.deepEqual(view.quickActions.map((a) => a.href), ["#about", "#worship-guide", "#featured-items", CONFIRMED_MAPS]);
+  assert.deepEqual(view.quickActions.map((a) => a.href), ["/history", "#worship-guide", "/sakkara", CONFIRMED_MAPS]);
   assert.equal(view.quickActions.at(-1).external, true);
 });
 

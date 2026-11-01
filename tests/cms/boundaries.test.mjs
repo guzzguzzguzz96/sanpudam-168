@@ -36,29 +36,59 @@ test("boundary: Client Components never import database or server modules", () =
 // Client Review Mode (C1.1) is the only data path wired into routes: the
 // root page/layout and the private src/app/_review folder may import the
 // review entry point (@/server/review) and nothing else on the server.
-const REVIEW_WIRING = new Set(["src/app/page.js", "src/app/layout.js", "src/app/_review/review-homepage.js", "src/app/_review/review-chrome.js"]);
+// The content pages (C2.1) may import only the site entry point
+// (@/server/site), which picks the review or public scope itself.
+const SERVER_WIRING = new Map([
+  ["src/app/page.js", "@/server/review"],
+  ["src/app/layout.js", "@/server/review"],
+  ["src/app/_review/review-homepage.js", "@/server/review"],
+  ["src/app/_review/review-chrome.js", "@/server/review"],
+  ["src/app/history/page.js", "@/server/site"],
+  ["src/app/sakkara/page.js", "@/server/site"],
+  ["src/app/sakkara/[slug]/page.js", "@/server/site"],
+]);
 
-test("boundary: UI components never use the data layer; routes use only the review entry point", () => {
+test("boundary: UI components never use the data layer; routes use only their entry point", () => {
   const uiFiles = sourceFiles.filter((file) => /src[\\/](app|components|data)[\\/]/.test(file));
   for (const file of uiFiles) {
     const text = read(file);
-    if (!REVIEW_WIRING.has(rel(file))) {
+    if (!SERVER_WIRING.has(rel(file))) {
       assert.doesNotMatch(text, SERVER_IMPORT, rel(file));
       continue;
     }
     const serverImports = [...text.matchAll(/from\s+["']([^"']+)["']/g)].map((m) => m[1]).filter((s) => SERVER_IMPORT.test(`from "${s}"`));
-    for (const specifier of serverImports) assert.equal(specifier, "@/server/review", `${rel(file)} imports ${specifier}`);
+    for (const specifier of serverImports) assert.equal(specifier, SERVER_WIRING.get(rel(file)), `${rel(file)} imports ${specifier}`);
   }
 });
 
 test("boundary: review mode is decided from the environment only, never from request data", () => {
-  const reviewFiles = [...walk(join(root, "src/server/review"), /\.js$/), join(root, "src/lib/review-mode.js"), join(root, "src/server/cms/review-access.js"), ...walk(join(root, "src/app/_review"), /\.js$/)];
+  const reviewFiles = [
+    ...walk(join(root, "src/server/review"), /\.js$/),
+    ...walk(join(root, "src/server/site"), /\.js$/),
+    join(root, "src/lib/review-mode.js"),
+    join(root, "src/server/cms/review-access.js"),
+    ...walk(join(root, "src/app/_review"), /\.js$/),
+  ];
   for (const file of reviewFiles) {
     const text = read(file);
     assert.doesNotMatch(text, /next\/headers|cookies\(|headers\(\)|searchParams|draftMode|NEXT_PUBLIC_/, rel(file));
   }
-  const page = read(join(root, "src/app/page.js"));
-  assert.doesNotMatch(page, /searchParams|cookies|headers/);
+  for (const route of ["src/app/page.js", "src/app/history/page.js", "src/app/sakkara/page.js", "src/app/sakkara/[slug]/page.js"]) {
+    assert.doesNotMatch(read(join(root, route)), /searchParams|cookies|headers|draftMode/, route);
+  }
+});
+
+test("boundary: content routes are never prerendered from CMS data", () => {
+  for (const route of ["src/app/history/page.js", "src/app/sakkara/page.js", "src/app/sakkara/[slug]/page.js"]) {
+    const text = read(join(root, route));
+    assert.doesNotMatch(text, /generateStaticParams|generateMetadata|"use cache"/, route);
+    assert.match(text, /<Suspense/, `${route} reads data inside Suspense`);
+  }
+  const entry = read(join(root, "src/server/site/index.js"));
+  for (const loader of ["getHistoryPage", "getSacredItemsPage", "getSacredItemPage"]) {
+    assert.match(entry, new RegExp(`export async function ${loader}\\([^)]*\\) \\{\\s*await connection\\(\\);`), `${loader} waits for the request`);
+  }
+  for (const file of sourceFiles) assert.doesNotMatch(read(file), /dangerouslySetInnerHTML/, rel(file));
 });
 
 test("boundary: review credentials are read only by the review config, with no fallback", () => {

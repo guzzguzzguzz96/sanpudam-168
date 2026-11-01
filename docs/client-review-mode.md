@@ -123,12 +123,10 @@ Missing source content: an owner-confirmed Google Maps link, a high-resolution l
 
 ## 8. Broken links (for C2)
 
-The homepage links to routes that do not exist yet (they return 404):
+`/history`, `/sakkara`, and `/sakkara/[slug]` exist since C2.1 (§12). These links still lead to routes that do not exist yet (they return 404) and are pending C2.2:
 
-- `/history`: navigation, footer, and the "อ่านประวัติเพิ่มเติม" button
-- `/sakkara`: navigation and footer
 - `/news`: navigation, footer, and "ดูข่าวสารทั้งหมด"
-- `/visit`: navigation, footer, and the worship-guide "ข้อมูลการเยี่ยมชม" button
+- `/visit`: navigation, footer, and the worship-guide "ข้อมูลการเยี่ยมชม" button (on the homepage and on `/history`)
 
 Newly found in migrated data:
 
@@ -241,3 +239,90 @@ How the directions link works:
 - **Scope:** only the directions link is confirmed. Address, phone, LINE, and social links stay labeled "imported, unverified" and are not clickable.
 - **Imported links:** a valid imported link (none exists today) would show only in Visit, labeled unverified, and never in the header, footer, or quick actions.
 - **Verified on 2026-11-01:** the short link redirects (302) to `www.google.com/maps/place/…`. In a local review build all 5 anchors carry the exact URL with the external-link attributes, and there is no layout overflow at 390, 768, or 1440 px. The public build contains no copy of the link.
+
+## 12. Content pages: /history, /sakkara, /sakkara/[slug] (C2.1, 2026-11-01)
+
+### Routes and data
+
+| Route | Source | Loader |
+|---|---|---|
+| `/history` | `pages` (`key=history`): `title`, `intro`, `historyImage`, `historyBody`, `quote`, `coatOfArms` (heading, body, image, parts), `wishTopics`, `worshipSteps` | `getHistoryPage()` |
+| `/sakkara` | `sacred_items` (sorted `sortOrder`, `_id`) + `categories` | `getSacredItemsPage()` |
+| `/sakkara/[slug]` | one `sacred_items` record by `slug` + its category: name, category, `primaryImage`, `excerpt`, `body`, `prayerTopics`, `offerings`, variant names | `getSacredItemPage(slug)` |
+
+- **Code:** `src/server/site/` (entry `index.js`, scope selection `service.js`, view data `pages.js`) and `src/components/pages/`. Route files import only `@/server/site` (boundary test).
+- **Scope:** chosen by the environment-based review policy only:
+  - review on: the dedicated read-only review repositories (§3); if they cannot be opened, the page is "unavailable" and never falls back to public or sample data;
+  - review off: the existing public repositories (published + approved + no open placeholders).
+- **Slug lookup:** the slug must match `^[a-z0-9]+(?:-[a-z0-9]+)*$` (at most 100 characters) before any query. It is then used only as a literal string equality on `slug`; invalid values return not found without a query.
+- **Page states:**
+  - "ok": page content;
+  - "empty": list only, honest empty state "ยังไม่มีรายการวัตถุมงคลที่เผยแพร่";
+  - "not_found": `notFound()`;
+  - "unavailable": "ยังโหลดเนื้อหาไม่ได้ในขณะนี้" (a database failure is not shown as 404).
+- **Text:** `legacy-text-v1` is parsed on the server into paragraphs and bold segments and rendered as React text. No CMS HTML exists, and none is injected (no `dangerouslySetInnerHTML` anywhere; boundary test).
+- **Not shown:** `inquiryText` (the legacy price note, "สอบถามราคาและสั่งจองทางไลน์") and variant quantities (`showVariantQuantities=false`). There is no price, stock, ordering, or contact action. The coin's body text mentions ordering via LINE as plain text, without a link.
+- **Labels:** sample labels appear next to the affected block or field (history body, worship steps, item excerpt/body/offerings). List cards also show "pending details", like the homepage cards.
+
+### Caching, metadata, indexing
+
+- **Request-time data:** every loader awaits `connection()` inside `<Suspense>`. There is no `"use cache"` and no static params list; `/sakkara/[slug]` has no prerendered pages.
+- **Build output:** a scan of the review, public, and simulated-production builds found no titles, body text, slugs, variant names, or Cloudinary URLs in `.next/server/app` or `.next/static`.
+- **Metadata:** generic titles only ("ประวัติ", "วัตถุมงคล"), with no CMS content in `<head>`, Open Graph, or structured data. No sitemap, robots file, feed, or API route exists.
+- **Review headers:** `X-Robots-Tag: noindex, nofollow` and `Cache-Control: private, no-store, max-age=0` on HTML and RSC responses of every route, including the not-found UI (via `next.config.mjs`).
+- **Not-found status:** `notFound()` runs after streaming starts (runtime params inside Suspense). Next.js therefore renders the not-found UI with HTTP 200 and injects `noindex`. Unmatched routes such as `/news` return a real 404.
+
+### Navigation
+
+- **Review homepage:**
+  - featured cards link to `/sakkara/<slug>`;
+  - "ดูวัตถุมงคลทั้งหมด" goes to `/sakkara`;
+  - the "ประวัติศาล" and "วัตถุมงคล" quick actions go to `/history` and `/sakkara`;
+  - "อ่านประวัติเพิ่มเติม" goes to `/history`.
+- **Public homepage:** "ดูวัตถุมงคลทั้งหมด" goes to `/sakkara` (which lists published items only); its placeholder cards stay unlinked.
+- **Elsewhere:** the header, mobile menu, and footer already linked `/history` and `/sakkara`. Every content page has a breadcrumb, and each detail page links back to the collection.
+
+### Verification (local, live staging, read-only account only)
+
+**Review build** (`CLIENT_REVIEW_LOCAL=true`):
+
+| Check | Result |
+|---|---|
+| `/history` | Real title, 3 body paragraphs including the bold sample notice, quote, coat of arms with 8 parts, 4 wish topics, 4 worship steps. Sample labels on the body and worship steps. 2 Cloudinary images |
+| `/sakkara` | All 5 items in `sortOrder` (องค์ปู่ดำ 168, ตราแผ่นดินสยาม, รูปเหมือนหลวงปู่ศิลา สิริจันโท, เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ, ซุ้มประตูศาลปู่ดำ ตราแผ่นดิน). Categories: สถานที่ศักดิ์สิทธิ์ ×3, สายมู ×1, จุดเช็กอิน ×1. Every card links to its slug |
+| Detail pages | `pu-dam-168`, `tra-phaendin-siam`, `luang-pu-sila`, `coin-charoenlap-charoenyot`, and `shrine-gate` each resolve with the matching title, category, and image (statue, coat of arms, interior altar, coin poster, front entrance) |
+| Unknown slugs | `not-a-real-item`, `PU-DAM-168`, and `%24ne` render "ไม่พบรายการนี้" |
+| Homepage | Card, catalog, and history links work; all 5 Maps links are intact |
+
+**Public build** (review off; public path pointed at the same read-only account by a scratch preload, never the admin URI):
+
+| Check | Result |
+|---|---|
+| `/sakkara` | Empty state |
+| `/history` | Site not-found |
+| All 5 detail slugs | "ไม่พบรายการนี้" |
+| Draft content | No draft title, slug, or image in any HTML or RSC payload |
+| No database configured | All three routes show the unavailable state |
+
+**Simulated Vercel production** (all review flags set): `/` static; no review headers or image hosts.
+
+**Automated:** lint passes; 92 of 92 tests pass. They cover slug validation and literal lookup, operator and invalid slugs (no query runs), review ordering, categories, labels, missing media and excerpts, public isolation (drafts and placeholder records hidden), unavailable vs. not found, no public fallback when review is down, `legacy-text-v1` parsing (markup stays literal), DTO safety, and boundaries (route imports, no static params, metadata, cache, or HTML injection).
+
+**Visual QA:** headless Chrome via CDP at 390, 768, and 1440 px on `/history`, `/sakkara`, and three detail pages. No horizontal overflow, no broken images, visible focus on breadcrumb links, Thai text wraps inside cards and prose.
+
+Two fixes came from that QA:
+
+- Page titles now wrap at phrase boundaries (`ThaiPhrases`; previously "เจริญ/ลาภ" split at 390 px).
+- Review badges fit their text instead of stretching across grid and flex columns. This also affects the homepage cards.
+
+### Content gaps (owner)
+
+- `historyBody` and `worshipSteps` are placeholders: the real history (origin of the name "ปู่ดำ 168", the founding year, the stories) and confirmed worship steps.
+- Item details: placeholder bodies for องค์ปู่ดำ, หลวงปู่ศิลา, and the shrine gate; offerings for องค์ปู่ดำ; the excerpt and prayer topics for หลวงปู่ศิลา; the coin's `inquiryText`.
+- Each item has one image only; there is no item gallery field. หลวงปู่ศิลา uses the shared interior-altar photo.
+
+### Remaining
+
+- **C2.2:** `/news`, `/news/[slug]`, and `/visit`.
+- **Preview:** Vercel Preview connectivity and Deployment Protection are still **NOT VERIFIED**.
+- **Production:** public mode needs a read-only production database user before any public page reads MongoDB in production.

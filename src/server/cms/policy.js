@@ -16,6 +16,13 @@ export const DRAFT_SCOPE = "draft";
 // but opened by the review policy and degraded to "unavailable" on errors.
 export const REVIEW_SCOPE = "review";
 
+// Route slugs (models/shared.js SLUG_PATTERN, plus a length cap). A value
+// that fails this check is never sent to the database.
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export function isValidSlug(value) {
+  return typeof value === "string" && value.length <= 100 && SLUG_PATTERN.test(value);
+}
+
 export function publicContentFilter(extra = {}) {
   return {
     ...extra,
