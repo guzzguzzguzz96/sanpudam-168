@@ -12,6 +12,7 @@ import "@/components/home/home.css";
 import "@/components/pages/pages.css";
 import "@/components/review/review.css";
 import "@/components/sacred-items/sacred-items.css";
+import "@/components/admin/admin.css";
 
 const bodyFont = Noto_Sans_Thai_Looped({
   variable: "--font-noto-sans-thai-looped",

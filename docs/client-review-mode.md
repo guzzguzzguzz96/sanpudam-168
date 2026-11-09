@@ -663,6 +663,8 @@ These are the only checks still open. Nothing here needs a code change.
 
 ### Next development step: Google Sign-In (Auth.js), then Admin CMS
 
+> **Update 2026-11-09:** implemented. See `docs/admin-authentication.md`. The allowlist variable is `ADMIN_ALLOWED_ACCOUNTS` (`email:role` pairs). The outline below is kept as the original plan. Client Review access is unchanged and still needs no login.
+
 **Starting point (already built, tested, not wired to any route):**
 
 | Piece | File | Role after Auth.js |

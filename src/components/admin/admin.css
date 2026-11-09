@@ -1,0 +1,71 @@
+/* Admin sign-in pages: one centred card on the warm ivory page. */
+
+.admin-section {
+  padding-block: var(--space-8) var(--space-16);
+}
+
+.admin-panel {
+  max-width: 36rem;
+  padding: var(--space-6);
+  border: 1px solid var(--soft-border);
+  border-top: 4px solid var(--royal-gold);
+  border-radius: var(--card-radius);
+  background: var(--white);
+}
+
+.admin-panel--notice {
+  border-top-color: var(--deep-gold);
+}
+
+.admin-panel__title {
+  margin: 0;
+  color: var(--deep-navy);
+  font-size: var(--type-h3);
+  line-height: var(--leading-h3);
+}
+
+.admin-panel__text {
+  margin: var(--space-3) 0 0;
+  color: var(--muted-text);
+}
+
+.admin-panel__alert {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--deep-gold);
+  border-radius: var(--control-radius);
+  background: var(--warm-ivory);
+  color: var(--deep-navy);
+}
+
+.admin-panel__facts {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+}
+
+.admin-panel__facts dt {
+  color: var(--muted-text);
+  font-size: var(--type-small);
+  line-height: var(--leading-small);
+}
+
+.admin-panel__facts dd {
+  margin: 0;
+  color: var(--deep-navy);
+  font-weight: var(--weight-semibold);
+}
+
+.admin-panel__email {
+  overflow-wrap: anywhere;
+}
+
+.admin-panel__action {
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 48rem) {
+  .admin-panel {
+    padding: var(--space-8);
+  }
+}

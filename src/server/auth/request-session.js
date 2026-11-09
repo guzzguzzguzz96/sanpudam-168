@@ -1,7 +1,6 @@
 import "server-only";
-import { cookies } from "next/headers";
 import { DraftAccessDeniedError } from "../cms/draft-access.js";
-import { SESSION_COOKIE_NAME } from "./config.js";
+import { getAdminAccess } from "./admin-access.js";
 import { previewAccessPolicy } from "./preview-access.js";
 
 // Next.js request binding for preview authorization. Call it at the top of
@@ -10,20 +9,16 @@ import { previewAccessPolicy } from "./preview-access.js";
 //   const grant = await getPreviewGrant();
 //   if (!grant) notFound();   // no hint that a preview exists
 //
-// Reading cookies makes the route dynamic, so preview output is never
+// The Auth.js session is read per request, so preview output is never
 // prerendered or shared with other visitors. Not used by any route yet.
 
-export async function getPreviewGrant({ readCookie = defaultReadCookie, policy = previewAccessPolicy } = {}) {
-  const sessionToken = await readCookie(SESSION_COOKIE_NAME);
-  if (!sessionToken) return null;
+export async function getPreviewGrant({ getAccess = getAdminAccess, policy = previewAccessPolicy } = {}) {
+  const access = await getAccess();
+  if (access?.status !== "ok") return null;
   try {
-    return await policy.requestGrant({ sessionToken });
+    return await policy.requestGrant({ principal: access.principal });
   } catch (error) {
     if (error instanceof DraftAccessDeniedError) return null;
     throw error;
   }
-}
-
-async function defaultReadCookie(name) {
-  return (await cookies()).get(name)?.value ?? null;
 }

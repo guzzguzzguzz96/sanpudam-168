@@ -6,6 +6,14 @@ import { evaluateReviewMode, reviewResponseHeaders } from "./src/lib/review-mode
 // the configuration.
 const reviewMode = evaluateReviewMode(process.env);
 
+// Admin sign-in pages and Auth.js endpoints are private in every
+// environment: never indexed, never stored by shared caches.
+const privateHeaders = [
+  { key: "X-Robots-Tag", value: "noindex, nofollow" },
+  { key: "Cache-Control", value: "private, no-store, max-age=0" },
+];
+const adminResponseHeaders = ["/admin", "/admin/:path*", "/api/auth/:path*"].map((source) => ({ source, headers: privateHeaders }));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   /* config options here */
@@ -26,7 +34,7 @@ const nextConfig = {
       }
     : {}),
   async headers() {
-    return reviewResponseHeaders(reviewMode);
+    return [...reviewResponseHeaders(reviewMode), ...adminResponseHeaders];
   },
   turbopack: {
     rules: {

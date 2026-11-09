@@ -38,18 +38,25 @@ test("boundary: Client Components never import database or server modules", () =
 // review entry point (@/server/review) and nothing else on the server.
 // The content pages (C2.1) may import only the site entry point
 // (@/server/site), which picks the review or public scope itself.
+// The admin sign-in routes may import only admin authentication modules.
+const ADMIN_PAGE_WIRING = ["@/server/auth/admin-access", "@/server/auth/identity"];
 const SERVER_WIRING = new Map([
-  ["src/app/page.js", "@/server/review"],
-  ["src/app/layout.js", "@/server/review"],
-  ["src/app/_review/review-homepage.js", "@/server/review"],
-  ["src/app/_review/review-chrome.js", "@/server/review"],
-  ["src/app/history/page.js", "@/server/site"],
-  ["src/app/sakkara/page.js", "@/server/site"],
-  ["src/app/sakkara/[slug]/page.js", "@/server/site"],
-  ["src/app/news/page.js", "@/server/site"],
-  ["src/app/news/[slug]/page.js", "@/server/site"],
-  ["src/app/visit/page.js", "@/server/site"],
+  ["src/app/page.js", ["@/server/review"]],
+  ["src/app/layout.js", ["@/server/review"]],
+  ["src/app/_review/review-homepage.js", ["@/server/review"]],
+  ["src/app/_review/review-chrome.js", ["@/server/review"]],
+  ["src/app/history/page.js", ["@/server/site"]],
+  ["src/app/sakkara/page.js", ["@/server/site"]],
+  ["src/app/sakkara/[slug]/page.js", ["@/server/site"]],
+  ["src/app/news/page.js", ["@/server/site"]],
+  ["src/app/news/[slug]/page.js", ["@/server/site"]],
+  ["src/app/visit/page.js", ["@/server/site"]],
+  ["src/app/admin/page.js", ADMIN_PAGE_WIRING],
+  ["src/app/admin/login/page.js", ADMIN_PAGE_WIRING],
+  ["src/app/admin/actions.js", ["@/server/auth/auth", "@/server/auth/config", "@/server/auth/identity"]],
+  ["src/app/api/auth/[...nextauth]/route.js", ["@/server/auth/auth", "@/server/auth/config"]],
 ]);
+const ADMIN_ROUTES = ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/actions.js", "src/app/api/auth/[...nextauth]/route.js"];
 const CONTENT_ROUTES = ["src/app/history/page.js", "src/app/sakkara/page.js", "src/app/sakkara/[slug]/page.js", "src/app/news/page.js", "src/app/news/[slug]/page.js", "src/app/visit/page.js"];
 
 test("boundary: UI components never use the data layer; routes use only their entry point", () => {
@@ -61,7 +68,7 @@ test("boundary: UI components never use the data layer; routes use only their en
       continue;
     }
     const serverImports = [...text.matchAll(/from\s+["']([^"']+)["']/g)].map((m) => m[1]).filter((s) => SERVER_IMPORT.test(`from "${s}"`));
-    for (const specifier of serverImports) assert.equal(specifier, SERVER_WIRING.get(rel(file)), `${rel(file)} imports ${specifier}`);
+    for (const specifier of serverImports) assert.ok(SERVER_WIRING.get(rel(file)).includes(specifier), `${rel(file)} imports ${specifier}`);
   }
 });
 
@@ -119,23 +126,62 @@ test("boundary: database secrets are read only in the server data layer", () => 
   assert.doesNotMatch(example, /NEXT_PUBLIC_[A-Z_]*(MONGO|SECRET|API_KEY|PASSWORD)/);
 });
 
-test("boundary: session secrets and the preview allowlist are read only by the auth module", () => {
+test("boundary: auth secrets, OAuth credentials, and the admin allowlist are read only by the auth config", () => {
   for (const file of sourceFiles) {
-    if (/env(\.|\[["'])(AUTH_SECRET|CMS_PREVIEW_ALLOWED_SUBJECTS)/.test(read(file))) assert.equal(rel(file), "src/server/auth/config.js");
+    if (/env(\.|\[["'])(AUTH_|ADMIN_ALLOWED_ACCOUNTS)/.test(read(file))) assert.equal(rel(file), "src/server/auth/config.js");
   }
 });
 
-test("boundary: no preview, CMS, or auth route is active", () => {
+// Admin sign-in (Auth.js) is the only authenticated area. There is still no
+// draft preview or CMS route, and no proxy/middleware: client review pages
+// never depend on a login.
+test("boundary: only the admin sign-in routes exist; no preview or CMS route, no proxy", () => {
   const routeFiles = walk(join(root, "src/app"), /\.(js|jsx)$/).map(rel);
-  for (const file of routeFiles) assert.doesNotMatch(file, /(preview|cms|admin|auth|login|api)/i, file);
+  for (const file of routeFiles) {
+    if (ADMIN_ROUTES.includes(file)) continue;
+    assert.doesNotMatch(file, /(preview|cms|admin|auth|login|api)/i, file);
+  }
+  for (const file of ADMIN_ROUTES) assert.ok(existsSync(join(root, file)), file);
   assert.ok(!existsSync(join(root, "src/proxy.js")) && !existsSync(join(root, "src/middleware.js")));
+});
+
+// Authentication and Client Review access stay separate in both directions.
+test("boundary: admin authentication never uses Client Review modules, flags, or other cookies", () => {
+  const authFiles = [...walk(join(root, "src/server/auth"), /\.js$/), ...ADMIN_ROUTES.map((file) => join(root, file)), join(root, "src/components/admin/admin-panel.js")];
+  for (const file of authFiles) {
+    const text = read(file);
+    assert.doesNotMatch(text, /server\/review|lib\/review-mode|cms\/review-access|CLIENT_REVIEW|isClientReviewEnabled|VERCEL/, rel(file));
+    assert.doesNotMatch(text, /cookies\(|__Host-sanpudam-cms-session|_vercel_jwt/, rel(file));
+  }
+  const reviewFiles = [...walk(join(root, "src/server/review"), /\.js$/), ...walk(join(root, "src/server/site"), /\.js$/), join(root, "src/lib/review-mode.js")];
+  for (const file of reviewFiles) assert.doesNotMatch(read(file), /server\/auth|next-auth|ADMIN_ALLOWED_ACCOUNTS/, rel(file));
+  for (const file of sourceFiles) {
+    assert.doesNotMatch(read(file), /__Host-sanpudam-cms-session|signSessionToken|CMS_PREVIEW_ALLOWED_SUBJECTS/, `${rel(file)} keeps the retired session path`);
+  }
+});
+
+test("boundary: admin routes check access on the server and stay private", () => {
+  for (const page of ["src/app/admin/page.js", "src/app/admin/login/page.js"]) {
+    const text = read(join(root, page));
+    assert.match(text, /getAdminAccess\(\)/, page);
+    assert.match(text, /<Suspense/, page);
+    assert.doesNotMatch(text, /"use client"|"use cache"|generateStaticParams/, page);
+  }
+  assert.match(read(join(root, "src/app/api/auth/[...nextauth]/route.js")), /await connection\(\);/);
+  // Admin decisions are never prerendered, even when sign-in is not configured.
+  const adminAccess = read(join(root, "src/server/auth/admin-access.js"));
+  assert.match(adminAccess, /export async function getAdminAccess\([^)]*\) \{\s*await waitForRequest\(\);/);
+  assert.match(adminAccess, /waitForRequest = connection\b/);
+  const config = read(join(root, "next.config.mjs"));
+  for (const source of ['"/admin"', '"/admin/:path*"', '"/api/auth/:path*"']) assert.ok(config.includes(source), source);
+  assert.match(config, /private, no-store, max-age=0/);
 });
 
 // Runs after `npm run build`; skipped when no build output exists.
 test("boundary: browser bundles contain no database code or secret names", { skip: !existsSync(join(root, ".next/static")) }, () => {
   for (const file of walk(join(root, ".next/static"), /\.(js|css|json)$/)) {
     const text = read(file);
-    for (const marker of ["MONGODB_URI", "MONGODB_DB_NAME", "CLOUDINARY_API_SECRET", "AUTH_SECRET", "CMS_PREVIEW_ALLOWED_SUBJECTS", "__Host-sanpudam-cms-session", "mongodb+srv", "sanpudam168_staging", "CLIENT_REVIEW_", "sanpudam168/staging", "res.cloudinary.com"]) {
+    for (const marker of ["MONGODB_URI", "MONGODB_DB_NAME", "CLOUDINARY_API_SECRET", "AUTH_SECRET", "AUTH_GOOGLE_SECRET", "ADMIN_ALLOWED_ACCOUNTS", "mongodb+srv", "sanpudam168_staging", "CLIENT_REVIEW_", "sanpudam168/staging", "res.cloudinary.com"]) {
       assert.ok(!text.includes(marker), `${marker} found in ${rel(file)}`);
     }
   }
@@ -152,6 +198,10 @@ test("boundary: prerendered output contains no migrated draft content", { skip: 
 
 test("boundary: no sitemap, robots, feed, or public API route advertises review content", () => {
   const appFiles = walk(join(root, "src/app"), /\.(js|jsx|xml|txt)$/).map(rel);
-  for (const file of appFiles) assert.doesNotMatch(file, /(sitemap|robots|feed|rss|route\.js)/i, file);
+  // The Auth.js handler is the only route handler.
+  for (const file of appFiles) {
+    if (file === "src/app/api/auth/[...nextauth]/route.js") continue;
+    assert.doesNotMatch(file, /(sitemap|robots|feed|rss|route\.js)/i, file);
+  }
   assert.match(read(join(root, "src/app/layout.js")), /robots:\s*{\s*index:\s*false,\s*follow:\s*false/);
 });
