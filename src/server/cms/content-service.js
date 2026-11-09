@@ -100,8 +100,12 @@ export function createContentService({ models, connect, sanitize = (error) => er
       sacredItems: guarded(scope, list, async ({ limit = 12 } = {}) => {
         const items = await find(scope, models.SacredItem, {}, { sort: { sortOrder: 1, _id: 1 }, limit });
         const categoryIds = [...new Set(items.map((item) => item.categoryId).filter(Boolean).map(String))];
-        const categories = categoryIds.length ? await find(scope, models.Category, { _id: { $in: categoryIds } }, { sort: { sortOrder: 1 } }) : [];
-        return { ...(await withMedia(items)), categories: new Map(categories.map((c) => [String(c._id), c])) };
+        // Categories and media depend only on the items: read them together.
+        const [categories, withItemMedia] = await Promise.all([
+          categoryIds.length ? find(scope, models.Category, { _id: { $in: categoryIds } }, { sort: { sortOrder: 1 } }) : [],
+          withMedia(items),
+        ]);
+        return { ...withItemMedia, categories: new Map(categories.map((c) => [String(c._id), c])) };
       }),
 
       // One sacred item by its slug: a validated string used as a literal
@@ -110,8 +114,8 @@ export function createContentService({ models, connect, sanitize = (error) => er
       sacredItemBySlug: guarded(scope, none, async (slug) => {
         if (!isValidSlug(slug)) return { data: null, media: createMediaResolver([], { scope: scope.name }), category: null };
         const item = await findOne(scope, models.SacredItem, { slug: String(slug) });
-        const category = item?.categoryId ? await findOne(scope, models.Category, { _id: item.categoryId }) : null;
-        return { ...(await withMedia(item)), category };
+        const [category, withItemMedia] = await Promise.all([item?.categoryId ? findOne(scope, models.Category, { _id: item.categoryId }) : null, withMedia(item)]);
+        return { ...withItemMedia, category };
       }),
 
       // One news article by its slug; same literal-match rule as above.

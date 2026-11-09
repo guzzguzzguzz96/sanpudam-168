@@ -340,6 +340,7 @@ function faqView(result) {
 // Loads every section through review repositories (service.withReviewAccess).
 export async function loadReviewHomepageContent(repositories) {
   const [siteSettings, banners, sacredItems, news, gallery, faqs, historyPage] = await Promise.all([
+    // Shared with the header and footer within one request (index.js).
     repositories.siteSettings(),
     repositories.banners({ limit: REVIEW_QUERY_LIMITS.banners }),
     repositories.sacredItems({ limit: REVIEW_QUERY_LIMITS.sacredItems }),
@@ -349,6 +350,19 @@ export async function loadReviewHomepageContent(repositories) {
     repositories.historyPage(),
   ]);
   return { siteSettings, banners, sacredItems, news, gallery, faqs, historyPage };
+}
+
+// Header and footer data from the site settings alone (brand, compact
+// contact summary, confirmed directions). Used on every review page, so it
+// never loads the homepage sections. Same view rules as the homepage.
+export function buildReviewChrome(siteSettings, { overrides = REVIEW_CONFIRMED_OVERRIDES } = {}) {
+  if (!siteSettings || siteSettings.status === "unavailable") return { status: "unavailable" };
+  return {
+    status: "ok",
+    brand: brandView(siteSettings),
+    footer: visitorViews(siteSettings, overrides).footer,
+    confirmedDirectionsHref: reviewMapsUrl(overrides?.directionsUrl),
+  };
 }
 
 // content: result of loadReviewHomepageContent(). overrides: owner-confirmed

@@ -709,3 +709,62 @@ Client Review Mode stays separate: it is environment-gated and grants only the r
    - no auth variables in `.next/static`.
 
 No CMS pages, draft routes, or database writes are part of that step. The `/cms/preview` routes and the Admin CMS follow after approval.
+
+## 17. Review page loading: measurements and changes (2026-11-09)
+
+**Test conditions:**
+- Local Windows host.
+- `next build` + `next start` with `CLIENT_REVIEW_LOCAL=true` against live `sanpudam168_staging` through the read-only review account.
+- Sequential requests; the median of 3 repeats after a first request.
+- A preload counted MongoDB operations and connection setup (counts and durations only; no documents, filters, or URIs).
+- Client navigations clicked header links in headless Chrome.
+- Development-server compilation is excluded.
+- **Not measured:** deployed Preview. There was no authorized session.
+
+### Findings (before, at `d59ce47`)
+
+- **Connection:** already shared per process. One connection (about 420–480 ms to open) and one read-only role check at the first request; none afterwards.
+- **Duplicate work:** the review header and footer loaded the **whole homepage dataset** on every page (14 queries), only to show the logo and contact summary. Content pages ran 16–17 queries, of which 1–3 belonged to the page.
+- **Pool contention:** those queries competed for a pool of 5 sockets.
+- **Full reloads:** the homepage quick actions to `/history` and `/sakkara` were plain `<a>` elements, so they reloaded the whole document. All other internal links already used client-side navigation.
+- **Client navigation floor:** client navigations fetch only the page segment (2–3 queries for content pages). Content appears about 320–345 ms after the click even when the server response is complete in about 85 ms. React reveals a Suspense boundary no sooner than 300 ms after its fallback appears (an anti-flicker throttle in React DOM). Locally, that floor, not the database, is what the user feels.
+
+### Changes
+
+- **Header and footer:** read only the site settings and their media (`getReviewChrome`, `buildReviewChrome`), with the same view rules as the homepage.
+- **Request-scoped sharing:** one repository opening and one site-settings read per request (`getReviewRepositories` with React `cache()` and `shareSiteSettings`), shared by the header, footer, homepage, and `/visit`. Every request still reads the database; nothing is cached across requests.
+- **Parallel reads:** sacred-item categories and media are read in parallel (one round trip less on `/` and `/sakkara`).
+- **Connection binding:** the per-process review connection is bound to its configuration (a SHA-256 key). A different URI, database, or DNS setting closes it and reconnects, which runs the database-name and `read`-role checks again.
+- **Quick actions:** internal quick actions use `next/link`.
+
+### Results (same conditions)
+
+| Route | Queries before → after | Full HTML stream before → after (median) |
+|---|---|---|
+| `/` | 14 → 14 | 181 → 138 ms |
+| `/history` | 16 → 4 | 180 → 101 ms |
+| `/sakkara` | 17 → 5 | 184 → 133 ms |
+| `/sakkara/pu-dam-168` | 17 → 5 | 185 → 99 ms |
+| `/news` | 16 → 4 | 163 → 97 ms |
+| `/news/know-tra-phaendin-siam` | 16 → 4 | 171 → 98 ms |
+| `/visit` | 16 → 2 | 173 → 84 ms |
+
+- **First byte:** about 3–20 ms before and after (the prerendered shell).
+- **First request after server start:** one connection (422 ms) and one role check, unchanged by design.
+- **Client navigation:** unchanged at about 315–345 ms (the React floor above). Every click is now same-document, including from the quick actions at 390 px.
+- **Regression sweep** (15 routes × 3 widths): identical labels, Maps links, and image mapping to §15, with no overflow or broken images.
+- **Content unchanged:** a read-only check confirmed 56 records matching the baseline and 39 `draft/pending_review` records with 32 open placeholder flags. The instrumented runs issued only `find`/`findOne`.
+
+### Remaining costs and a proposal (separate decision)
+
+- **Deployed Preview, likely costs (not measured):**
+  - each cold serverless instance opens its own connection (DNS, TLS, authentication, role check);
+  - every query pays the Vercel-function-to-Atlas round trip, at least twice per page (record, then its media);
+  - the 300 ms React reveal floor.
+- **Owner check:** compare the Vercel function region with the Atlas cluster region (Vercel → Settings → Functions; Atlas → cluster overview). A region mismatch multiplies every round trip.
+- **One bounded caching design** (not implemented; needs approval):
+  - **What:** a per-process, in-memory cache of the **review-scope site-settings result and its media resolver only**, with a 60-second TTL.
+  - **Key:** the review configuration hash.
+  - **Scope:** never shared across processes, never used for an authorization decision, never placed in a CDN or prerendered output, and bypassed for any admin or draft-preview route.
+  - **Benefit:** every review page would save one record + media round trip.
+  - **Cost:** owner edits to site settings would appear up to 60 seconds later, and a cold instance still pays the full cost once.

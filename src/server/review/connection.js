@@ -1,4 +1,5 @@
 import "server-only";
+import { createHash } from "node:crypto";
 import dns from "node:dns";
 import mongoose from "mongoose";
 import { sanitizeError } from "../../lib/db.js";
@@ -58,7 +59,15 @@ export function registerReviewModels(connection) {
   );
 }
 
-const cache = (globalThis.__sanpudamReviewMongo ??= { promise: null });
+// One connection (and its pool) per server process, shared by every
+// request. It is bound to the configuration that opened it: a different
+// URI, database, or DNS setting closes it and opens a new one, which runs
+// every safeguard again. Only a hash of the configuration is kept.
+const cache = (globalThis.__sanpudamReviewMongo ??= { promise: null, key: null, connection: null });
+
+export function reviewConfigKey(config) {
+  return createHash("sha256").update(JSON.stringify([config.uri, config.dbName, config.dnsServers ?? null])).digest("hex");
+}
 
 // config: { uri, dbName, dnsServers } from readReviewDatabaseConfig().
 // dnsServers (local review only, see service.js) replaces this process's
@@ -66,6 +75,12 @@ const cache = (globalThis.__sanpudamReviewMongo ??= { promise: null });
 // safeguard has passed.
 export function connectReviewDatabase(config, { mongooseInstance = mongoose, dnsModule = dns } = {}) {
   if (!config?.uri || config.dbName !== REVIEW_DATABASE_NAME) return Promise.reject(new Error("Client review database is not configured."));
+  const key = reviewConfigKey(config);
+  if (cache.promise && cache.key !== key) {
+    cache.connection?.close().catch(() => {});
+    cache.promise = null;
+    cache.connection = null;
+  }
   if (!cache.promise) {
     if (config.dnsServers?.length) {
       // Callback and promise APIs keep separate default resolvers.
@@ -73,6 +88,8 @@ export function connectReviewDatabase(config, { mongooseInstance = mongoose, dns
       dnsModule.promises?.setServers(config.dnsServers);
     }
     const connection = mongooseInstance.createConnection(config.uri, { ...REVIEW_CONNECTION_OPTIONS, dbName: config.dbName });
+    cache.key = key;
+    cache.connection = connection;
     cache.promise = connection
       .asPromise()
       .then(async () => {
@@ -82,7 +99,11 @@ export function connectReviewDatabase(config, { mongooseInstance = mongoose, dns
         return { models: registerReviewModels(connection) };
       })
       .catch(async (error) => {
-        cache.promise = null;
+        if (cache.connection === connection) {
+          cache.promise = null;
+          cache.key = null;
+          cache.connection = null;
+        }
         await connection.close().catch(() => {});
         throw sanitizeError(error, config.uri);
       });
@@ -93,4 +114,6 @@ export function connectReviewDatabase(config, { mongooseInstance = mongoose, dns
 // Test helper: forget the cached connection.
 export function resetReviewConnectionCache() {
   cache.promise = null;
+  cache.key = null;
+  cache.connection = null;
 }

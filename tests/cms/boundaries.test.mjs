@@ -128,7 +128,7 @@ test("boundary: database secrets are read only in the server data layer", () => 
 
 test("boundary: auth secrets, OAuth credentials, and the admin allowlist are read only by the auth config", () => {
   for (const file of sourceFiles) {
-    if (/env(\.|\[["'])(AUTH_|ADMIN_ALLOWED_ACCOUNTS)/.test(read(file))) assert.equal(rel(file), "src/server/auth/config.js");
+    if (/env\??\.(AUTH_|ADMIN_ALLOWED_ACCOUNTS)|env\??\.?\[["'](AUTH_|ADMIN_ALLOWED_ACCOUNTS)/.test(read(file))) assert.equal(rel(file), "src/server/auth/config.js");
   }
 });
 

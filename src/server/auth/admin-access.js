@@ -1,6 +1,6 @@
 import "server-only";
 import { connection } from "next/server";
-import { ADMIN_ROLES, readAuthConfig } from "./config.js";
+import { ADMIN_ROLES, readAuthConfig, reportAuthConfigProblems } from "./config.js";
 import { evaluateAdminSession } from "./identity.js";
 
 // Server-side admin authorization for pages, route handlers, and server
@@ -39,7 +39,10 @@ async function defaultReadSession() {
 export async function getAdminAccess({ env = process.env, readSession = defaultReadSession, now, waitForRequest = connection } = {}) {
   await waitForRequest();
   const config = readAuthConfig(env);
-  if (!config.enabled) return { status: "unavailable", principal: null };
+  if (!config.enabled) {
+    reportAuthConfigProblems(config, { env });
+    return { status: "unavailable", principal: null };
+  }
   const session = await readSession();
   const result = evaluateAdminSession(session, config, { now: typeof now === "function" ? now() : now });
   if (result.principal) issuedPrincipals.add(result.principal);

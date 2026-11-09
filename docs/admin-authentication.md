@@ -147,7 +147,29 @@ Sign-in started from a per-deployment URL returns to the stable alias, because `
 
 **Production** configuration (production origin, separate secret, published consent screen, production allowlist) is a separate future task.
 
-## 8. Next step after login works
+## 8. Troubleshooting "ระบบเข้าสู่ระบบยังไม่พร้อมใช้งาน"
+
+The login page shows this generic message whenever the configuration is incomplete. The cause appears only in the **server log**, never in the page.
+- **In development (`next dev`)** the log has safe reason codes (variable name + failed rule), once per distinct problem. For example:
+  ```
+  [admin-auth] sign-in unavailable (development diagnostic): ADMIN_ALLOWED_ACCOUNTS:entry_1_missing_role. ...
+  ```
+- **In other environments** it lists variable names only.
+
+| Code | Fix |
+|---|---|
+| `AUTH_SECRET:missing` / `too_short` | generate with `npx auth secret`; keep exactly one line |
+| `AUTH_URL:missing` / `not_an_allowed_origin` | an exact origin: `http://localhost:3000` locally, the https Preview URL on Vercel |
+| `AUTH_GOOGLE_ID:missing`, `AUTH_GOOGLE_SECRET:missing` | from the Google OAuth Web client |
+| `ADMIN_ALLOWED_ACCOUNTS:missing` | add the variable |
+| `ADMIN_ALLOWED_ACCOUNTS:entry_<n>_missing_role` | entry *n* needs `:owner` or `:editor` (an email alone is not accepted, and no default role exists) |
+| `ADMIN_ALLOWED_ACCOUNTS:entry_<n>_invalid_email` / `unknown_role` / `duplicate_email` | fix entry *n*; one bad entry disables sign-in for everyone |
+| `AUTH_REDIRECT_PROXY_URL:must_be_unset` | remove it |
+
+- **Applying changes:** the configuration is read on every request. `next dev` reloads `.env.local` automatically when it changes; `next start` and deployments need a restart or redeploy.
+- **First local incident (2026-11-09):** the allowlist held an email without `:role`. That matched the earlier email-only format of the retired `CMS_PREVIEW_ALLOWED_SUBJECTS`.
+
+## 9. Next step after login works
 
 Add the first read-only CMS screen:
 - an `/admin/content` list of draft and published records with their publication stage, using the existing `getPreviewGrant()` → `loadPreviewSection()` path;

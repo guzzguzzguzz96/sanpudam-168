@@ -23,7 +23,7 @@ import {
 } from "../../src/server/review/connection.js";
 import { REVIEW_LABELS, buildReviewHomepage, describeReviewStatus, loadReviewHomepageContent, reviewMapsUrl, reviewSocialLink } from "../../src/server/review/homepage.js";
 import { REVIEW_CONFIRMED_OVERRIDES } from "../../src/server/review/overrides.js";
-import { loadReviewHomepage } from "../../src/server/review/service.js";
+import { loadReviewChrome, loadReviewHomepage, openReviewRepositories, shareSiteSettings } from "../../src/server/review/service.js";
 import { SECRET_URI, asset, draft, ids, imageRef, mockModels, published } from "./fixtures.mjs";
 
 const CONFIRMED_MAPS = "https://maps.app.goo.gl/xTiyZjWJcKTH3sHR7";
@@ -553,4 +553,72 @@ test("presentation: hints match by asset identity in any environment, default co
   assert.deepEqual(mediaPresentation("sanpudam168/staging/legacy/events/monks-holy-water-coat-of-arms"), { fit: "cover", matte: null });
   assert.deepEqual(mediaPresentation(undefined), { fit: "cover", matte: null });
   assert.deepEqual(mediaPresentation("other/pu-dam-168-statue"), { fit: "cover", matte: null });
+});
+
+// --- per-request work (header, footer, page) --------------------------------
+
+const touchedModels = (models) => Object.entries(models).filter(([, model]) => model.calls.length).map(([name]) => name).sort();
+const reviewOptions = (models) => ({ env: { ...LOCAL, ...REVIEW_DB }, connect: async () => ({ models }), logger: silent });
+
+test("chrome: header and footer read only the site settings and its media, with the homepage's view", async () => {
+  const models = mockModels(migratedSite());
+  const chrome = await loadReviewChrome(reviewOptions(models));
+  assert.equal(chrome.status, "ok");
+  assert.deepEqual(touchedModels(models), ["MediaAsset", "SiteSettings"]);
+  assert.equal(models.SiteSettings.calls.length, 1);
+  assert.equal(models.MediaAsset.calls.length, 1);
+
+  const home = await loadReviewHomepage(reviewOptions(mockModels(migratedSite())));
+  assert.deepEqual(chrome.brand, home.brand);
+  assert.deepEqual(chrome.footer, home.footer);
+  assert.equal(chrome.confirmedDirectionsHref, home.confirmedDirectionsHref);
+  assert.equal(chrome.confirmedDirectionsHref, CONFIRMED_MAPS);
+});
+
+test("chrome: unreadable site settings fall back to the public header and footer", async () => {
+  const failing = mockModels(migratedSite());
+  failing.SiteSettings.findOne = () => ({ exec: async () => { throw new Error("boom"); } });
+  assert.deepEqual(await loadReviewChrome(reviewOptions(failing)), { status: "unavailable", reason: "query_failed" });
+  assert.deepEqual(await loadReviewChrome({ env: {}, connect: async () => assert.fail("no connection when disabled"), logger: silent }), { status: "disabled" });
+});
+
+test("request sharing: one site-settings read per request, a new read for the next request", async () => {
+  let reads = 0;
+  const repositories = { siteSettings: async () => (reads++, { status: "ok" }), news: async () => "news" };
+  const request = shareSiteSettings(repositories);
+  await Promise.all([request.siteSettings(), request.siteSettings(), request.siteSettings()]);
+  assert.equal(reads, 1);
+  assert.equal(await request.news(), "news");
+  await shareSiteSettings(repositories).siteSettings();
+  assert.equal(reads, 2, "nothing is shared across requests");
+
+  // Header, footer, and homepage in one request: SiteSettings is queried once.
+  const models = mockModels(migratedSite());
+  const opened = await openReviewRepositories(reviewOptions(models));
+  const shared = { ...opened, repositories: shareSiteSettings(opened.repositories) };
+  const [chrome, home] = await Promise.all([loadReviewChrome({ opened: shared }), loadReviewHomepage({ opened: shared })]);
+  assert.equal(chrome.status, "ok");
+  assert.equal(home.status, "ok");
+  assert.equal(models.SiteSettings.calls.length, 1);
+});
+
+test("connection: reused per process for the same configuration, replaced when it changes", async () => {
+  resetReviewConnectionCache();
+  const fake = fakeMongoose();
+  const config = { uri: SECRET_URI, dbName: "sanpudam168_staging" };
+  const first = await connectReviewDatabase(config, { mongooseInstance: fake });
+  const again = await connectReviewDatabase({ ...config }, { mongooseInstance: fake });
+  assert.equal(first, again);
+  assert.equal(fake.calls.createConnection.length, 1);
+  assert.equal(fake.calls.commands.length, 1, "one role check per connection");
+
+  const otherUri = SECRET_URI.replace("cluster9", "cluster8");
+  assert.notEqual(otherUri, SECRET_URI);
+  await connectReviewDatabase({ ...config, uri: otherUri }, { mongooseInstance: fake });
+  assert.equal(fake.calls.createConnection.length, 2);
+  assert.equal(fake.calls.closed, 1, "the old connection is closed");
+  assert.equal(fake.calls.commands.length, 2, "the new connection is verified again");
+  await connectReviewDatabase({ ...config, uri: otherUri, dnsServers: ["8.8.8.8"] }, { mongooseInstance: fake, dnsModule: { setServers() {} } });
+  assert.equal(fake.calls.createConnection.length, 3);
+  resetReviewConnectionCache();
 });

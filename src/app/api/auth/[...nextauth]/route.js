@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 import { handlers } from "@/server/auth/auth";
-import { readAuthConfig } from "@/server/auth/config";
+import { readAuthConfig, reportAuthConfigProblems } from "@/server/auth/config";
 
 // Auth.js endpoints (sign-in, Google callback, sign-out, session, CSRF).
 // Evaluated per request; while admin sign-in is not configured every
@@ -10,7 +10,7 @@ async function handle(request, method) {
   await connection();
   const config = readAuthConfig(process.env);
   if (!config.enabled) {
-    console.warn(`[admin-auth] sign-in unavailable; check: ${config.problems.join(", ")}`);
+    reportAuthConfigProblems(config);
     return new Response("Not Found", { status: 404, headers: { "Cache-Control": "private, no-store, max-age=0" } });
   }
   return handlers[method](request);

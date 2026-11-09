@@ -4,7 +4,7 @@ import { createContentService } from "../cms/content-service.js";
 import { createReviewAccessPolicy } from "../cms/review-access.js";
 import { readReviewDatabaseConfig, readReviewPolicy } from "./config.js";
 import { connectReviewDatabase } from "./connection.js";
-import { buildReviewHomepage, loadReviewHomepageContent } from "./homepage.js";
+import { buildReviewChrome, buildReviewHomepage, loadReviewHomepageContent } from "./homepage.js";
 
 // Opens the review repositories. Returns one of:
 //   { status: "disabled" }                    review mode is off; no query ran
@@ -42,12 +42,30 @@ export async function openReviewRepositories({ env = process.env, connect = conn
   }
 }
 
+// Wraps review repositories so every caller in one render shares a single
+// site-settings read (header, footer, homepage, /visit). Built per request
+// by index.js; nothing is kept across requests.
+export function shareSiteSettings(repositories) {
+  let siteSettings = null;
+  return { ...repositories, siteSettings: () => (siteSettings ??= repositories.siteSettings()) };
+}
+
 // Client Review homepage: { status: "disabled" | "unavailable" } as above,
 // "unavailable" also when every section fails, or { status: "ok", ...view }
-// (see buildReviewHomepage). Never sample content.
+// (see buildReviewHomepage). Never sample content. options.opened reuses
+// repositories already opened for this request.
 export async function loadReviewHomepage(options = {}) {
-  const opened = await openReviewRepositories(options);
+  const opened = options.opened ?? (await openReviewRepositories(options));
   if (opened.status !== "ok") return opened;
   const view = buildReviewHomepage(await loadReviewHomepageContent(opened.repositories));
   return view.status === "ok" ? view : { status: "unavailable", reason: "query_failed" };
+}
+
+// Header and footer only: one site-settings read (plus its media), never
+// the homepage sections. Same statuses as loadReviewHomepage.
+export async function loadReviewChrome(options = {}) {
+  const opened = options.opened ?? (await openReviewRepositories(options));
+  if (opened.status !== "ok") return opened;
+  const chrome = buildReviewChrome(await opened.repositories.siteSettings());
+  return chrome.status === "ok" ? chrome : { status: "unavailable", reason: "query_failed" };
 }

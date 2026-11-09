@@ -10,7 +10,7 @@ import { encode } from "next-auth/jwt";
 import { NextRequest } from "next/server";
 import { AdminAccessDeniedError, getAdminAccess, hasAdminRole, requireAdminRole } from "../../src/server/auth/admin-access.js";
 import { buildAuthJsConfig } from "../../src/server/auth/auth-config.js";
-import { MAX_SESSION_SECONDS, parseAllowedAccounts, parseAuthOrigin, readAuthConfig } from "../../src/server/auth/config.js";
+import { MAX_SESSION_SECONDS, parseAllowedAccounts, parseAuthOrigin, readAuthConfig, reportAuthConfigProblems } from "../../src/server/auth/config.js";
 import { evaluateAdminSession, resolveGoogleIdentity, safeAdminRedirect } from "../../src/server/auth/identity.js";
 
 const SECRET = "test-only-secret-0123456789abcdefghijklmnop";
@@ -78,6 +78,41 @@ test("config: AUTH_URL must be an exact https origin or a loopback http origin",
   for (const value of [undefined, "", "localhost:3000", "http://example.test", "https://x.example/app", "https://x.example/?a=1", "https://u:p@x.example", "javascript:alert(1)", "ftp://x.example"]) {
     assert.equal(parseAuthOrigin(value), null, String(value));
   }
+});
+
+test("config: diagnostics name the failed rule as a safe code, never a value", () => {
+  const allowlistCases = {
+    "": "ADMIN_ALLOWED_ACCOUNTS:missing",
+    "owner@example.test": "ADMIN_ALLOWED_ACCOUNTS:entry_1_missing_role",
+    "owner@example.test:": "ADMIN_ALLOWED_ACCOUNTS:entry_1_missing_role",
+    "owner@example.test:owner,nobody:editor": "ADMIN_ALLOWED_ACCOUNTS:entry_2_invalid_email",
+    "owner@example.test:admin": "ADMIN_ALLOWED_ACCOUNTS:entry_1_unknown_role",
+    "a@example.test:owner,A@example.test:editor": "ADMIN_ALLOWED_ACCOUNTS:entry_2_duplicate_email",
+  };
+  for (const [value, reason] of Object.entries(allowlistCases)) {
+    const checked = readAuthConfig({ ...env, ADMIN_ALLOWED_ACCOUNTS: value });
+    assert.equal(checked.enabled, false, value);
+    assert.deepEqual(checked.reasons, [reason], value);
+  }
+  assert.deepEqual(readAuthConfig({}).reasons, ["AUTH_SECRET:missing", "AUTH_URL:missing", "AUTH_GOOGLE_ID:missing", "AUTH_GOOGLE_SECRET:missing", "ADMIN_ALLOWED_ACCOUNTS:missing"]);
+  assert.deepEqual(readAuthConfig({ ...env, AUTH_SECRET: "short" }).reasons, ["AUTH_SECRET:too_short"]);
+  assert.deepEqual(readAuthConfig({ ...env, AUTH_URL: "http://example.test" }).reasons, ["AUTH_URL:not_an_allowed_origin"]);
+  assert.deepEqual(config.reasons, []);
+
+  // Development: codes and the expected format, logged once. Otherwise:
+  // variable names only. Never the values.
+  const logged = [];
+  const logger = { warn: (line) => logged.push(line) };
+  const broken = readAuthConfig({ ...env, ADMIN_ALLOWED_ACCOUNTS: "private.person@example.test" });
+  reportAuthConfigProblems(broken, { env: { NODE_ENV: "development" }, logger });
+  reportAuthConfigProblems(broken, { env: { NODE_ENV: "development" }, logger });
+  reportAuthConfigProblems(broken, { env: { NODE_ENV: "production" }, logger });
+  reportAuthConfigProblems(config, { env: { NODE_ENV: "development" }, logger });
+  assert.equal(logged.length, 2);
+  assert.match(logged[0], /ADMIN_ALLOWED_ACCOUNTS:entry_1_missing_role/);
+  assert.match(logged[0], /email:owner or email:editor/);
+  assert.equal(logged[1], "[admin-auth] sign-in unavailable; check: ADMIN_ALLOWED_ACCOUNTS");
+  for (const line of logged) for (const value of ["private.person", SECRET, env.AUTH_GOOGLE_SECRET, env.AUTH_GOOGLE_ID]) assert.ok(!line.includes(value), "a value was logged");
 });
 
 test("config: a redirect proxy can never be enabled", () => {
