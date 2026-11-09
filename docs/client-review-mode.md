@@ -1,6 +1,6 @@
 # Client Review Mode (Phase 02.5.6 — Step C1.1)
 
-Status: **verified locally against live staging data** (§10, §12–§15). The owner has demonstrated the real homepage on a Vercel Preview deployment and later reported that the Preview route checks passed (§15). Those are owner reports: the Atlas Network Access configuration for Vercel and Vercel Deployment Protection have **not** been independently inspected, and no deployed URL has been checked from here. Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting has been changed.
+Status: **verified locally against live staging data** (§10, §12–§15); milestone close-out and release status in §16; client handoff in `docs/client-review-handoff-th.md`. The owner has demonstrated the real homepage on a Vercel Preview deployment and later reported that the Preview route checks passed (§15). Those are owner reports: the Atlas Network Access configuration for Vercel and Vercel Deployment Protection have **not** been independently inspected, and no deployed URL has been checked from here. Review mode is off by default, and production cannot enable it. No database record, Cloudinary asset, or Vercel setting has been changed.
 
 Client Review Mode renders the migrated draft content from `sanpudam168_staging` and its Cloudinary media on the existing homepage, so the owner can check it before anything is approved. It is a separate read-only path. It does not use the public publication rules or authenticated draft preview (Step B1), and it does not change either of them.
 
@@ -602,3 +602,108 @@ Publication rules, the read-only connection, review headers, caching, and indexi
   - production readiness work (not started).
 
 Step H is complete. Production readiness is **not** complete.
+
+## 16. Milestone close-out: client review (2026-11-09)
+
+The client-facing guide is `docs/client-review-handoff-th.md` (Thai). It contains the Preview URL, the review order, the label meanings, the content checklist, and the feedback table. It names no infrastructure, accounts, or credentials.
+
+### Repository state
+
+- **Branch:** `dev`, HEAD `9fd1606` (Step H), with a clean working tree before this close-out.
+- **Tracking:** the local `origin/dev` ref also points to `9fd1606` (0 ahead, 0 behind). This comes from local tracking information only: nothing was fetched, so the actual remote state and the deployed commit were not checked.
+- **Code changes:** none since Step H. No code defect blocks the restricted client review, so no further tests were run (§15 results stand).
+
+### Release status
+
+| Item | Status | Evidence |
+|---|---|---|
+| Local checks: lint, 100 tests, production build, review headers, and 15 routes × 3 widths | **Passed** | §12–§15, at `9fd1606` and its parent |
+| Homepage on Vercel Preview | **Owner-reported pass** | Owner demonstration and Step G screenshots |
+| C2 routes on Vercel Preview | **Owner-reported pass** | Owner report (§15); not reproduced here |
+| Independently verified deployed checks | **None** | No authorized Preview session was available |
+| Vercel Deployment Protection on the `dev` Preview | **Unconfirmed** | Manual check A below |
+| Atlas Network Access for Vercel (scope, expiry) | **Unconfirmed** | Manual check B below |
+| Review variables scoped to Preview only | **Unconfirmed** | Manual check C below |
+| Unknown slugs return HTTP 200 (streamed soft 404) | **Known issue, open** | §13. Pages show not-found content with `noindex`. Blocks production, not the restricted review |
+| Read-only production database account | **Not created** | Requirements below |
+
+The owner's content items (the checklist in the handoff) are content approvals, not code defects.
+
+### Manual checks for the owner
+
+These are the only checks still open. Nothing here needs a code change.
+
+**A. Deployment Protection** (before sending the link to the client)
+
+1. In Vercel: Project → Settings → Deployment Protection. Confirm that protection (Vercel Authentication, or Password Protection) is on and covers Preview deployments.
+2. In a private browser window, signed out of Vercel, open `https://sanpudam-168-git-dev-guzzguzzguzz96s-projects.vercel.app/`.
+   - **Pass:** a Vercel sign-in or password page appears, and no site content is shown.
+   - **Fail:** the review banner or homepage appears.
+3. Decide how the client gets in. With Vercel Authentication the client needs access granted in Vercel, or a shareable link created by the owner. Record which method was used.
+
+**B. Atlas Network Access**
+
+1. In Atlas: Network Access. Find the entry that allows Vercel.
+2. Record its scope (a specific address, or `0.0.0.0/0`) and whether it is temporary. A temporary entry has an expiry date in the list. Do not record any credentials.
+   - **Pass:** the entry is permanent for the review period, or its expiry date is noted with a renewal owner.
+   - **Note:** if the entry is `0.0.0.0/0`, the only safeguard is the dedicated `read@sanpudam168_staging` user. Keep its password unique and rotate it after the review.
+3. After an expiry, Preview shows the review "unavailable" state. The site does not fall back to other credentials.
+
+**C. Variable scope** (names only; do not copy values)
+
+1. In Vercel: Settings → Environment Variables. `CLIENT_REVIEW_ENABLED`, `CLIENT_REVIEW_MONGODB_URI`, and `CLIENT_REVIEW_MONGODB_DB_NAME` must be set for **Preview** (branch `dev`) only, and **not** for Production.
+2. `MONGODB_URI` with migration or admin credentials must not be set for any deployed environment.
+
+### Production database account (requirements, before any public MongoDB read)
+
+- A dedicated user with exactly `read` on the production database. Never `atlasAdmin`, `readAnyDatabase`, or the migration account.
+- A unique password, stored only in the Vercel **Production** environment.
+- Atlas Network Access limited as far as the hosting plan allows, with no temporary entries.
+- The review variables (`CLIENT_REVIEW_*`) are never set in Production. Production cannot enable review mode in any case (§1).
+
+### Next development step: Google Sign-In (Auth.js), then Admin CMS
+
+**Starting point (already built, tested, not wired to any route):**
+
+| Piece | File | Role after Auth.js |
+|---|---|---|
+| Auth settings | `src/server/auth/config.js` | Reads `AUTH_SECRET` and the allowlist. Extend it to an account → role list |
+| Signed session token | `src/server/auth/session-token.js` | 8-hour HMAC token. Kept as the lifetime reference; likely superseded by the Auth.js session (option 2 below) |
+| Authorization policy | `src/server/auth/preview-access.js` | Allowlist and role check (`owner`, `editor`), re-run on every request |
+| Request binding | `src/server/auth/request-session.js` | `getPreviewGrant()` reads the session and returns a draft grant or `null`. Swap its session source to Auth.js `auth()` |
+| Draft preview entry | `src/server/preview/index.js` | `getAuthorizedPreview(section)`, for the `/cms/preview/...` routes planned in `docs/frontend-data-integration.md` §13 |
+| Draft scope | `src/server/cms/draft-access.js`, `content-service.js` | Unchanged: grants stay server-side WeakSet objects |
+
+Client Review Mode stays separate: it is environment-gated and grants only the read-only review scope. A signed-in editor does not receive a review grant, and the review flag does not authorize anything.
+
+**Decisions for the implementation step:**
+
+1. **Allowlist key:** use the Google account email, lowercased, accepted only when Google reports `email_verified`. Map each email to a role. The existing subject pattern already accepts email characters.
+2. **Session source:** recommended is the Auth.js session (JWT strategy, `maxAge` 8 h), mapped to `{ subject, role }` in `getPreviewGrant()`. The allowlist is re-checked on every request, so removing an account takes effect immediately. The alternative, minting the existing `__Host-` token after sign-in, keeps two session systems.
+3. **Where checks run:** in the data access layer (`getAuthorizedPreview`) inside page components under `<Suspense>`, not in layouts. `proxy.js` (the Next 16 name for middleware) is optional and only for optimistic redirects.
+
+**Owner configuration (names only; values never go into the repository):**
+
+- **Google Cloud:**
+  - an OAuth 2.0 Web client;
+  - a consent screen (External, in testing mode with the approved accounts listed as test users, or Internal for Workspace accounts);
+  - redirect URIs `http://localhost:3000/api/auth/callback/google` and `<dev Preview URL>/api/auth/callback/google`. Use the stable branch alias, not per-deployment URLs.
+- **Variables (local and Vercel Preview first):**
+  - `AUTH_SECRET` (a new random value per environment);
+  - `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`;
+  - `AUTH_URL` where needed;
+  - the allowlist variable (accounts and roles chosen by the owner).
+- **Later, for Admin CMS writes:** a separate database user with `readWrite` on the staging database only, never used by the review or public modes.
+
+**Next small step:**
+
+1. Install Auth.js. Check its Next 16 compatibility and read `node_modules/next/dist/docs/01-app/02-guides/authentication.md` first.
+2. Add the Google provider, the `/api/auth/[...nextauth]` route handler, and a `signIn` callback that refuses any account not on the allowlist.
+3. Switch `getPreviewGrant()` to the Auth.js session.
+4. Add tests:
+   - no session → `null`;
+   - an unlisted or unverified account → refused;
+   - a listed account → a grant for its role;
+   - no auth variables in `.next/static`.
+
+No CMS pages, draft routes, or database writes are part of that step. The `/cms/preview` routes and the Admin CMS follow after approval.
