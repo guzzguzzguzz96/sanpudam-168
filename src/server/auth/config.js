@@ -23,6 +23,8 @@ export const MAX_SESSION_SECONDS = 8 * 60 * 60;
 export const ADMIN_ROLES = Object.freeze(["owner", "editor"]);
 // Both admin roles may read drafts in the (future) private preview.
 export const PREVIEW_ROLES = ADMIN_ROLES;
+// Read-only content inventory (/admin/content): owners and editors.
+export const CONTENT_INVENTORY_ROLES = Object.freeze(["owner", "editor"]);
 
 const EMAIL_PATTERN = /^[^\s@:,]+@[^\s@:,]+\.[^\s@:,]+$/;
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);

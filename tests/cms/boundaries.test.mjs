@@ -53,10 +53,11 @@ const SERVER_WIRING = new Map([
   ["src/app/visit/page.js", ["@/server/site"]],
   ["src/app/admin/page.js", ADMIN_PAGE_WIRING],
   ["src/app/admin/login/page.js", ADMIN_PAGE_WIRING],
+  ["src/app/admin/content/page.js", ["@/server/admin/content-inventory", "@/server/auth/admin-access", "@/server/auth/config", "@/server/auth/identity"]],
   ["src/app/admin/actions.js", ["@/server/auth/auth", "@/server/auth/config", "@/server/auth/identity"]],
   ["src/app/api/auth/[...nextauth]/route.js", ["@/server/auth/auth", "@/server/auth/config"]],
 ]);
-const ADMIN_ROUTES = ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/actions.js", "src/app/api/auth/[...nextauth]/route.js"];
+const ADMIN_ROUTES = ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/content/page.js", "src/app/admin/actions.js", "src/app/api/auth/[...nextauth]/route.js"];
 const CONTENT_ROUTES = ["src/app/history/page.js", "src/app/sakkara/page.js", "src/app/sakkara/[slug]/page.js", "src/app/news/page.js", "src/app/news/[slug]/page.js", "src/app/visit/page.js"];
 
 test("boundary: UI components never use the data layer; routes use only their entry point", () => {
@@ -161,7 +162,7 @@ test("boundary: admin authentication never uses Client Review modules, flags, or
 });
 
 test("boundary: admin routes check access on the server and stay private", () => {
-  for (const page of ["src/app/admin/page.js", "src/app/admin/login/page.js"]) {
+  for (const page of ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/content/page.js"]) {
     const text = read(join(root, page));
     assert.match(text, /getAdminAccess\(\)/, page);
     assert.match(text, /<Suspense/, page);
@@ -175,6 +176,21 @@ test("boundary: admin routes check access on the server and stay private", () =>
   const config = read(join(root, "next.config.mjs"));
   for (const source of ['"/admin"', '"/admin/:path*"', '"/api/auth/:path*"']) assert.ok(config.includes(source), source);
   assert.match(config, /private, no-store, max-age=0/);
+});
+
+// The read-only content inventory: admin access first, staging data through
+// the dedicated read-only connection, never enabled by Client Review flags.
+test("boundary: the admin content inventory needs an admin role and ignores review flags", () => {
+  const inventory = read(join(root, "src/server/admin/content-inventory.js"));
+  assert.doesNotMatch(inventory, /readReviewPolicy|isClientReviewEnabled|evaluateReviewMode|CLIENT_REVIEW_ENABLED|CLIENT_REVIEW_LOCAL|getContentService|lib\/db/);
+  assert.doesNotMatch(inventory, /\.(insert|update|delete|replace|save|create|bulkWrite|aggregate)\w*\(/);
+  const body = inventory.slice(inventory.indexOf("export async function loadContentInventory"));
+  assert.ok(body.indexOf("requireAdminRole(principal, CONTENT_INVENTORY_ROLES)") > 0);
+  assert.ok(body.indexOf("requireAdminRole(") < body.indexOf("readReviewDatabaseConfig("), "role check before configuration or connection");
+  const page = read(join(root, "src/app/admin/content/page.js"));
+  assert.ok(page.indexOf("getAdminAccess()") < page.indexOf("loadContentInventory("), "access check before reading content");
+  assert.ok(page.indexOf("loadContentInventory(") < page.indexOf("await searchParams"), "filter read only after access");
+  assert.match(page, /hasAdminRole\(access\.principal, CONTENT_INVENTORY_ROLES\)/);
 });
 
 // Runs after `npm run build`; skipped when no build output exists.

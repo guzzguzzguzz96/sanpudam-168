@@ -64,8 +64,175 @@
   margin-top: var(--space-6);
 }
 
+.admin-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-top: var(--space-6);
+}
+
+.admin-panel__actions .admin-panel__action {
+  margin-top: 0;
+}
+
 @media (min-width: 48rem) {
   .admin-panel {
     padding: var(--space-8);
+  }
+}
+
+/* Content inventory (/admin/content): read-only list. */
+
+.admin-inventory__summary {
+  margin: 0;
+  color: var(--deep-navy);
+  font-size: var(--type-h3);
+  line-height: var(--leading-h3);
+}
+
+.admin-filter {
+  margin-top: var(--space-6);
+}
+
+.admin-filter__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-filter__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--soft-border);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--deep-navy);
+  text-decoration: none;
+}
+
+.admin-filter__link:hover {
+  border-color: var(--deep-navy);
+}
+
+.admin-filter__link--active {
+  border-color: var(--deep-navy);
+  background: var(--deep-navy);
+  color: var(--white);
+}
+
+.admin-filter__count {
+  font-size: var(--type-small);
+  font-weight: var(--weight-semibold);
+}
+
+.admin-table {
+  width: 100%;
+  margin-top: var(--space-6);
+  border-collapse: collapse;
+  background: var(--white);
+}
+
+.admin-table th,
+.admin-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--soft-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-table thead th {
+  color: var(--muted-text);
+  font-size: var(--type-small);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-small);
+}
+
+.admin-table__title {
+  color: var(--deep-navy);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.admin-status {
+  display: inline-block;
+  padding: 0.125rem var(--space-2);
+  border: 1px solid currentColor;
+  border-radius: var(--control-radius);
+  font-size: var(--type-small);
+  line-height: var(--leading-small);
+  white-space: nowrap;
+}
+
+.admin-status--publication-draft,
+.admin-status--publication-archived {
+  color: var(--muted-text);
+}
+
+.admin-status--publication-published,
+.admin-status--review-approved {
+  color: var(--deep-navy);
+}
+
+.admin-status--review-pending_review,
+.admin-status--review-changes_requested,
+.admin-status--unknown {
+  color: var(--deep-gold);
+}
+
+/* Small screens: each row becomes a labelled card. */
+@media (max-width: 47.99rem) {
+  .admin-table,
+  .admin-table tbody,
+  .admin-table tr,
+  .admin-table th,
+  .admin-table td {
+    display: block;
+  }
+
+  .admin-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .admin-table {
+    background: transparent;
+  }
+
+  .admin-table tr {
+    margin-bottom: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--soft-border);
+    border-radius: var(--card-radius);
+    background: var(--white);
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: var(--space-1) 0;
+    border-bottom: 0;
+  }
+
+  .admin-table td {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    align-items: baseline;
+  }
+
+  .admin-table td::before {
+    min-width: 6.5rem;
+    color: var(--muted-text);
+    font-size: var(--type-small);
+    content: attr(data-label);
   }
 }

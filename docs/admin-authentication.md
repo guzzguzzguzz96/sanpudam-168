@@ -20,7 +20,8 @@ Status (2026-11-09): **foundation implemented and verified locally without a com
 | Route | Purpose |
 |---|---|
 | `/admin/login` | Thai explanation and the "เข้าสู่ระบบด้วย Google" button. It also shows the denied state (`?error=AccessDenied`, or a signed-in account that is not allowed, with a sign-out button), a generic error, or "not available" when the configuration is incomplete |
-| `/admin` | Protected landing page: name, Google account email, role, and sign-out. Nothing else |
+| `/admin` | Protected landing page: name, Google account email, role, a "ดูรายการเนื้อหา" link, and sign-out |
+| `/admin/content` | Read-only list of the staging content for owners and editors (§10) |
 | `/api/auth/[...nextauth]` | Auth.js handlers (CSRF, sign-in, Google callback, session, sign-out). Returns **404** while the configuration is incomplete |
 
 - **Headers:** all three answer with `X-Robots-Tag: noindex, nofollow` and `Cache-Control: private, no-store, max-age=0` in every environment (`next.config.mjs`). Pages also set `robots` metadata.
@@ -169,10 +170,60 @@ The login page shows this generic message whenever the configuration is incomple
 - **Applying changes:** the configuration is read on every request. `next dev` reloads `.env.local` automatically when it changes; `next start` and deployments need a restart or redeploy.
 - **First local incident (2026-11-09):** the allowlist held an email without `:role`. That matched the earlier email-only format of the retired `CMS_PREVIEW_ALLOWED_SUBJECTS`.
 
-## 9. Next step after login works
+## 9. Owner verification (2026-11-12)
 
-Add the first read-only CMS screen:
-- an `/admin/content` list of draft and published records with their publication stage, using the existing `getPreviewGrant()` → `loadPreviewSection()` path;
-- `getAdminAccess()` checked at the top of the page.
+The owner verified on the `dev` Preview:
+- Google sign-in;
+- the `owner` role on `/admin`;
+- sign-out;
+- the redirect to `/admin/login` when logged out.
 
-No editing, uploads, or database writes in that step. Write access (a separate staging `readWrite` database user and audited server actions with `requireAdminRole`) follows only after approval.
+## 10. Read-only content inventory (`/admin/content`)
+
+**Access:**
+- On the server, before anything is read: `getAdminAccess()` must return `ok`, and `hasAdminRole(principal, CONTENT_INVENTORY_ROLES)` must pass. `CONTENT_INVENTORY_ROLES` is `owner` and `editor`, defined in `config.js`.
+- Anyone else is redirected to `/admin/login`, and the response contains no content.
+- `loadContentInventory(principal)` checks the principal again (`requireAdminRole`) before reading configuration or opening a connection.
+- Client Review flags, Vercel access, and other cookies grant nothing.
+
+**Data:**
+- **Source:** the dedicated read-only staging connection (`src/server/review/connection.js`), which checks the database name and the `read` role. The same per-process connection serves the review pages.
+- **Content collections only:** site settings, pages, sacred items, categories, news, banners, gallery items, FAQs, videos, reviews, team members. Media assets, migration runs, and other operational collections are not read.
+- **Minimal fields:** each query projects only the title field(s), `status`, `review.status`, and an ordering field. The page receives `{ id, type, typeLabel, title, publication, review }` per record.
+- **Titles:** banners and gallery items have no title field, so they use their image caption, or a neutral "ลำดับ n" title.
+- **Labels:**
+  - `status`: draft → ฉบับร่าง, published → เผยแพร่แล้ว, archived → เก็บถาวร.
+  - `review.status`: pending_review → รอตรวจทาน, approved → อนุมัติแล้ว, changes_requested → ขอให้แก้ไข.
+  - Any other stored value is shown as "ค่าที่ไม่รู้จัก (<value>)"; a missing value as "ไม่มีข้อมูล".
+
+**Environment:**
+- **Available:** a local machine (no hosting markers) and the Vercel Preview of branch `dev`.
+- **Refused:** Production (`VERCEL_ENV` or `VERCEL_TARGET_ENV` = production) and every other hosted environment. It shows "ไม่เปิดใช้ในสภาพแวดล้อมนี้" without connecting.
+- **Independent of review flags:** the gate does not use the Client Review flags.
+
+**Filter:**
+- `?type=<key>`, rendered as links (no client JavaScript).
+- Only one known key applies. Anything else (unknown, repeated, or odd values) shows every type with a generic notice, and the value is never echoed.
+
+**States:**
+- empty database;
+- empty type;
+- unavailable (environment, configuration, connection, or query failure; logs carry no connection details).
+
+**Responses:** `private, no-store, max-age=0` and `noindex, nofollow` (`/admin/:path*`).
+
+**Read-only:** there are no edit or publish actions, and the module issues only `find`. A boundary test rejects write methods.
+
+**Verification (local `next build` + `next start`, live staging, 2026-11-12):**
+- **Session:** a locally minted session for placeholder accounts in the process environment, not a Google login.
+- **Counts:** 39 records in 11 types, identical to the migration baseline. Site settings 1, pages 1, sacred items 5, categories 3, news 3, banners 4, gallery 10, FAQs 6, videos 1, reviews 3, team 2. All 39 are `draft` / `pending_review`, with no unknown or missing values.
+- **Access:** logged-out, unlisted-account, and forged-cookie requests are redirected and contain no titles. Both owner and editor see the list.
+- **Filter:** `news` shows 3 rows. Seven invalid values show all 39 with the notice and are never echoed.
+- **Layout:** 390 px (cards), 768 and 1440 px (table). No overflow, 49–50 px filter targets, visible focus.
+- **Production markers at runtime:** the unavailable message and no connection attempt.
+
+## 11. Next step
+
+A read-only detail view per record (`/admin/content/<type>/<id>`) is the recommended next step. It would show the fields an editor will later change, the open placeholder flags with their notes, and the image references with their rights status.
+
+It is still read-only, and it is the base the first edit form will need. Write access (a separate staging `readWrite` user, audited server actions with `requireAdminRole`, and no publishing) follows only after approval.

@@ -284,7 +284,7 @@ test("connection: models expose find/findOne only and never auto-create collecti
   // A real, never-opened Mongoose connection: compile the review models.
   const connection = mongoose.createConnection();
   const models = registerReviewModels(connection);
-  assert.deepEqual(Object.keys(models).sort(), ["Banner", "Category", "Faq", "GalleryItem", "MediaAsset", "News", "Page", "SacredItem", "SiteSettings"]);
+  assert.deepEqual(Object.keys(models).sort(), ["Banner", "Category", "Faq", "GalleryItem", "MediaAsset", "News", "Page", "Review", "SacredItem", "SiteSettings", "TeamMember", "Video"]);
   for (const compiled of Object.values(connection.models)) {
     assert.equal(compiled.schema.options.autoCreate, false, compiled.modelName);
     assert.equal(compiled.schema.options.autoIndex, false, compiled.modelName);

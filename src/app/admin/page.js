@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AdminPanel, SignOutButton } from "@/components/admin/admin-panel";
 import { PageHeader } from "@/components/pages/page-header";
+import { Button } from "@/components/ui/button";
 import { getAdminAccess } from "@/server/auth/admin-access";
 import { ADMIN_LOGIN } from "@/server/auth/identity";
 
@@ -38,8 +39,13 @@ async function AdminContent() {
           <dd>{ROLE_LABELS[role] ?? role}</dd>
         </div>
       </dl>
-      <p className="admin-panel__text">ระบบจัดการเนื้อหาจะเปิดใช้ในขั้นถัดไป ขณะนี้หน้านี้ใช้ยืนยันการเข้าสู่ระบบเท่านั้น</p>
-      <SignOutButton />
+      <p className="admin-panel__text">ขณะนี้ดูรายการเนื้อหาได้อย่างเดียว ยังแก้ไขหรือเผยแพร่ไม่ได้</p>
+      <div className="admin-panel__actions">
+        <Button href="/admin/content" variant="primary">
+          ดูรายการเนื้อหา
+        </Button>
+        <SignOutButton />
+      </div>
     </AdminPanel>
   );
 }

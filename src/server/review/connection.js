@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import dns from "node:dns";
 import mongoose from "mongoose";
 import { sanitizeError } from "../../lib/db.js";
-import { Banner, Category, Faq, GalleryItem, MediaAsset, News, Page, SacredItem, SiteSettings } from "../../models/index.js";
+import { Banner, Category, Faq, GalleryItem, MediaAsset, News, Page, Review, SacredItem, SiteSettings, TeamMember, Video } from "../../models/index.js";
 import { REVIEW_DATABASE_NAME } from "./config.js";
 
 // Dedicated read-only connection for Client Review. It never shares the
@@ -21,7 +21,9 @@ import { REVIEW_DATABASE_NAME } from "./config.js";
 // The MongoDB user's own permissions remain the real boundary; these checks
 // make a misconfiguration fail closed instead of silently working.
 
-const MODELS = { Banner, Category, Faq, GalleryItem, MediaAsset, News, Page, SacredItem, SiteSettings };
+// Every content model, read-only. Review pages use a subset; the admin
+// content inventory (src/server/admin) lists all of them.
+const MODELS = { Banner, Category, Faq, GalleryItem, MediaAsset, News, Page, Review, SacredItem, SiteSettings, TeamMember, Video };
 const READ_METHODS = ["find", "findOne"];
 
 export const REVIEW_CONNECTION_OPTIONS = Object.freeze({
