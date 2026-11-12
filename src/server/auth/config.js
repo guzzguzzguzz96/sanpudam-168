@@ -25,6 +25,8 @@ export const ADMIN_ROLES = Object.freeze(["owner", "editor"]);
 export const PREVIEW_ROLES = ADMIN_ROLES;
 // Read-only content inventory (/admin/content): owners and editors.
 export const CONTENT_INVENTORY_ROLES = Object.freeze(["owner", "editor"]);
+// First edit form (FAQ question/answer): owners only.
+export const FAQ_EDIT_ROLES = Object.freeze(["owner"]);
 
 const EMAIL_PATTERN = /^[^\s@:,]+@[^\s@:,]+\.[^\s@:,]+$/;
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);

@@ -23,6 +23,7 @@ Status (2026-11-09): **foundation implemented and verified locally without a com
 | `/admin` | Protected landing page: name, Google account email, role, a "ดูรายการเนื้อหา" link, and sign-out |
 | `/admin/content` | Read-only list of the staging content for owners and editors (§10) |
 | `/admin/content/[type]/[id]` | Read-only detail of one record: fields, placeholder flags, images (§11) |
+| `/admin/content/faqs/[id]/edit` | Owner-only FAQ edit form (question and answer), saved through the staging writer (§13) |
 | `/api/auth/[...nextauth]` | Auth.js handlers (CSRF, sign-in, Google callback, session, sign-out). Returns **404** while the configuration is incomplete |
 
 - **Headers:** all three answer with `X-Robots-Tag: noindex, nofollow` and `Cache-Control: private, no-store, max-age=0` in every environment (`next.config.mjs`). Pages also set `robots` metadata.
@@ -272,6 +273,8 @@ The owner verified `/admin/content` on the `dev` Preview (2026-11-12): 39 record
 
 ## 12. Gaps before the first edit form
 
+Items 1–4 are addressed for FAQs in §13. Items 5–8 remain open.
+
 1. **A write path:** a separate staging database user with `readWrite` on `sanpudam168_staging` only, its own variables, and the same database-name and role checks inverted for write. The current connection is read-only by design.
 2. **Edit permissions:** decide which fields an `editor` may change and which are `owner`-only (for example contact details and site settings). Today both roles have the same read access.
 3. **Server actions:** validation through the existing Mongoose schemas, and a concurrency check. The schemas use `optimisticConcurrency`, so the form must carry the record version.
@@ -280,3 +283,96 @@ The owner verified `/admin/content` on the `dev` Preview (2026-11-12): 39 record
 6. **Text format:** the editor for `legacy-text-v1` (paragraphs and `**bold**`), and how its preview matches the public renderer.
 7. **Media:** the first form should only reuse existing assets. Uploads, rights confirmation, and approval are separate steps.
 8. **Publishing:** stays out of scope. The publish rules in `models/shared.js` (approved review, no open placeholders, resolved media) will gate it later.
+
+## 13. First edit form: FAQ question and answer (2026-11-12)
+
+**Route:** `/admin/content/faqs/<id>/edit`, implemented as `/admin/content/[type]/[id]/edit` and accepting only `type = faqs`. A static `faqs/` folder would have shadowed the FAQ detail pages.
+
+**Who and what:**
+- **Who:** `owner` only (`FAQ_EDIT_ROLES` in `config.js`). Editors see a Thai permission notice, and no stored text is read for them.
+- **Which FAQs:** existing FAQs whose stored values are `status: "draft"` and `review.status: "pending_review"` (the schema's enums), with a numeric `__v`. All six staging FAQs qualify.
+- **What changes:** only `question` (max 140) and `answer` (max 800), with the limits read from the FAQ schema.
+- **Unchanged by a save:** `status`, `review`, `showOnHome`, `sortOrder`, and the placeholder flags stay exactly as stored.
+- **Placeholder flags:** an open flag on an edited field is shown in the form. After saving, the detail page says the field still carries it.
+- **Text format:** plain text. CRLF becomes LF and the ends are trimmed. The question must be one line. Control characters are refused.
+- **Preview:** the same markup and React text rendering as the public FAQ (`components/home/faq.js`).
+
+**Request flow:**
+1. **The page:**
+   - `getAdminAccess()`;
+   - the owner role;
+   - writer readiness (configuration only, no connection);
+   - the FAQ loaded through the **read-only** staging reader.
+2. **Every save** (`actions.js` → `saveFaqEdit`):
+   - the session and the current allowlist again;
+   - the owner role;
+   - the id;
+   - a field allowlist: exactly `question`, `answer`, and `version`. Next.js `$ACTION_*` entries are ignored; anything else, a repeat, or a non-text value is refused.
+   - field validation;
+   - environment (local or the `dev` Preview only);
+   - writer configuration;
+   - the writer connection.
+3. **One MongoDB transaction** (snapshot read concern, majority write concern):
+   - read the FAQ;
+   - check eligibility and that the submitted version equals the stored `__v`;
+   - stop with **no write and no audit entry** if nothing changed;
+   - otherwise `updateOne({ _id, __v, status: "draft", "review.status": "pending_review" }, { $set: { changed fields, updatedAt }, $inc: { __v: 1 } })`. A match count other than 1 means "stale".
+   - insert the audit entry.
+
+   If the insert fails, the transaction aborts and the FAQ is unchanged.
+4. **Messages:** the Thai messages cover permission, invalid request, validation (per field), stale form, no longer eligible, unavailable, and failed. Every error message says nothing was saved.
+
+**Audit entry** (`admin_audit_log`):
+`{ at, action: "faq.update", collection: "faqs", recordId, actor: { provider: "google", subject, email, role }, changes: { <field>: { before, after } }, version: { before, after } }`. Only changed fields are recorded.
+
+**Writer configuration** (`src/server/cms-writer/`, the only write path in `src/`):
+- **Variables:**
+  - `CMS_WRITER_MONGODB_URI`: the dedicated writer user, never the review or migration account; there is no fallback.
+  - `CMS_WRITER_MONGODB_DB_NAME`: exactly `sanpudam168_staging`.
+  - `CMS_WRITER_DNS_SERVERS`: optional, IPv4, local only.
+- **Values:** names only in `.env.example`; values never logged.
+- **On connect it refuses unless:**
+  - the database name matches;
+  - `connectionStatus` with `showPrivileges` shows **only** `find` + `update` on `sanpudam168_staging.faqs` and `insert` (optionally `find`) on `sanpudam168_staging.admin_audit_log`. Built-in `readWrite`, admin roles, other collections, other databases, `remove`, and `createCollection` are all refused.
+  - the audit collection already exists.
+
+**Minimum database privileges:** an Atlas custom role `cmsFaqWriter`:
+
+| Resource | Actions |
+|---|---|
+| `sanpudam168_staging.faqs` | `find`, `update` |
+| `sanpudam168_staging.admin_audit_log` | `insert` (`find` optional, for reading the log later) |
+
+**Transactions:** they need a replica set. Atlas clusters are replica sets, and transactions need no extra privilege.
+
+**Verification (2026-11-12):**
+- **Unit and integration:** `tests/cms/faq-editor.test.mjs`, 16 tests. It uses an isolated in-memory store with transaction semantics (staged writes applied only on commit).
+  - **Covered:** successful save with an exact audit entry; unchanged submissions (also with CRLF and spaces); stale versions; a concurrent commit during the transaction; audit failure rolling back the FAQ; editor, forged, and missing principals; 16 malformed requests and 6 bad ids rejected before any connection; schema-limit validation; ineligible records; fail-closed configuration in Production, other hosts, or with only the reader configured.
+  - **Writer checks covered:** 13 privilege shapes, database-name, privilege, and audit-collection refusals, and the store's session, snapshot, and majority wiring.
+  - **Not covered:** the real MongoDB transaction engine. Installing a local test database (`mongodb-memory-server`) was not permitted in this round.
+- **Local build, read-only staging:**
+  - **Setup:** placeholder owner/editor sessions; the writer pointed at a closed local port, so no write was possible.
+  - **Link and access:** the "แก้ไข FAQ" link appears for the owner on FAQs only. The form shows the stored values and version 0 from staging. Editors get the permission notice. Logged-out, unlisted, and forged sessions are redirected. Four invalid URLs show "not found".
+  - **Submissions:** a real change got "ระบบบันทึกยังไม่พร้อมใช้งาน" with the typed text kept. An empty question, a 141-character question, and an injected `status` field got their Thai errors.
+  - **Layout:** 390 and 1440 px with no overflow.
+  - **Missing writer:** the notice, with no form.
+  - **Production-built server:** "แก้ไขไม่ได้ในสภาพแวดล้อมนี้".
+  - **Afterwards:** staging still showed version 0 and the original answer.
+
+**Staging smoke test (pending owner approval; not run):**
+1. **Owner setup:**
+   - create the collection `admin_audit_log` in `sanpudam168_staging`;
+   - create the custom role above and a user `cms-faq-writer-staging` with only that role;
+   - put its connection string in `.env.local` as `CMS_WRITER_MONGODB_URI`, with `CMS_WRITER_MONGODB_DB_NAME=sanpudam168_staging` (plus `CMS_WRITER_DNS_SERVERS=8.8.8.8,1.1.1.1` if local DNS needs it).
+2. **Target:** FAQ `f108969e97d5375e1e5cb190`. It is FAQ 4, "ไหว้ศาลปู่ดำต้องใช้ของไหว้อะไรบ้าง", not shown on the homepage, with an open placeholder flag on `answer`.
+3. **Temporary change:** in `/admin/content/faqs/f108969e97d5375e1e5cb190/edit`, append " (ทดสอบระบบแก้ไข)" to the end of the answer and save.
+4. **Expected after saving:**
+   - the detail page says "บันทึกการแก้ไขแล้ว" and that คำตอบ still has the placeholder status;
+   - `__v` is 1;
+   - one audit entry has `before` = the original answer;
+   - the status and flags are unchanged;
+   - the public review pages are unchanged (the FAQ is not on the homepage).
+5. **Restore:** open the form again, remove the appended text so the answer is exactly the original (it is also the audit entry's `before` value), and save. Expect `__v` 2 and a second audit entry whose `after` equals the original text.
+6. **Also check:**
+   - submitting again without changes reports "ไม่มีการเปลี่ยนแปลง" and adds no audit entry;
+   - a second browser tab opened before step 3 reports the stale-form message.

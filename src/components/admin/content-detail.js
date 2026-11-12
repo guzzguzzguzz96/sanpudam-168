@@ -109,15 +109,34 @@ function FieldValue({ field }) {
   }
 }
 
-export function ContentDetail({ detail, backHref }) {
+// editHref: the FAQ edit page, only when the server allowed it.
+// notice: { tone, text, flagged: [field labels] } after a save.
+export function ContentDetail({ detail, backHref, editHref = null, notice = null }) {
   const { placeholders } = detail;
   return (
     <>
       <PageHeader current={detail.title} eyebrow={detail.type.label} title={detail.title} trail={TRAIL}>
-        <BackLink href={backHref} />
+        <div className="admin-detail__header-actions">
+          <BackLink href={backHref} />
+          {editHref ? (
+            <Link className="ui-button ui-button--primary admin-detail__edit" href={editHref} prefetch={false}>
+              แก้ไข FAQ
+            </Link>
+          ) : null}
+        </div>
       </PageHeader>
       <Section as="div" className="admin-section">
         <Container>
+          {notice ? (
+            <div className={`admin-notice admin-notice--${notice.tone}`} role="status">
+              <p>{notice.text}</p>
+              {notice.flagged.length ? (
+                <p>
+                  {notice.flagged.join(" และ ")} ยังมีสถานะข้อความตัวอย่างตามที่บันทึกไว้ การแก้ไขนี้ไม่ได้เปลี่ยนสถานะดังกล่าว
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           <div className="admin-detail">
             <section aria-labelledby="admin-detail-status" className="admin-detail__card">
               <h2 id="admin-detail-status" className="admin-detail__heading">

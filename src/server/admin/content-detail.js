@@ -339,6 +339,8 @@ export async function loadContentDetail(principal, { type: typeKey, id }, { env 
         title: titleOf(type, doc),
         publication: labelled(doc.status, PUBLICATION_LABELS),
         review: labelled(doc.review?.status, REVIEW_STATUS_LABELS),
+        // Raw stored values, for edit eligibility only (never displayed).
+        state: { status: typeof doc.status === "string" ? doc.status : null, review: typeof doc.review?.status === "string" ? doc.review.status : null },
         reviewNote: clip(text(doc.review?.note)),
         placeholders: {
           open: openFlags.map((flag) => ({

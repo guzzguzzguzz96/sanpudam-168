@@ -54,11 +54,13 @@ const SERVER_WIRING = new Map([
   ["src/app/admin/page.js", ADMIN_PAGE_WIRING],
   ["src/app/admin/login/page.js", ADMIN_PAGE_WIRING],
   ["src/app/admin/content/page.js", ["@/server/admin/content-inventory", "@/server/auth/admin-access", "@/server/auth/config", "@/server/auth/identity"]],
-  ["src/app/admin/content/[type]/[id]/page.js", ["@/server/admin/content-detail", "@/server/auth/admin-access", "@/server/auth/config", "@/server/auth/identity"]],
+  ["src/app/admin/content/[type]/[id]/page.js", ["@/server/admin/content-detail", "@/server/admin/faq-editor", "@/server/auth/admin-access", "@/server/auth/config", "@/server/auth/identity"]],
+  ["src/app/admin/content/[type]/[id]/edit/page.js", ["@/server/admin/faq-editor", "@/server/auth/admin-access", "@/server/auth/config", "@/server/auth/identity"]],
+  ["src/app/admin/content/[type]/[id]/edit/actions.js", ["@/server/admin/faq-editor", "@/server/auth/admin-access", "@/server/auth/identity"]],
   ["src/app/admin/actions.js", ["@/server/auth/auth", "@/server/auth/config", "@/server/auth/identity"]],
   ["src/app/api/auth/[...nextauth]/route.js", ["@/server/auth/auth", "@/server/auth/config"]],
 ]);
-const ADMIN_ROUTES = ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/content/page.js", "src/app/admin/content/[type]/[id]/page.js", "src/app/admin/actions.js", "src/app/api/auth/[...nextauth]/route.js"];
+const ADMIN_ROUTES = ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/content/page.js", "src/app/admin/content/[type]/[id]/page.js", "src/app/admin/content/[type]/[id]/edit/page.js", "src/app/admin/content/[type]/[id]/edit/actions.js", "src/app/admin/actions.js", "src/app/api/auth/[...nextauth]/route.js"];
 const CONTENT_ROUTES = ["src/app/history/page.js", "src/app/sakkara/page.js", "src/app/sakkara/[slug]/page.js", "src/app/news/page.js", "src/app/news/[slug]/page.js", "src/app/visit/page.js"];
 
 test("boundary: UI components never use the data layer; routes use only their entry point", () => {
@@ -163,7 +165,7 @@ test("boundary: admin authentication never uses Client Review modules, flags, or
 });
 
 test("boundary: admin routes check access on the server and stay private", () => {
-  for (const page of ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/content/page.js", "src/app/admin/content/[type]/[id]/page.js"]) {
+  for (const page of ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/content/page.js", "src/app/admin/content/[type]/[id]/page.js", "src/app/admin/content/[type]/[id]/edit/page.js"]) {
     const text = read(join(root, page));
     assert.match(text, /getAdminAccess\(\)/, page);
     assert.match(text, /<Suspense/, page);
@@ -211,11 +213,42 @@ test("boundary: the admin content inventory needs an admin role and ignores revi
   }
 });
 
+// The CMS writer: its own configuration, the only write path in src/, used
+// only by the FAQ editor, and the save action re-checks access first.
+test("boundary: the staging writer is isolated and the only write path", () => {
+  const writerDir = join(root, "src/server/cms-writer");
+  for (const file of sourceFiles) {
+    const text = read(file);
+    const inWriter = rel(file).startsWith("src/server/cms-writer/");
+    if (/CMS_WRITER_/.test(text)) assert.equal(rel(file), "src/server/cms-writer/config.js", `${rel(file)} reads writer variables`);
+    if (/\.(updateOne|updateMany|insertOne|insertMany|deleteOne|deleteMany|replaceOne|findOneAndUpdate|findOneAndDelete|findOneAndReplace|bulkWrite|withTransaction|startSession|save)\(/.test(text)) {
+      assert.equal(rel(file), "src/server/cms-writer/connection.js", `${rel(file)} writes to the database`);
+    }
+    if (!inWriter && /cms-writer/.test(text)) assert.equal(rel(file), "src/server/admin/faq-editor.js", `${rel(file)} imports the writer`);
+  }
+  for (const file of walk(writerDir, /\.js$/)) {
+    const text = read(file);
+    assert.doesNotMatch(text, /CLIENT_REVIEW|from\s+["'][^"']*(review|site|cms)\/|getContentService|(?<!CMS_WRITER_)MONGODB_(URI|DB_NAME)/, rel(file));
+  }
+  const connection = read(join(writerDir, "connection.js"));
+  assert.match(connection, /assertWriterPrivileges\(await connection\.db\.command\(\{ connectionStatus: 1, showPrivileges: true \}\)\)/);
+  assert.match(connection, /connected !== WRITER_DATABASE_NAME/);
+  const action = read(join(root, "src/app/admin/content/[type]/[id]/edit/actions.js"));
+  assert.ok(action.indexOf("getAdminAccess(") < action.indexOf("saveFaqEdit("), "access is checked before every save");
+  const editor = read(join(root, "src/server/admin/faq-editor.js"));
+  const save = editor.slice(editor.indexOf("export async function saveFaqEdit"));
+  assert.ok(save.indexOf("hasAdminRole(principal, FAQ_EDIT_ROLES)") < save.indexOf("parseFaqSubmission("), "role before input");
+  assert.ok(save.indexOf("parseFaqSubmission(") < save.indexOf("readWriterConfig("), "input before configuration");
+  assert.ok(save.indexOf("readWriterConfig(") < save.indexOf("withFaqTransaction("), "configuration before writing");
+  const example = read(join(root, ".env.example"));
+  for (const name of ["CMS_WRITER_MONGODB_URI", "CMS_WRITER_MONGODB_DB_NAME", "CMS_WRITER_DNS_SERVERS"]) assert.match(example, new RegExp(`^${name}=$`, "m"), name);
+});
+
 // Runs after `npm run build`; skipped when no build output exists.
 test("boundary: browser bundles contain no database code or secret names", { skip: !existsSync(join(root, ".next/static")) }, () => {
   for (const file of walk(join(root, ".next/static"), /\.(js|css|json)$/)) {
     const text = read(file);
-    for (const marker of ["MONGODB_URI", "MONGODB_DB_NAME", "CLOUDINARY_API_SECRET", "AUTH_SECRET", "AUTH_GOOGLE_SECRET", "ADMIN_ALLOWED_ACCOUNTS", "mongodb+srv", "sanpudam168_staging", "CLIENT_REVIEW_", "sanpudam168/staging", "res.cloudinary.com"]) {
+    for (const marker of ["MONGODB_URI", "MONGODB_DB_NAME", "CLOUDINARY_API_SECRET", "AUTH_SECRET", "AUTH_GOOGLE_SECRET", "ADMIN_ALLOWED_ACCOUNTS", "CMS_WRITER_", "mongodb+srv", "sanpudam168_staging", "CLIENT_REVIEW_", "sanpudam168/staging", "res.cloudinary.com"]) {
       assert.ok(!text.includes(marker), `${marker} found in ${rel(file)}`);
     }
   }
