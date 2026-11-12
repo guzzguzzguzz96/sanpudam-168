@@ -22,6 +22,7 @@ Status (2026-11-09): **foundation implemented and verified locally without a com
 | `/admin/login` | Thai explanation and the "เข้าสู่ระบบด้วย Google" button. It also shows the denied state (`?error=AccessDenied`, or a signed-in account that is not allowed, with a sign-out button), a generic error, or "not available" when the configuration is incomplete |
 | `/admin` | Protected landing page: name, Google account email, role, a "ดูรายการเนื้อหา" link, and sign-out |
 | `/admin/content` | Read-only list of the staging content for owners and editors (§10) |
+| `/admin/content/[type]/[id]` | Read-only detail of one record: fields, placeholder flags, images (§11) |
 | `/api/auth/[...nextauth]` | Auth.js handlers (CSRF, sign-in, Google callback, session, sign-out). Returns **404** while the configuration is incomplete |
 
 - **Headers:** all three answer with `X-Robots-Tag: noindex, nofollow` and `Cache-Control: private, no-store, max-age=0` in every environment (`next.config.mjs`). Pages also set `robots` metadata.
@@ -222,8 +223,60 @@ The owner verified on the `dev` Preview:
 - **Layout:** 390 px (cards), 768 and 1440 px (table). No overflow, 49–50 px filter targets, visible focus.
 - **Production markers at runtime:** the unavailable message and no connection attempt.
 
-## 11. Next step
+## 11. Read-only content detail (`/admin/content/[type]/[id]`)
 
-A read-only detail view per record (`/admin/content/<type>/<id>`) is the recommended next step. It would show the fields an editor will later change, the open placeholder flags with their notes, and the image references with their rights status.
+The owner verified `/admin/content` on the `dev` Preview (2026-11-12): 39 records, 3 under the news filter, and the login redirect after sign-out.
 
-It is still read-only, and it is the base the first edit form will need. Write access (a separate staging `readWrite` user, audited server actions with `requireAdminRole`, and no publishing) follows only after approval.
+**Navigation:**
+- Every title in the list links to its detail page.
+- When a type filter is active, the link carries `?from=<type>`, and the "← กลับไปยังรายการเนื้อหา" link returns to that filtered list.
+- Unknown or odd `from` values return to the full list.
+
+**Access and validation, in order:**
+1. `getAdminAccess()` + `hasAdminRole(principal, CONTENT_INVENTORY_ROLES)` on the server; anyone else is redirected to `/admin/login`.
+2. `loadContentDetail(principal, ...)` checks the principal again.
+3. `type` must be a key of the inventory's content types, and `id` must be a 24-character lowercase hex ObjectId. Both are checked before configuration, connection, or query; an invalid URL is "not found" without a database call.
+4. The environment gate and the read-only staging connection are the same as for the list.
+5. An exact `findOne({ _id })` in the requested collection only. A valid id under another type is "not found".
+
+**States:**
+- **"ไม่พบรายการนี้":** an invalid type, an invalid id, or no record.
+- **"ยังแสดงรายการเนื้อหาไม่ได้":** the environment, configuration, connection, or query failed.
+
+**Fields** (`src/server/admin/content-detail.js`):
+- **Explicit field maps:** each of the 11 types has its own map with Thai labels, and only those fields are projected and returned.
+- **Never read:** `legacy`, `migration`, created/updated-by ids, media-mapping legacy URLs and notes, consent notes, analytics settings, and media-asset owner, notes, and source.
+- **Text:** shown exactly as stored (including legacy `**` markers), as React text with line breaks preserved. It is never HTML.
+- **Contact URLs:** shown as text, not links.
+- **Status:** publication and review status, and the review note when one is recorded.
+- **Placeholder flags:**
+  - Open flags (`status: placeholder`) are listed with the field name, status, note, and recorded date.
+  - The matching fields are marked "ข้อความตัวอย่าง".
+  - Resolved flags are counted.
+- **Images:**
+  - A 480 px Cloudinary thumbnail (rendered unoptimized, so it does not depend on review-mode image settings) for usable image assets.
+  - Caption, alt text, and the file state ("เชื่อมไฟล์ภาพแล้ว", "ไม่มีการอ้างอิงไฟล์ภาพ", "ไม่พบไฟล์ภาพในคลังสื่อ", "ไฟล์ภาพถูกลบแล้ว").
+  - Rights and approval exactly as recorded on the asset. A missing or unknown value is "ยังไม่ยืนยัน".
+  - Assets with rejected rights or a deleted file have no thumbnail.
+
+**Verification (local `next build` + `next start`, live staging, 2026-11-12):**
+- **Session:** a locally minted session for placeholder accounts in the process environment, not a Google login.
+- **All 39 records:** every list link opens its detail page. All 11 types are covered, each response is `private, no-store` + `noindex`, and none contains migration or credential metadata.
+- **Placeholder flags:** all 32 open flags appear on their records and each maps to a displayed field (site settings 2, page 2, sacred items 7, news 3, FAQs 3, video 2, reviews 9, team 4). This matches the migration baseline.
+- **Images:** 17 thumbnails, all loading. Every recorded rights status is "อนุมัติสิทธิ์แล้ว" and every approval status "รออนุมัติภาพ".
+- **Missing media:** the video file and both team-member photos are absent and are shown as such.
+- **Denied access:** logged-out, unlisted-account, and forged-cookie requests are redirected and contain no record content. The only images are the review header logo.
+- **Invalid URLs:** nine cases (unknown or migration type, malformed, uppercase, short or operator-like ids, a valid id under another type, an unknown valid id, script in the type) all show "not found" and echo nothing.
+- **Layout:** 390, 768, and 1440 px with no overflow, labels above values on mobile and beside them from 768 px, and a visible focus ring on the back link.
+- **Production markers at runtime:** "ไม่เปิดใช้ในสภาพแวดล้อมนี้" with no connection attempt.
+
+## 12. Gaps before the first edit form
+
+1. **A write path:** a separate staging database user with `readWrite` on `sanpudam168_staging` only, its own variables, and the same database-name and role checks inverted for write. The current connection is read-only by design.
+2. **Edit permissions:** decide which fields an `editor` may change and which are `owner`-only (for example contact details and site settings). Today both roles have the same read access.
+3. **Server actions:** validation through the existing Mongoose schemas, and a concurrency check. The schemas use `optimisticConcurrency`, so the form must carry the record version.
+4. **Audit trail:** who changed what and when (`updatedBy` exists but there is no user collection yet; a principal is a Google subject and email). Record changes before any edit ships.
+5. **Placeholder workflow:** how an edit resolves a flag (`replaced` / `confirmed_correct`, `resolvedAt`, `resolvedBy`), and whether review status changes with it.
+6. **Text format:** the editor for `legacy-text-v1` (paragraphs and `**bold**`), and how its preview matches the public renderer.
+7. **Media:** the first form should only reuse existing assets. Uploads, rights confirmation, and approval are separate steps.
+8. **Publishing:** stays out of scope. The publish rules in `models/shared.js` (approved review, no open placeholders, resolved media) will gate it later.

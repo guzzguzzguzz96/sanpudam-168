@@ -54,10 +54,11 @@ const SERVER_WIRING = new Map([
   ["src/app/admin/page.js", ADMIN_PAGE_WIRING],
   ["src/app/admin/login/page.js", ADMIN_PAGE_WIRING],
   ["src/app/admin/content/page.js", ["@/server/admin/content-inventory", "@/server/auth/admin-access", "@/server/auth/config", "@/server/auth/identity"]],
+  ["src/app/admin/content/[type]/[id]/page.js", ["@/server/admin/content-detail", "@/server/auth/admin-access", "@/server/auth/config", "@/server/auth/identity"]],
   ["src/app/admin/actions.js", ["@/server/auth/auth", "@/server/auth/config", "@/server/auth/identity"]],
   ["src/app/api/auth/[...nextauth]/route.js", ["@/server/auth/auth", "@/server/auth/config"]],
 ]);
-const ADMIN_ROUTES = ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/content/page.js", "src/app/admin/actions.js", "src/app/api/auth/[...nextauth]/route.js"];
+const ADMIN_ROUTES = ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/content/page.js", "src/app/admin/content/[type]/[id]/page.js", "src/app/admin/actions.js", "src/app/api/auth/[...nextauth]/route.js"];
 const CONTENT_ROUTES = ["src/app/history/page.js", "src/app/sakkara/page.js", "src/app/sakkara/[slug]/page.js", "src/app/news/page.js", "src/app/news/[slug]/page.js", "src/app/visit/page.js"];
 
 test("boundary: UI components never use the data layer; routes use only their entry point", () => {
@@ -162,7 +163,7 @@ test("boundary: admin authentication never uses Client Review modules, flags, or
 });
 
 test("boundary: admin routes check access on the server and stay private", () => {
-  for (const page of ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/content/page.js"]) {
+  for (const page of ["src/app/admin/page.js", "src/app/admin/login/page.js", "src/app/admin/content/page.js", "src/app/admin/content/[type]/[id]/page.js"]) {
     const text = read(join(root, page));
     assert.match(text, /getAdminAccess\(\)/, page);
     assert.match(text, /<Suspense/, page);
@@ -191,6 +192,23 @@ test("boundary: the admin content inventory needs an admin role and ignores revi
   assert.ok(page.indexOf("getAdminAccess()") < page.indexOf("loadContentInventory("), "access check before reading content");
   assert.ok(page.indexOf("loadContentInventory(") < page.indexOf("await searchParams"), "filter read only after access");
   assert.match(page, /hasAdminRole\(access\.principal, CONTENT_INVENTORY_ROLES\)/);
+
+  // The detail module and page follow the same rules, and never project
+  // legacy or migration metadata.
+  const detail = read(join(root, "src/server/admin/content-detail.js"));
+  assert.doesNotMatch(detail, /readReviewPolicy|isClientReviewEnabled|evaluateReviewMode|CLIENT_REVIEW_ENABLED|CLIENT_REVIEW_LOCAL|getContentService|lib\/db|dangerouslySetInnerHTML/);
+  assert.doesNotMatch(detail, /\.(insert|update|delete|replace|save|create|bulkWrite|aggregate)\w*\(/);
+  assert.doesNotMatch(detail, /["']legacy[."']|["']migration[."']|createdBy|updatedBy|legacyUrl|consent\.note/);
+  const detailBody = detail.slice(detail.indexOf("export async function loadContentDetail"));
+  assert.ok(detailBody.indexOf("requireAdminRole(principal, CONTENT_INVENTORY_ROLES)") > 0);
+  assert.ok(detailBody.indexOf("requireAdminRole(") < detailBody.indexOf("readReviewDatabaseConfig("), "role check before configuration or connection");
+  const detailPage = read(join(root, "src/app/admin/content/[type]/[id]/page.js"));
+  assert.ok(detailPage.indexOf("getAdminAccess()") < detailPage.indexOf("await params"), "access check before the URL values are used");
+  assert.ok(detailPage.indexOf("await params") < detailPage.indexOf("loadContentDetail("));
+  assert.match(detailPage, /hasAdminRole\(access\.principal, CONTENT_INVENTORY_ROLES\)/);
+  for (const component of ["src/components/admin/content-detail.js", "src/components/admin/content-inventory.js"]) {
+    assert.doesNotMatch(read(join(root, component)), /dangerouslySetInnerHTML|"use client"/, component);
+  }
 });
 
 // Runs after `npm run build`; skipped when no build output exists.

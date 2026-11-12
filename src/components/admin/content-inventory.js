@@ -4,9 +4,13 @@ import { Section } from "@/components/ui/section";
 
 // Read-only content list for /admin/content. Receives the list DTO only
 // (title, type, publication and review status). Filters are plain links,
-// so the page works without client JavaScript. No edit or publish actions.
+// so the page works without client JavaScript. Each title opens the
+// read-only detail page. No edit or publish actions.
 
 const typeHref = (key) => (key ? `/admin/content?type=${encodeURIComponent(key)}` : "/admin/content");
+// Detail link; "from" keeps the active type filter for the back link.
+const detailHref = (item, filterType) =>
+  `/admin/content/${encodeURIComponent(item.type)}/${encodeURIComponent(item.id)}${filterType ? `?from=${encodeURIComponent(filterType)}` : ""}`;
 
 function StatusBadge({ status, kind }) {
   const tone = status.known ? `${kind}-${status.value}` : "unknown";
@@ -81,7 +85,9 @@ export function ContentInventory({ inventory, filter }) {
                   {filter.items.map((item) => (
                     <tr key={`${item.type}-${item.id}`}>
                       <th scope="row" className="admin-table__title">
-                        {item.title}
+                        <Link className="admin-table__link" href={detailHref(item, filter.type)} prefetch={false}>
+                          {item.title}
+                        </Link>
                       </th>
                       <td data-label="ประเภท">{item.typeLabel}</td>
                       <td data-label="การเผยแพร่">
@@ -106,7 +112,7 @@ const UNAVAILABLE_TEXT = {
   environment: "รายการเนื้อหาจากฐานข้อมูลทดสอบไม่เปิดใช้ในสภาพแวดล้อมนี้",
 };
 
-export function ContentInventoryUnavailable({ reason }) {
+export function ContentInventoryUnavailable({ reason, backHref = null }) {
   return (
     <Section aria-labelledby="admin-inventory-unavailable" className="admin-section">
       <Container>
@@ -115,6 +121,13 @@ export function ContentInventoryUnavailable({ reason }) {
             ยังแสดงรายการเนื้อหาไม่ได้
           </h2>
           <p className="admin-panel__text">{UNAVAILABLE_TEXT[reason] ?? "ระบบอ่านข้อมูลเนื้อหาไม่สำเร็จในขณะนี้ กรุณาลองใหม่ภายหลัง"}</p>
+          {backHref ? (
+            <p className="admin-detail__back">
+              <Link href={backHref} prefetch={false}>
+                ← กลับไปยังรายการเนื้อหา
+              </Link>
+            </p>
+          ) : null}
         </div>
       </Container>
     </Section>
