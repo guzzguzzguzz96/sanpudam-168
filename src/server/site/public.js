@@ -2,6 +2,7 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { getPublicContent } from "../cms/index.js";
 import { buildHomepage, buildSiteChrome, loadHomepageSections } from "../review/homepage.js";
+import { buildSeoIndex } from "./seo.js";
 import { createSitePages } from "./service.js";
 
 // Public site data, cached with "use cache" (Cache Components).
@@ -93,6 +94,26 @@ export async function getPublicNewsArticlePage(slug) {
   if (page.status === "unavailable") cacheLife("minutes");
   else cacheLife(PUBLISHED_LIFE);
   return page;
+}
+
+// Titles, descriptions, social images, slugs, and JSON-LD inputs for every
+// public page (src/server/site/seo.js), from one set of reads.
+export async function getPublicSeoIndex() {
+  "use cache";
+  cacheTag(PUBLIC_CONTENT_TAG);
+  const repositories = getPublicContent();
+  const [siteSettings, historyPage, sacredItems, news, banners] = await Promise.all([
+    repositories.siteSettings(),
+    repositories.historyPage(),
+    repositories.sacredItems({ limit: 200 }),
+    repositories.news({ limit: 200 }),
+    repositories.banners({ limit: 20 }),
+  ]);
+  const index = buildSeoIndex({ siteSettings, historyPage, sacredItems, news, banners });
+  const degraded = [siteSettings, historyPage, sacredItems, news, banners].some((result) => result.status === "unavailable");
+  if (degraded) cacheLife("minutes");
+  else cacheLife(PUBLISHED_LIFE);
+  return { ...index, degraded };
 }
 
 export async function getPublicVisitPage() {

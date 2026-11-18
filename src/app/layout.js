@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/site-header";
 import { siteConfig } from "@/config/site";
 import { evaluateSiteLaunch, readSiteUrl, robotsFor } from "@/lib/site-launch";
 import { isClientReviewEnabled } from "@/server/review";
+import { getSiteMetadataDefaults } from "@/server/site";
 import "./globals.css";
 import "@/components/home/home.css";
 import "@/components/pages/pages.css";
@@ -38,23 +39,33 @@ const displayFont = Noto_Sans_Thai({
 const launch = evaluateSiteLaunch(process.env);
 const siteUrl = readSiteUrl(process.env);
 
-export const metadata = {
-  ...(siteUrl ? { metadataBase: siteUrl } : {}),
-  applicationName: siteConfig.name,
-  title: {
-    default: siteConfig.name,
-    template: `%s | ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  openGraph: {
-    type: "website",
-    locale: "th_TH",
-    siteName: siteConfig.name,
-    title: siteConfig.name,
-    description: siteConfig.description,
-  },
-  robots: robotsFor(launch),
-};
+// Generic defaults; on the public site the published site settings supply
+// the title template (short name), default description, and social image.
+// Review mode never reads content here.
+export async function generateMetadata() {
+  const site = await getSiteMetadataDefaults();
+  const name = site?.shortName ?? siteConfig.name;
+  const title = site?.title ?? siteConfig.name;
+  const description = site?.description ?? siteConfig.description;
+  return {
+    ...(siteUrl ? { metadataBase: siteUrl } : {}),
+    applicationName: name,
+    title: {
+      default: title,
+      template: `%s | ${name}`,
+    },
+    description,
+    openGraph: {
+      type: "website",
+      locale: "th_TH",
+      siteName: name,
+      title,
+      description,
+      ...(site?.image ? { images: [site.image] } : {}),
+    },
+    robots: robotsFor(launch),
+  };
+}
 
 export default function RootLayout({ children }) {
   // Environment-only decision (src/lib/review-mode.js). In review mode the

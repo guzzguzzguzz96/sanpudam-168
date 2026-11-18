@@ -4,12 +4,15 @@ import { PageHeader } from "@/components/pages/page-header";
 import { PageUnavailable } from "@/components/pages/page-unavailable";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
-import { getNewsPage } from "@/server/site";
+import { getNewsPage, getPageMetadata } from "@/server/site";
 
-// Generic metadata only: no CMS content (draft or published) is used here.
-export const metadata = {
-  title: "ข่าวสาร",
-};
+// Review mode: generic title only (no CMS content). Public site: title,
+// description, canonical URL, and social image from the published records.
+const fallback = { title: "ข่าวสาร" };
+
+export async function generateMetadata() {
+  return getPageMetadata("news", { title: "ข่าวสารและกิจกรรม", fallback });
+}
 
 async function NewsContent() {
   const page = await getNewsPage();

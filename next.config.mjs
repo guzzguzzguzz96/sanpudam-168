@@ -18,7 +18,13 @@ const adminResponseHeaders = ["/admin", "/admin/:path*", "/api/auth/:path*"].map
 const nextConfig = {
   /* config options here */
   cacheComponents: true,
-  partialPrefetching: true,
+  // Partial Prefetching serves a route's App Shell (HTTP 200) for a slug that
+  // was not prerendered and renders the page in the background. The public
+  // site turns it off so the first request for an unknown slug waits for the
+  // page, whose notFound() then returns a real HTTP 404 (slug pages await
+  // params outside Suspense on the public site). Client Review keeps it on,
+  // unchanged: its pages stream drafts inside Suspense per request.
+  partialPrefetching: reviewMode.enabled,
   // The migrated media library, in every mode: the public site reuses the
   // same Cloudinary files (sanpudam168/staging) that review mode shows. The
   // pattern stays exactly this narrow: one cloud, versioned uploads, one

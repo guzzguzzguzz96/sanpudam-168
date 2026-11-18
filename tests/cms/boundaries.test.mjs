@@ -43,7 +43,8 @@ const ADMIN_PAGE_WIRING = ["@/server/auth/admin-access", "@/server/auth/identity
 const SERVER_WIRING = new Map([
   ["src/app/page.js", ["@/server/site"]],
   ["src/app/_site/site-chrome.js", ["@/server/site"]],
-  ["src/app/layout.js", ["@/server/review"]],
+  ["src/app/layout.js", ["@/server/review", "@/server/site"]],
+  ["src/app/sitemap.js", ["@/server/site"]],
   ["src/app/_review/review-homepage.js", ["@/server/review"]],
   ["src/app/_review/review-chrome.js", ["@/server/review"]],
   ["src/app/history/page.js", ["@/server/site"]],
@@ -116,7 +117,20 @@ test("boundary: review content is request-time only; public content is cached pu
   for (const file of sourceFiles) {
     if (rel(file) !== "src/server/site/public.js") assert.doesNotMatch(read(file), /^\s*"use cache/m, `${rel(file)}: "use cache" only in the public loaders`);
   }
-  for (const file of sourceFiles) assert.doesNotMatch(read(file), /dangerouslySetInnerHTML/, rel(file));
+  // JSON-LD is the only raw HTML, from one component that escapes "<".
+  for (const file of sourceFiles) {
+    if (rel(file) === "src/components/seo/json-ld.js") continue;
+    assert.doesNotMatch(read(file), /dangerouslySetInnerHTML/, rel(file));
+  }
+  assert.ok(read(join(root, "src/components/seo/json-ld.js")).includes("dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }}"), "JSON-LD goes through serializeJsonLd");
+  // Public slug pages decide 404 before streaming; review keeps Suspense.
+  for (const route of ["src/app/sakkara/[slug]/page.js", "src/app/news/[slug]/page.js"]) {
+    const text = read(join(root, route));
+    assert.match(text, /export async function generateStaticParams\(\) \{\s*return getStaticSlugs\(/, route);
+    assert.match(text, /if \(isClientReviewEnabled\(\)\) \{\s*return \(\s*<main[^]*?<Suspense/, `${route}: review branch streams inside Suspense`);
+  }
+  // Partial Prefetching (App Shell = HTTP 200 for unknown slugs) is review-only.
+  assert.match(read(join(root, "next.config.mjs")), /partialPrefetching: reviewMode\.enabled,/);
 });
 
 test("boundary: review credentials are read only by the review config, with no fallback", () => {
@@ -276,12 +290,21 @@ test("boundary: prerendered output contains no migrated draft content", { skip: 
   }
 });
 
-test("boundary: no sitemap, robots, feed, or public API route advertises review content", () => {
+test("boundary: sitemap and robots follow the launch policy and publish public data only", () => {
   const appFiles = walk(join(root, "src/app"), /\.(js|jsx|xml|txt)$/).map(rel);
-  // The Auth.js handler is the only route handler.
+  // The Auth.js handler is the only route handler; robots.js and sitemap.js
+  // are the only metadata routes. No feed or public API.
+  const allowed = new Set(["src/app/api/auth/[...nextauth]/route.js", "src/app/robots.js", "src/app/sitemap.js"]);
   for (const file of appFiles) {
-    if (file === "src/app/api/auth/[...nextauth]/route.js") continue;
+    if (allowed.has(file)) continue;
     assert.doesNotMatch(file, /(sitemap|robots|feed|rss|route\.js)/i, file);
   }
+  const robots = read(join(root, "src/app/robots.js"));
+  assert.match(robots, /if \(!launch\.indexable\) return \{ rules: \{ userAgent: "\*", disallow: "\/" \} \};/);
+  assert.match(robots, /disallow: \["\/admin", "\/api\/"\]/);
+  assert.doesNotMatch(robots, /@\/server\//);
+  assert.match(read(join(root, "src/app/sitemap.js")), /import \{ getSitemapEntries \} from "@\/server\/site";/);
+  const entry = read(join(root, "src/server/site/index.js"));
+  assert.match(entry, /export async function getSitemapEntries\(\) \{\s*const siteUrl = readSiteUrl\(process\.env\);\s*if \(isClientReviewEnabled\(\) \|\| !evaluateSiteLaunch\(process\.env\)\.indexable \|\| !siteUrl\) return \[\];\s*const index = await getPublicSeoIndex\(\);/);
   assert.match(read(join(root, "src/app/layout.js")), /robots: robotsFor\(launch\)/);
 });
