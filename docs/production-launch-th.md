@@ -79,7 +79,7 @@ Preview (`dev`) คงค่าเดิมของ Client Review ทั้ง�
    รันซ้ำได้: ผลเป็น `unchanged`; เอกสารที่ถูกแก้บน Production หลังย้าย จะเป็น `conflict` และไม่ถูกเขียนทับ
 5. **ตั้ง env Production** ตามข้อ 3 (ยังไม่ตั้ง `SITE_LAUNCHED`) → deploy `main` → ตรวจบน URL ของ Vercel:
    หน้าแรก/ประวัติ/วัตถุมงคล 5 รายการ/ข่าว 3 ข่าว/เยี่ยมชม แสดงข้อมูลจริง, ไม่มีป้าย review, ปุ่มโทร/LINE/Maps ทำงาน, `/news/ไม่มีจริง` ได้ 404, robots.txt = `Disallow: /`
-6. **เปิดให้ค้นหา**: ตั้ง `SITE_LAUNCHED=true` → redeploy → ตรวจ `https://sanpudam168.com/robots.txt` (Allow + Sitemap), `/sitemap.xml` (หน้า + 5 วัตถุมงคล + 3 ข่าว), meta `index, follow`, ไม่มีแถบ "เว็บไซต์ต้นแบบ"
+6. **เปิดให้ค้นหา**: ตั้ง `SITE_LAUNCHED=true` → redeploy → ตรวจ `https://sanpudam168.com/robots.txt` (Allow + Sitemap), `/sitemap.xml` (หน้า + 5 วัตถุมงคล + 3 ข่าว), meta `index, follow`, ไม่มีแถบ "เว็บไซต์ทดสอบ · ยังไม่เปิดให้บริการจริง"
 7. **DNS** (ข้อ 5) แล้วส่ง sitemap ใน Google Search Console
 
 ## 5. DNS (Cloudflare)
@@ -116,6 +116,9 @@ Preview (`dev`) คงค่าเดิมของ Client Review ทั้ง�
    - ตัวเขียน FAQ / `admin_audit_log` สำหรับ Production
    - ไฟล์ og-default เฉพาะ (ตอนนี้ใช้ `brand-og-default` 1200×630 ที่ย้ายมา และสำรองด้วยภาพซุ้มประตู crop 1200×630)
    - videos / reviews / team members เมื่อได้ไฟล์และ consent
+   - แก้เทสต์ `migration/scripts/tests/dns-config.test.mjs` ข้อ "the Next.js application does not use the DNS override" ที่ fail มาตั้งแต่ commit `10130eb`:
+     `src/server/review/connection.js` ใช้ `node:dns` (`CLIENT_REVIEW_DNS_SERVERS`, เฉพาะ review บนเครื่อง local) ซึ่งขัดกับเทสต์;
+     ต้องตัดสินใจว่าจะยกเว้นไฟล์นี้ในเทสต์ หรือย้าย DNS override ออกจากแอป (เทสต์นี้ไม่อยู่ใน `npm test`)
 
 ## 8. การตรวจหลัง deploy (เช็กลิสต์)
 
