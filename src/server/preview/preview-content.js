@@ -1,22 +1,17 @@
 import "server-only";
-import { adaptFeaturedItems, adaptGallery, adaptLatestNews, composeHomepageData } from "../cms/adapters.js";
-import { loadHomepageContent } from "../cms/homepage.js";
-import { homepagePreviewData } from "../../data/homepage-preview.js";
+import { buildHomepage, galleryView, loadHomepageSections } from "../review/homepage.js";
+import { buildNewsListPage, buildSacredItemsPage } from "../site/pages.js";
 import { describePublicationState } from "./publication-state.js";
 
 // Private preview loaders. Each one requires a draft grant (checked by
-// service.withDraftAccess before any query), reuses the public adapters and
-// media resolver, and returns view data plus a per-record publication state
+// service.withDraftAccess before any query), reuses the site view builders
+// (draft scope: placeholder labels, no sample fallback) and media resolver, and returns view data plus a per-record publication state
 // (stage label and open placeholder fields).
 //
 // Read-only: nothing here changes status, review, or any other field.
 // Not used by any route yet (docs/frontend-data-integration.md §13).
 
 export const PREVIEW_SECTIONS = Object.freeze(["homepage", "sacred-items", "news", "history", "gallery"]);
-
-// Every link is enabled in preview; preview routes mirror the public ones
-// under the private prefix.
-const PREVIEW_ROUTES = { sacredItems: true, sacredItemDetail: true, newsDetail: true };
 
 function recordStates(collection, result) {
   const docs = result?.data == null ? [] : Array.isArray(result.data) ? result.data : [result.data];
@@ -50,9 +45,10 @@ function historyView(result) {
 
 const loaders = {
   async homepage(repos) {
-    const content = await loadHomepageContent(repos);
+    const content = await loadHomepageSections(repos);
     return {
-      view: composeHomepageData(content, homepagePreviewData, { routes: PREVIEW_ROUTES }),
+      // No owner overrides in the draft preview.
+      view: buildHomepage(content, { scope: "draft", overrides: null }),
       records: [
         ...recordStates("site_settings", content.siteSettings),
         ...recordStates("banners", content.banners),
@@ -66,12 +62,12 @@ const loaders = {
   },
   async "sacred-items"(repos) {
     const result = await repos.sacredItems({ limit: 200 });
-    const view = result.status === "ok" ? adaptFeaturedItems(result, { catalogHref: null, items: [] }, { limit: 200, routes: PREVIEW_ROUTES }).items : [];
+    const view = result.status === "ok" ? buildSacredItemsPage(result) : [];
     return { view, records: [...recordStates("sacred_items", result), ...[...(result.categories?.values() ?? [])].flatMap((c) => recordStates("categories", { data: c }))] };
   },
   async news(repos) {
     const result = await repos.news({ limit: 200 });
-    return { view: result.status === "ok" ? adaptLatestNews(result, [], { limit: 200, routes: PREVIEW_ROUTES }) : [], records: recordStates("news", result) };
+    return { view: result.status === "ok" ? buildNewsListPage(result) : [], records: recordStates("news", result) };
   },
   async history(repos) {
     const result = await repos.historyPage();
@@ -79,7 +75,7 @@ const loaders = {
   },
   async gallery(repos) {
     const result = await repos.gallery({ limit: 200 });
-    return { view: result.status === "ok" ? adaptGallery(result, [{ layout: "" }], { limit: 200 }) : [], records: recordStates("gallery_items", result) };
+    return { view: result.status === "ok" ? (galleryView(result) ?? []) : [], records: recordStates("gallery_items", result) };
   },
 };
 

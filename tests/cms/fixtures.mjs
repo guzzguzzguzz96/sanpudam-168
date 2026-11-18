@@ -11,7 +11,9 @@ export const ids = {
   draftCategory: "cccccccccccccccccccccccd",
 };
 
-export function asset(id, { rights = "approved", resourceType = "image", deletedAt = null } = {}) {
+// approval defaults to "approved" for approved rights, so "approved" fixtures
+// pass the full public media rule unless a test says otherwise.
+export function asset(id, { rights = "approved", approval = rights === "approved" ? "approved" : "pending", people = false, consent = people ? "pending" : "not_required", resourceType = "image", deletedAt = null } = {}) {
   return {
     _id: id,
     resourceType,
@@ -26,7 +28,8 @@ export function asset(id, { rights = "approved", resourceType = "image", deleted
     width: 1600,
     height: 1066,
     defaultAlt: "ภาพจากคลังสื่อ",
-    rights: { status: rights },
+    rights: { status: rights, containsIdentifiablePeople: people, consent: { status: consent } },
+    approval: { status: approval },
     deletedAt,
   };
 }

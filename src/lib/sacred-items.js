@@ -56,3 +56,12 @@ export function filterSacredItemsByCategory(items, categoryId) {
     ? items.filter((item) => item.category?.id === categoryId)
     : items;
 }
+
+// ?cat=<slug> on /sakkara: the category id when the value is a well-formed
+// slug of a category in the list, otherwise null (show every item).
+const CATEGORY_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+export function activeCategory(value, categories) {
+  if (typeof value !== "string" || value.length > 100 || !CATEGORY_SLUG.test(value)) return null;
+  return categories.some((category) => category.id === value) ? value : null;
+}

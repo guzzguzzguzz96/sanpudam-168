@@ -189,6 +189,13 @@ export function buildNewsArticlePage(result) {
 
 // --- /visit --------------------------------------------------------------
 
+// Keyless Google Maps embed for a place query (at most 120 characters, as in
+// the schema). Returns null for an empty or oversized query.
+export function mapEmbedUrl(query) {
+  if (typeof query !== "string" || !query.trim() || query.trim().length > 120) return null;
+  return `https://www.google.com/maps?q=${encodeURIComponent(query.trim())}&hl=th&z=17&output=embed`;
+}
+
 // scope "review": imported values are shown as text with their labels;
 // only an owner-confirmed directions override becomes an action (an
 // imported link that passes validation is shown labeled).
@@ -233,8 +240,13 @@ export function buildVisitPage(result, { scope, overrides = null }) {
     social: (settings.socialLinks ?? [])
       .map(reviewSocialLink)
       .filter((link) => link && (isReview || link.verified))
-      .map((link) => ({ id: `social-${link.platform}`, label: link.label, value: link.value, note: isReview && !link.verified ? REVIEW_LABELS.unverifiedContact : null })),
+      // Public: verified links become clickable (tracking parameters removed).
+      // Review: text only, as before.
+      .map((link) => ({ id: `social-${link.platform}`, label: link.label, value: link.value, ...(isReview ? {} : { href: link.href }), note: isReview && !link.verified ? REVIEW_LABELS.unverifiedContact : null })),
     directions,
+    // Embedded Google Maps (public, verified contact only). Keyless embed
+    // URL built from the stored query; never from request data.
+    mapEmbedUrl: !isReview && verified ? mapEmbedUrl(text(contact.mapEmbedQuery) ?? [text(settings.identity?.name), text(contact.locationShort)].filter(Boolean).join(" ")) : null,
     // Clickable phone/LINE actions: public and owner-verified only.
     verifiedContact: !isReview && verified ? { phoneNumber: phone, lineInquiryUrl: lineUrlFromId(contact.lineId) } : null,
   };

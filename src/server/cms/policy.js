@@ -43,10 +43,25 @@ export function isPubliclyVisible(doc) {
   return !(doc.placeholderFields ?? []).some((flag) => flag.status === "placeholder");
 }
 
-// Media may appear publicly only when its rights are approved and it has not
-// been removed (spec §6: rights.status = approved for media in use).
+// Media may appear publicly only when, at the same time (spec §6 plus the
+// launch rule from the owner-data audit):
+//   - rights.status is "approved" (the owner may reuse the file),
+//   - approval.status is "approved" (the file itself was signed off),
+//   - a photo with identifiable people has consent "obtained"
+//     (ConsentSchema has no "approved" value; "obtained" is its equivalent),
+//   - it has not been removed.
+// Like the content rule it is applied in the query and again on every
+// returned asset, so a wrong query can never leak an unapproved image.
+export const PUBLIC_MEDIA_CONSENT = "obtained";
+
 export function publicMediaFilter(ids) {
-  return { _id: { $in: ids }, "rights.status": "approved", deletedAt: null };
+  return {
+    _id: { $in: ids },
+    "rights.status": "approved",
+    "approval.status": "approved",
+    $or: [{ "rights.containsIdentifiablePeople": { $ne: true } }, { "rights.consent.status": PUBLIC_MEDIA_CONSENT }],
+    deletedAt: null,
+  };
 }
 
 export function draftMediaFilter(ids) {
@@ -54,7 +69,9 @@ export function draftMediaFilter(ids) {
 }
 
 export function isMediaPubliclyUsable(asset) {
-  return Boolean(asset) && asset.rights?.status === "approved" && !asset.deletedAt;
+  if (!asset || asset.deletedAt) return false;
+  if (asset.rights?.status !== "approved" || asset.approval?.status !== "approved") return false;
+  return asset.rights?.containsIdentifiablePeople !== true || asset.rights?.consent?.status === PUBLIC_MEDIA_CONSENT;
 }
 
 export function isMediaDraftUsable(asset) {
@@ -77,5 +94,6 @@ export const MEDIA_PROJECTION = {
   defaultAlt: 1,
   resourceType: 1,
   rights: 1,
+  approval: 1,
   deletedAt: 1,
 };

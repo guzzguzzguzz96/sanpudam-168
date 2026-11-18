@@ -9,7 +9,10 @@ import { Section } from "@/components/ui/section";
 // Thumbnail in a consistent 16:9 frame. Posters and newsletters are shown
 // whole (fit "contain" on a neutral matte); the full image stays on the
 // article page.
-export function NewsCard({ article, headingLevel: Heading = "h3" }) {
+// hideMissingImage (public site): an article whose cover image is not
+// approved for public use renders as a text-only card, with no empty frame.
+// Client Review keeps the placeholder frame so missing media stays visible.
+export function NewsCard({ article, headingLevel: Heading = "h3", hideMissingImage = false }) {
   const title = article.href ? (
     <Link href={article.href} prefetch={false}>
       {article.title}
@@ -19,8 +22,8 @@ export function NewsCard({ article, headingLevel: Heading = "h3" }) {
   );
 
   return (
-    <Card as="article" className="home-news-card">
-      <MediaFrame
+    <Card as="article" className={`home-news-card${!article.image && hideMissingImage ? " home-news-card--text-only" : ""}`}>
+      {!article.image && hideMissingImage ? null : <MediaFrame
         alt={article.image?.alt}
         className="home-news-card__media"
         desktopImage={article.image}
@@ -28,7 +31,7 @@ export function NewsCard({ article, headingLevel: Heading = "h3" }) {
         matte={article.image?.matte}
         placeholderLabel="พื้นที่ภาพข่าวตัวอย่าง · ไม่มีภาพข่าวจริง"
         sizes="(max-width: 767px) 100vw, (max-width: 1023px) 40vw, 30vw"
-      />
+      />}
       <p className="home-news-card__date">
         {article.publicationDate ?? "วันที่เผยแพร่รอการยืนยัน"}
       </p>
@@ -49,7 +52,7 @@ export function NewsCard({ article, headingLevel: Heading = "h3" }) {
 }
 
 // Equal cards in reading order; each keeps its natural height.
-export function LatestNews({ data }) {
+export function LatestNews({ data, hideMissingImages = false }) {
   return (
     <Section aria-labelledby="latest-news-title" className="home-latest-news">
       <Container>
@@ -61,7 +64,7 @@ export function LatestNews({ data }) {
         <ul className="home-news-grid">
           {data.map((article) => (
             <li key={article.id}>
-              <NewsCard article={article} />
+              <NewsCard article={article} hideMissingImage={hideMissingImages} />
             </li>
           ))}
         </ul>

@@ -1,45 +1,90 @@
 import "server-only";
 import { connection } from "next/server";
 import { getPublicContent } from "../cms/index.js";
-import { getReviewRepositories } from "../review/index.js";
+import { getReviewChrome, getReviewHomepage, getReviewRepositories, isClientReviewEnabled } from "../review/index.js";
+import {
+  getPublicChrome,
+  getPublicHistoryPage,
+  getPublicHomepage,
+  getPublicNewsArticlePage,
+  getPublicNewsPage,
+  getPublicSacredItemPage,
+  getPublicSacredItemsPage,
+  getPublicVisitPage,
+} from "./public.js";
 import { createSitePages } from "./service.js";
 
-// Next.js entry point for the content pages: /history, /sakkara,
-// /sakkara/[slug] (docs/client-review-mode.md §12), /news, /news/[slug],
-// and /visit (§13). Every loader waits for connection()
-// first, so content is read per request and never prerendered into a
-// static shell or build artifact. In review mode the repositories (and the
-// site-settings read) are shared with the header and footer within one
-// request; nothing is cached across requests.
+// Next.js entry point for every content page: /, /history, /sakkara,
+// /sakkara/[slug], /news, /news/[slug], /visit, and the header and footer.
+//
+// The scope is chosen only by the environment-based review policy:
+//   review mode on  -> Client Review: connection() first, so draft data is
+//                      read per request and never prerendered, cached, or
+//                      part of a static shell or build artifact. The
+//                      repositories (and the site-settings read) are shared
+//                      with the header and footer within one request.
+//   review mode off -> the public site: published data through the cached
+//                      loaders in public.js (see there for the lifetimes).
+// Request data never selects the scope.
 
-const pages = createSitePages({ review: getReviewRepositories, publicRepositories: getPublicContent });
+const reviewPages = createSitePages({ review: getReviewRepositories, publicRepositories: getPublicContent });
+
+export { isClientReviewEnabled };
+
+export async function getHomepage() {
+  if (isClientReviewEnabled()) return getReviewHomepage();
+  return getPublicHomepage();
+}
+
+export async function getSiteChrome() {
+  if (isClientReviewEnabled()) return getReviewChrome();
+  return getPublicChrome();
+}
 
 export async function getHistoryPage() {
-  await connection();
-  return pages.history();
+  if (isClientReviewEnabled()) {
+    await connection();
+    return reviewPages.history();
+  }
+  return getPublicHistoryPage();
 }
 
 export async function getSacredItemsPage() {
-  await connection();
-  return pages.sacredItems();
+  if (isClientReviewEnabled()) {
+    await connection();
+    return reviewPages.sacredItems();
+  }
+  return getPublicSacredItemsPage();
 }
 
 export async function getSacredItemPage(slug) {
-  await connection();
-  return pages.sacredItem(slug);
+  if (isClientReviewEnabled()) {
+    await connection();
+    return reviewPages.sacredItem(slug);
+  }
+  return getPublicSacredItemPage(slug);
 }
 
 export async function getNewsPage() {
-  await connection();
-  return pages.news();
+  if (isClientReviewEnabled()) {
+    await connection();
+    return reviewPages.news();
+  }
+  return getPublicNewsPage();
 }
 
 export async function getNewsArticlePage(slug) {
-  await connection();
-  return pages.newsArticle(slug);
+  if (isClientReviewEnabled()) {
+    await connection();
+    return reviewPages.newsArticle(slug);
+  }
+  return getPublicNewsArticlePage(slug);
 }
 
 export async function getVisitPage() {
-  await connection();
-  return pages.visit();
+  if (isClientReviewEnabled()) {
+    await connection();
+    return reviewPages.visit();
+  }
+  return getPublicVisitPage();
 }

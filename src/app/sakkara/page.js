@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { PageHeader } from "@/components/pages/page-header";
 import { PageUnavailable } from "@/components/pages/page-unavailable";
+import { SacredItemFilter } from "@/components/sacred-items/sacred-item-filter";
 import { SacredItemGrid } from "@/components/sacred-items/sacred-item-grid";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
@@ -20,11 +21,11 @@ async function SacredItemsContent() {
   return (
     <Section aria-label="รายการวัตถุมงคล" className="content-page__section content-page__section--first">
       <Container>
-        <SacredItemGrid
-          emptyMessage="ยังไม่มีรายการวัตถุมงคลที่เผยแพร่"
-          headingLevel="h2"
-          items={page.view}
-        />
+        {/* ?cat=<slug> is read in the browser only (legacy-compatible links);
+            the server output is the full, cacheable list. */}
+        <Suspense fallback={<SacredItemGrid emptyMessage="ยังไม่มีรายการวัตถุมงคลที่เผยแพร่" headingLevel="h2" items={page.view} />}>
+          <SacredItemFilter emptyMessage="ยังไม่มีรายการวัตถุมงคลที่เผยแพร่" headingLevel="h2" items={page.view} />
+        </Suspense>
       </Container>
     </Section>
   );

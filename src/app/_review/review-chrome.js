@@ -22,7 +22,7 @@ function confirmedActionsOf(review) {
 
 export async function ReviewSiteHeader() {
   const review = await getReviewChrome();
-  return <SiteHeader brand={brandOf(review)} reviewActions={confirmedActionsOf(review)} />;
+  return <SiteHeader brand={brandOf(review)} actions={confirmedActionsOf(review)} />;
 }
 
 export async function ReviewSiteFooter() {
@@ -30,8 +30,8 @@ export async function ReviewSiteFooter() {
   return (
     <SiteFooter
       brand={brandOf(review)}
-      reviewActions={confirmedActionsOf(review)}
-      reviewContact={review.status === "ok" ? review.footer : null}
+      actions={confirmedActionsOf(review)}
+      contact={review.status === "ok" ? review.footer : null}
     />
   );
 }

@@ -19,20 +19,20 @@ const nextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
-  // Migrated staging media only, and only while review mode is on.
-  ...(reviewMode.enabled
-    ? {
-        images: {
-          remotePatterns: [
-            {
-              protocol: "https",
-              hostname: "res.cloudinary.com",
-              pathname: "/lov36obu/image/upload/*/sanpudam168/staging/**",
-            },
-          ],
-        },
-      }
-    : {}),
+  // The migrated media library, in every mode: the public site reuses the
+  // same Cloudinary files (sanpudam168/staging) that review mode shows. The
+  // pattern stays exactly this narrow: one cloud, versioned uploads, one
+  // folder. Which assets may render is decided by the media rules in
+  // src/server/cms/policy.js, not by this allowlist.
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/lov36obu/image/upload/*/sanpudam168/staging/**",
+      },
+    ],
+  },
   async headers() {
     return [...reviewResponseHeaders(reviewMode), ...adminResponseHeaders];
   },

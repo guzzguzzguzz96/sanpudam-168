@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { createContentService } from "../../src/server/cms/content-service.js";
 import { createDraftAccessPolicy, defaultDraftAccessPolicy, DraftAccessDeniedError } from "../../src/server/cms/draft-access.js";
 import { isPubliclyVisible, publicContentFilter } from "../../src/server/cms/policy.js";
-import { loadHomepageContent } from "../../src/server/cms/homepage.js";
+import { loadHomepageSections as loadHomepageContent } from "../../src/server/review/homepage.js";
 import { assertDatabaseMatchesEnvironment, sanitizeError } from "../../src/lib/db.js";
 import { SECRET_URI, draft, mockModels, pendingReview, published, publishedSite, withOpenPlaceholder } from "./fixtures.mjs";
 

@@ -62,7 +62,14 @@ export function VisitView({ view }) {
                     <div key={channel.id} className="content-page__fact">
                       <dt>{channel.label}</dt>
                       <dd>
-                        <span className="content-page__channel-value">{channel.value}</span>
+                        {channel.href ? (
+                          <a className="content-page__channel-value" href={channel.href} rel="noopener noreferrer" target="_blank">
+                            {channel.value}
+                            <span className="sr-only"> (เปิดในหน้าต่างใหม่)</span>
+                          </a>
+                        ) : (
+                          <span className="content-page__channel-value">{channel.value}</span>
+                        )}
                         <ReviewNote note={channel.note} />
                       </dd>
                     </div>
@@ -72,7 +79,18 @@ export function VisitView({ view }) {
             ) : null}
           </div>
 
-          {/* No map embed: there is no verified embed source. */}
+          {view.mapEmbedUrl ? (
+            <div className="home-visit__map home-visit__map--embed">
+              <iframe
+                allowFullScreen
+                className="home-visit__map-frame"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                src={view.mapEmbedUrl}
+                title={`แผนที่ Google Maps ตำแหน่ง${view.name ? view.name : "ศาล"}`}
+              />
+            </div>
+          ) : (
           <div className="home-visit__map">
             <span aria-hidden="true" className="home-visit__map-pin">
               <Icon name="mapPin" size={32} />
@@ -84,6 +102,7 @@ export function VisitView({ view }) {
             </p>
             <ReviewNote note={view.directions?.note} />
           </div>
+          )}
         </Container>
       </Section>
     </>

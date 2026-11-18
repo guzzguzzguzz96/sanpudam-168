@@ -33,15 +33,16 @@ test("boundary: Client Components never import database or server modules", () =
   for (const file of clientFiles) assert.doesNotMatch(read(file), SERVER_IMPORT, rel(file));
 });
 
-// Client Review Mode (C1.1) is the only data path wired into routes: the
-// root page/layout and the private src/app/_review folder may import the
-// review entry point (@/server/review) and nothing else on the server.
-// The content pages (C2.1) may import only the site entry point
-// (@/server/site), which picks the review or public scope itself.
+// Routes reach content only through two entry points: the root layout and
+// the private src/app/_review folder use the review entry point
+// (@/server/review); the homepage, the content pages, and the public
+// header/footer (src/app/_site) use the site entry point (@/server/site),
+// which picks the review or public scope itself.
 // The admin sign-in routes may import only admin authentication modules.
 const ADMIN_PAGE_WIRING = ["@/server/auth/admin-access", "@/server/auth/identity"];
 const SERVER_WIRING = new Map([
-  ["src/app/page.js", ["@/server/review"]],
+  ["src/app/page.js", ["@/server/site"]],
+  ["src/app/_site/site-chrome.js", ["@/server/site"]],
   ["src/app/layout.js", ["@/server/review"]],
   ["src/app/_review/review-homepage.js", ["@/server/review"]],
   ["src/app/_review/review-chrome.js", ["@/server/review"]],
@@ -93,15 +94,27 @@ test("boundary: review mode is decided from the environment only, never from req
   }
 });
 
-test("boundary: content routes are never prerendered from CMS data", () => {
+// Review data is read per request and never cached; public data is read
+// only through the cached public loaders (src/server/site/public.js).
+test("boundary: review content is request-time only; public content is cached published data", () => {
   for (const route of CONTENT_ROUTES) {
     const text = read(join(root, route));
-    assert.doesNotMatch(text, /generateStaticParams|generateMetadata|"use cache"|dynamicParams/, route);
-    assert.match(text, /<Suspense/, `${route} reads data inside Suspense`);
+    assert.doesNotMatch(text, /"use cache"|dynamicParams/, route);
+    assert.match(text, /<Suspense/, `${route} keeps a Suspense boundary for review mode`);
   }
   const entry = read(join(root, "src/server/site/index.js"));
+  assert.doesNotMatch(entry, /"use cache"/);
   for (const loader of ["getHistoryPage", "getSacredItemsPage", "getSacredItemPage", "getNewsPage", "getNewsArticlePage", "getVisitPage"]) {
-    assert.match(entry, new RegExp(`export async function ${loader}\\([^)]*\\) \\{\\s*await connection\\(\\);`), `${loader} waits for the request`);
+    assert.match(entry, new RegExp(`export async function ${loader}\\([^)]*\\) \\{\\s*if \\(isClientReviewEnabled\\(\\)\\) \\{\\s*await connection\\(\\);`), `${loader}: review reads wait for the request`);
+  }
+  assert.match(read(join(root, "src/server/review/index.js")), /getReviewRepositories = cache\(async \(\) => \{\s*await connection\(\);/);
+  const publicLoaders = read(join(root, "src/server/site/public.js"));
+  assert.doesNotMatch(publicLoaders, /review\/(index|service|connection|config)|withReviewAccess|withDraftAccess|connection\(\)/, "public loaders never touch review or draft data");
+  const loaders = [...publicLoaders.matchAll(/export async function (\w+)\([^)]*\) \{\s*("use cache";)?/g)];
+  assert.ok(loaders.length >= 8);
+  for (const match of loaders) assert.ok(match[2], `${match[1]} is cached`);
+  for (const file of sourceFiles) {
+    if (rel(file) !== "src/server/site/public.js") assert.doesNotMatch(read(file), /^\s*"use cache/m, `${rel(file)}: "use cache" only in the public loaders`);
   }
   for (const file of sourceFiles) assert.doesNotMatch(read(file), /dangerouslySetInnerHTML/, rel(file));
 });
@@ -270,5 +283,5 @@ test("boundary: no sitemap, robots, feed, or public API route advertises review 
     if (file === "src/app/api/auth/[...nextauth]/route.js") continue;
     assert.doesNotMatch(file, /(sitemap|robots|feed|rss|route\.js)/i, file);
   }
-  assert.match(read(join(root, "src/app/layout.js")), /robots:\s*{\s*index:\s*false,\s*follow:\s*false/);
+  assert.match(read(join(root, "src/app/layout.js")), /robots: robotsFor\(launch\)/);
 });

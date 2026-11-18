@@ -4,12 +4,22 @@ import { mediaPresentation } from "../cms/media-presentation.js";
 import { isValidSlug } from "../cms/policy.js";
 import { getPhoneHref } from "../../lib/contact-actions.js";
 import { normalizeSacredItem } from "../../lib/sacred-items.js";
+import { cleanSocialUrl } from "../../lib/social-links.js";
 import { REVIEW_CONFIRMED_OVERRIDES } from "./overrides.js";
 
-// Client Review homepage: migrated MongoDB content -> plain view data for
-// the existing homepage components (docs/client-review-mode.md).
+// Homepage and header/footer view data: MongoDB content -> plain view data
+// for the existing homepage components. One builder serves two scopes:
 //
-// Rules:
+//   scope "review" (default, docs/client-review-mode.md): migrated drafts
+//     with visible placeholder labels, imported contact values as labeled
+//     text, and the owner-confirmed overrides (overrides.js).
+//   scope "public": published records only (the repositories enforce the
+//     publication and media rules). No review label, note, or override is
+//     ever produced. Phone, LINE, Maps, and social links appear only when
+//     the owner verified them (contact.verified / link.verified) and the
+//     value passes validation; nothing falls back to another value.
+//
+// Review-scope rules:
 // - Explicit field selection only. No MongoDB document, ObjectId, review
 //   record, placeholder record, rights record, or legacy/migration value is
 //   passed on; ids become strings.
@@ -116,12 +126,20 @@ const SOCIAL_HOSTS = {
   youtube: { label: "YouTube", hosts: ["www.youtube.com", "youtube.com"] },
 };
 
+// href: the link without tracking parameters (src/lib/social-links.js).
+// Only the public scope turns
+// it into a clickable link, and only for verified links.
 export function reviewSocialLink(link) {
   const platform = SOCIAL_HOSTS[link?.platform];
   const url = parseHttps(link?.url);
   if (!platform || !url || !platform.hosts.includes(url.hostname)) return null;
-  return { platform: link.platform, label: platform.label, value: `${url.hostname}${url.pathname}`.replace(/\/$/, ""), verified: link.verified === true };
+  return { platform: link.platform, label: platform.label, value: `${url.hostname}${url.pathname}`.replace(/\/$/, ""), href: cleanSocialUrl(url), verified: link.verified === true };
 }
+
+export const PUBLIC_SCOPE_NAME = "public";
+const isPublic = (scope) => scope === PUBLIC_SCOPE_NAME;
+// Review labels never appear in the public scope.
+const statusOf = (scope, doc, shown) => (isPublic(scope) ? null : describeReviewStatus(doc, shown));
 
 function image(media, ref) {
   const resolved = media?.resolve(ref) ?? null;
@@ -141,7 +159,7 @@ function brandView(result) {
   };
 }
 
-function heroView(siteSettings, banners) {
+function heroView(siteSettings, banners, scope) {
   const identity = isOk(siteSettings) ? siteSettings.data.identity : null;
   // Ordering: sortOrder ascending (query). Banners have no enabled flag;
   // archived records are excluded by the review scope.
@@ -164,14 +182,21 @@ function heroView(siteSettings, banners) {
     mobileImage: chosen?.mobileImage ?? null,
     desktopFocalPoint: chosen?.desktopImage?.focalPoint ?? "50% 50%",
     mobileFocalPoint: chosen?.mobileImage?.focalPoint ?? chosen?.desktopImage?.focalPoint ?? "50% 50%",
-    reviewStatus: isOk(siteSettings) ? describeReviewStatus(siteSettings.data, ["identity"]) : null,
+    reviewStatus: isOk(siteSettings) ? statusOf(scope, siteSettings.data, ["identity"]) : null,
   };
 }
 
-// Directions: an owner-confirmed override (overrides.js) wins; otherwise the
-// imported link is used only if it passes validation and stays labeled.
-// An invalid override is ignored (never silently swapped for the import).
-function directionsView(contact, overrides, note) {
+// Directions, review scope: an owner-confirmed override (overrides.js) wins;
+// otherwise the imported link is used only if it passes validation and stays
+// labeled. An invalid override is ignored (never silently swapped for the
+// import).
+// Public scope: only the stored link, only when the contact block is
+// verified and the link passes validation. No override, no fallback.
+function directionsView(contact, overrides, note, scope) {
+  if (isPublic(scope)) {
+    const href = contact.verified === true ? reviewMapsUrl(contact.directionsUrl) : null;
+    return href ? { status: "confirmed", confirmed: true, href, note: null } : null;
+  }
   const confirmedHref = reviewMapsUrl(overrides?.directionsUrl);
   if (confirmedHref) return { status: "confirmed", confirmed: true, href: confirmedHref, note: null };
   const importedHref = reviewMapsUrl(contact.directionsUrl);
@@ -181,12 +206,14 @@ function directionsView(contact, overrides, note) {
 
 // Contact values: validated, displayed as text, and labeled unless the
 // owner has verified the contact block.
-function contactView(settings, overrides) {
+// Public scope: phone and LINE only when verified; no notes.
+function contactView(settings, overrides, scope) {
   const contact = settings?.contact ?? {};
   const verified = contact.verified === true;
-  const note = verified ? null : REVIEW_LABELS.unverifiedContact;
-  const phone = getPhoneHref(contact.phoneNumber) ? contact.phoneNumber.trim() : null;
-  const lineId = lineUrlFromId(contact.lineId) && !text(contact.lineId)?.startsWith("https://") ? text(contact.lineId) : null;
+  const showChannels = !isPublic(scope) || verified;
+  const note = verified || isPublic(scope) ? null : REVIEW_LABELS.unverifiedContact;
+  const phone = showChannels && getPhoneHref(contact.phoneNumber) ? contact.phoneNumber.trim() : null;
+  const lineId = showChannels && lineUrlFromId(contact.lineId) && !text(contact.lineId)?.startsWith("https://") ? text(contact.lineId) : null;
   const parts = [phone ? `โทร ${phone}` : null, lineId ? `LINE ${lineId}` : null].filter(Boolean);
   return {
     verified,
@@ -195,24 +222,27 @@ function contactView(settings, overrides) {
     channels: parts.length ? { value: parts.join(" · "), note } : null,
     phone,
     lineId,
-    directions: directionsView(contact, overrides, note),
+    directions: directionsView(contact, overrides, note, scope),
+    // Verified, validated values for clickable actions (public scope only).
+    actionConfig: isPublic(scope) && verified ? { phoneNumber: phone, lineInquiryUrl: lineUrlFromId(contact.lineId) } : null,
   };
 }
 
-function hoursView(settings) {
+function hoursView(settings, scope) {
   const hours = settings?.openingHours;
   if (!hours) return null;
   const value = [text(hours.daysText), text(hours.displayText)].filter(Boolean).join(" ");
   if (!value) return null;
+  if (isPublic(scope)) return { value, note: null };
   const status = describeReviewStatus(settings, ["openingHours"]);
   return { value, note: status?.tone === "sample" ? `${REVIEW_LABELS.sample} (${status.fields.join(", ")})` : REVIEW_LABELS.unverifiedContact };
 }
 
-function visitorViews(result, overrides) {
-  if (!isOk(result)) return { quickInformation: null, visit: null, footer: null };
+function visitorViews(result, overrides, scope) {
+  if (!isOk(result)) return { quickInformation: null, visit: null, footer: null, contact: null };
   const settings = result.data;
-  const hours = hoursView(settings);
-  const contact = contactView(settings, overrides);
+  const hours = hoursView(settings, scope);
+  const contact = contactView(settings, overrides, scope);
 
   const quickInformation = [
     hours ? { id: "hours", icon: "clock", label: "เวลาเปิดทำการ", ...hours } : null,
@@ -226,7 +256,12 @@ function visitorViews(result, overrides) {
     contact.channels ? { id: "contact", icon: "chat", label: "ช่องทางติดต่อ", ...contact.channels } : null,
   ].filter(Boolean);
 
-  const social = (settings.socialLinks ?? []).map(reviewSocialLink).filter(Boolean).map((link) => ({ ...link, note: link.verified ? null : REVIEW_LABELS.unverifiedContact }));
+  // Review: every valid link, as text, labeled unless verified (no href).
+  // Public: verified links only, with their cleaned href.
+  const social = (settings.socialLinks ?? [])
+    .map(reviewSocialLink)
+    .filter((link) => link && (!isPublic(scope) || link.verified))
+    .map(({ href, ...link }) => (isPublic(scope) ? { ...link, href, note: null } : { ...link, note: link.verified ? null : REVIEW_LABELS.unverifiedContact }));
 
   return {
     quickInformation: quickInformation.length ? quickInformation : null,
@@ -243,13 +278,14 @@ function visitorViews(result, overrides) {
           : null,
         social.length ? { id: "social", label: "โซเชียลมีเดีย", value: social.map((link) => link.label).join(" · ") } : null,
       ].filter(Boolean),
-      note: !contact.verified || social.some((link) => !link.verified) ? REVIEW_LABELS.unverifiedContact : null,
+      note: !isPublic(scope) && (!contact.verified || social.some((link) => !link.verified)) ? REVIEW_LABELS.unverifiedContact : null,
       moreHref: "/visit",
     },
+    contact,
   };
 }
 
-function aboutView(result) {
+function aboutView(result, scope) {
   if (!isOk(result)) return null;
   const page = result.data;
   const title = text(page.homeIntroHeading) ?? text(page.title);
@@ -262,11 +298,11 @@ function aboutView(result) {
     image: historyImage,
     imageAlt: historyImage?.alt ?? "",
     href: "/history",
-    reviewStatus: describeReviewStatus(page, ["homeIntroHeading", "title", "intro", "historyImage"]),
+    reviewStatus: statusOf(scope, page, ["homeIntroHeading", "title", "intro", "historyImage"]),
   };
 }
 
-function worshipView(result) {
+function worshipView(result, scope) {
   if (!isOk(result)) return null;
   const page = result.data;
   const steps = [...(page.worshipSteps ?? [])]
@@ -274,10 +310,10 @@ function worshipView(result) {
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map((step) => ({ id: String(step.key), title: step.title.trim(), description: text(step.detail) }));
   if (!steps.length) return null;
-  return { steps, reviewStatus: describeReviewStatus(page, ["worshipSteps"]) };
+  return { steps, reviewStatus: statusOf(scope, page, ["worshipSteps"]) };
 }
 
-function featuredView(result) {
+function featuredView(result, scope) {
   const docs = listOf(result);
   if (!docs.length) return null;
   const items = docs.slice(0, HOMEPAGE_LIMITS.featuredItems).map((doc) => {
@@ -292,13 +328,13 @@ function featuredView(result) {
         // Detail pages exist (C2.1); slugs come from the record.
         href: isValidSlug(doc.slug) ? `/sakkara/${doc.slug}` : null,
       }),
-      reviewStatus: describeReviewStatus(doc, ["name", "excerpt", "primaryImage", "categoryId"]),
+      reviewStatus: statusOf(scope, doc, ["name", "excerpt", "primaryImage", "categoryId"]),
     };
   });
   return { catalogHref: "/sakkara", items };
 }
 
-function newsView(result) {
+function newsView(result, scope) {
   const docs = listOf(result);
   if (!docs.length) return null;
   return docs.slice(0, HOMEPAGE_LIMITS.news).map((doc) => ({
@@ -309,11 +345,13 @@ function newsView(result) {
     image: image(result.media, doc.coverImage),
     // Article pages exist (C2.2); slugs come from the record.
     href: isValidSlug(doc.slug) ? `/news/${doc.slug}` : null,
-    reviewStatus: describeReviewStatus(doc, ["title", "date", "excerpt", "coverImage"]),
+    reviewStatus: statusOf(scope, doc, ["title", "date", "excerpt", "coverImage"]),
   }));
 }
 
-function galleryView(result) {
+// Images that fail the scope's media rule do not resolve; the next eligible
+// image takes their place, so the grid never shows an empty tile.
+export function galleryView(result) {
   const items = [];
   for (const doc of listOf(result)) {
     const resolved = image(result.media, doc.image);
@@ -330,15 +368,17 @@ function galleryView(result) {
   return items.length ? items : null;
 }
 
-function faqView(result) {
+function faqView(result, scope) {
   const items = listOf(result)
     .filter((doc) => doc.showOnHome === true && text(doc.question) && text(doc.answer))
-    .map((doc) => ({ id: String(doc._id), question: doc.question.trim(), answer: doc.answer.trim(), reviewStatus: describeReviewStatus(doc, ["question", "answer"]) }));
+    .map((doc) => ({ id: String(doc._id), question: doc.question.trim(), answer: doc.answer.trim(), reviewStatus: statusOf(scope, doc, ["question", "answer"]) }));
   return items.length ? items : null;
 }
 
-// Loads every section through review repositories (service.withReviewAccess).
-export async function loadReviewHomepageContent(repositories) {
+// Loads every homepage section in parallel. The limits are upper bounds
+// (every migrated collection is smaller), so a record whose media fails the
+// scope's rule is simply skipped and the next one takes its place.
+export async function loadHomepageSections(repositories) {
   const [siteSettings, banners, sacredItems, news, gallery, faqs, historyPage] = await Promise.all([
     // Shared with the header and footer within one request (index.js).
     repositories.siteSettings(),
@@ -352,34 +392,58 @@ export async function loadReviewHomepageContent(repositories) {
   return { siteSettings, banners, sacredItems, news, gallery, faqs, historyPage };
 }
 
+// Review repositories (service.withReviewAccess).
+export const loadReviewHomepageContent = loadHomepageSections;
+
+// Overrides are review-only; the public scope never reads them.
+const overridesFor = (scope, overrides) => (isPublic(scope) ? null : overrides);
+
 // Header and footer data from the site settings alone (brand, compact
-// contact summary, confirmed directions). Used on every review page, so it
-// never loads the homepage sections. Same view rules as the homepage.
-export function buildReviewChrome(siteSettings, { overrides = REVIEW_CONFIRMED_OVERRIDES } = {}) {
+// contact summary, confirmed directions). Used on every page, so it never
+// loads the homepage sections. Same view rules as the homepage.
+// Public scope adds contactConfig: verified, validated values for
+// getContactActions() (phone, LINE, Maps), or null.
+export function buildSiteChrome(siteSettings, { scope = "review", overrides = REVIEW_CONFIRMED_OVERRIDES } = {}) {
   if (!siteSettings || siteSettings.status === "unavailable") return { status: "unavailable" };
+  const visitor = visitorViews(siteSettings, overridesFor(scope, overrides), scope);
+  if (isPublic(scope)) {
+    const directionsHref = visitor.contact?.directions?.href ?? null;
+    return {
+      status: "ok",
+      brand: brandView(siteSettings),
+      footer: visitor.footer,
+      confirmedDirectionsHref: directionsHref,
+      contactConfig: visitor.contact?.actionConfig ? { ...visitor.contact.actionConfig, directionsUrl: directionsHref } : null,
+    };
+  }
   return {
     status: "ok",
     brand: brandView(siteSettings),
-    footer: visitorViews(siteSettings, overrides).footer,
+    footer: visitor.footer,
     confirmedDirectionsHref: reviewMapsUrl(overrides?.directionsUrl),
   };
 }
 
-// content: result of loadReviewHomepageContent(). overrides: owner-confirmed
-// values (overrides.js). Returns the view data.
-export function buildReviewHomepage(content, { overrides = REVIEW_CONFIRMED_OVERRIDES } = {}) {
-  const visitor = visitorViews(content.siteSettings, overrides);
+export function buildReviewChrome(siteSettings, { overrides = REVIEW_CONFIRMED_OVERRIDES } = {}) {
+  return buildSiteChrome(siteSettings, { scope: "review", overrides });
+}
+
+// content: result of loadHomepageSections(). scope: "review" | "public".
+// overrides: owner-confirmed values (overrides.js), review scope only.
+export function buildHomepage(content, { scope = "review", overrides = REVIEW_CONFIRMED_OVERRIDES } = {}) {
+  const scopedOverrides = overridesFor(scope, overrides);
+  const visitor = visitorViews(content.siteSettings, scopedOverrides, scope);
   const view = {
     brand: brandView(content.siteSettings),
-    banner: heroView(content.siteSettings, content.banners),
+    banner: heroView(content.siteSettings, content.banners, scope),
     quickInformation: visitor.quickInformation,
-    about: aboutView(content.historyPage),
-    featuredItems: featuredView(content.sacredItems),
-    worshipGuide: worshipView(content.historyPage),
-    news: newsView(content.news),
+    about: aboutView(content.historyPage, scope),
+    featuredItems: featuredView(content.sacredItems, scope),
+    worshipGuide: worshipView(content.historyPage, scope),
+    news: newsView(content.news, scope),
     gallery: galleryView(content.gallery),
     visit: visitor.visit,
-    faq: faqView(content.faqs),
+    faq: faqView(content.faqs, scope),
     footer: visitor.footer,
   };
   const sections = {
@@ -400,12 +464,21 @@ export function buildReviewHomepage(content, { overrides = REVIEW_CONFIRMED_OVER
     faqs: { available: listOf(content.faqs).length, rendered: view.faq?.length ?? 0 },
     worshipSteps: { available: view.worshipGuide?.steps.length ?? 0, rendered: view.worshipGuide?.steps.length ?? 0 },
   };
-  // Owner-confirmed directions do not depend on the database read.
-  const confirmedDirectionsHref = reviewMapsUrl(overrides?.directionsUrl);
+  // Review: owner-confirmed directions do not depend on the database read.
+  // Public: the verified, validated stored link only.
+  const confirmedDirectionsHref = isPublic(scope) ? (visitor.contact?.directions?.href ?? null) : reviewMapsUrl(overrides?.directionsUrl);
   const quickActions = QUICK_ACTIONS.filter((action) => view[action.section] || (action.id === "directions" && confirmedDirectionsHref))
     .map(({ section: _section, ...action }) =>
       action.id === "directions" && confirmedDirectionsHref ? { id: "directions", href: confirmedDirectionsHref, icon: "route", label: "นำทางไปศาล", external: true } : action,
     );
   const allUnavailable = Object.values(sections).every((status) => status === "unavailable");
-  return { status: allUnavailable ? "unavailable" : "ok", ...view, confirmedDirectionsHref, quickActions, sections, coverage };
+  const result = { status: allUnavailable ? "unavailable" : "ok", ...view, confirmedDirectionsHref, quickActions, sections, coverage };
+  if (isPublic(scope)) {
+    result.contactConfig = visitor.contact?.actionConfig ? { ...visitor.contact.actionConfig, directionsUrl: confirmedDirectionsHref } : null;
+  }
+  return result;
+}
+
+export function buildReviewHomepage(content, { overrides = REVIEW_CONFIRMED_OVERRIDES } = {}) {
+  return buildHomepage(content, { scope: "review", overrides });
 }
