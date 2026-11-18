@@ -1,18 +1,10 @@
-// Media resolution and homepage adapter compatibility. Offline.
+// Media resolution, the public media rule, and formatting helpers. Offline.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cloudinaryImageUrl, collectAssetIds, createMediaResolver, focalPointToPosition } from "../../src/server/cms/media.js";
-import { adaptContactConfig, composeHomepageData, formatThaiDate, lineUrlFromId } from "../../src/server/cms/adapters.js";
-import { createContentService } from "../../src/server/cms/content-service.js";
-import { loadHomepageContent } from "../../src/server/cms/homepage.js";
-import { homepagePreviewData } from "../../src/data/homepage-preview.js";
-import { asset, ids, imageRef, mockModels, publishedSite } from "./fixtures.mjs";
-
-const silent = { error() {} };
-async function homepageFrom(collections) {
-  const s = createContentService({ models: mockModels(collections), connect: async () => {}, logger: silent });
-  return loadHomepageContent(s.public);
-}
+import { formatThaiDate, lineUrlFromId } from "../../src/server/cms/adapters.js";
+import { isMediaDraftUsable, isMediaPubliclyUsable, publicMediaFilter } from "../../src/server/cms/policy.js";
+import { asset, ids, imageRef } from "./fixtures.mjs";
 
 test("media: resolves Cloudinary URL, dimensions, alt, caption, and focal point", () => {
   const media = createMediaResolver([asset(ids.approvedAsset)]);
@@ -62,100 +54,37 @@ test("media: focal points and responsive Cloudinary URLs", () => {
   assert.equal(cloudinaryImageUrl(null), null);
 });
 
-test("adapters: composed data keeps the exact homepage shape", async () => {
-  const data = composeHomepageData(await homepageFrom(publishedSite()), homepagePreviewData);
-  assert.deepEqual(Object.keys(data).sort(), [...Object.keys(homepagePreviewData), "contactConfig"].sort());
-  assert.deepEqual(Object.keys(data.banner).sort(), Object.keys(homepagePreviewData.banner).sort());
-  assert.deepEqual(Object.keys(data.about).sort(), Object.keys(homepagePreviewData.about).sort());
-  const sameItemKeys = (list, reference) => list.forEach((item) => assert.deepEqual(Object.keys(item).sort(), Object.keys(reference[0]).sort()));
-  sameItemKeys(data.featuredItems.items, homepagePreviewData.featuredItems.items);
-  sameItemKeys(data.news, homepagePreviewData.news);
-  sameItemKeys(data.gallery, homepagePreviewData.gallery);
-  sameItemKeys(data.faq, homepagePreviewData.faq);
-  sameItemKeys(data.worshipGuide, homepagePreviewData.worshipGuide);
-  sameItemKeys(data.quickInformation, homepagePreviewData.quickInformation);
-  sameItemKeys(data.visit, homepagePreviewData.visit);
+
+test("media: public use needs approved rights, approved file, and consent for identifiable people", () => {
+  assert.equal(isMediaPubliclyUsable(asset("a")), true);
+  assert.equal(isMediaPubliclyUsable(asset("a", { approval: "pending" })), false, "rights alone are not enough");
+  assert.equal(isMediaPubliclyUsable(asset("a", { rights: "pending_owner_confirmation", approval: "approved" })), false);
+  assert.equal(isMediaPubliclyUsable(asset("a", { people: true })), false, "people without consent");
+  assert.equal(isMediaPubliclyUsable(asset("a", { people: true, consent: "refused" })), false);
+  assert.equal(isMediaPubliclyUsable(asset("a", { people: true, consent: "obtained" })), true);
+  assert.equal(isMediaPubliclyUsable(asset("a", { deletedAt: new Date() })), false);
+  assert.equal(isMediaPubliclyUsable(null), false);
+  // Draft/review scope is unchanged: pending approval and consent still preview.
+  assert.equal(isMediaDraftUsable(asset("a", { approval: "pending", people: true })), true);
 });
 
-test("adapters: published content maps to the expected values", async () => {
-  const data = composeHomepageData(await homepageFrom(publishedSite()), homepagePreviewData);
-  // Hero: banner b0 has unapproved media, so b1 is used.
-  assert.equal(data.banner.title, "ศาลปู่ดำ168 และตราแผ่นดิน");
-  assert.equal(data.banner.desktopImage.alt, "โถงสักการะ");
-  assert.equal(data.banner.desktopFocalPoint, "55% 50%");
-  assert.equal(data.banner.primaryCta, homepagePreviewData.banner.primaryCta, "interface copy unchanged");
-  // Sacred items: unpublished category dropped, unapproved image -> null.
-  assert.deepEqual(data.featuredItems.items[0].category, { id: "published-category", label: "หมวดที่เผยแพร่" });
-  assert.equal(data.featuredItems.items[1].category, null);
-  assert.equal(data.featuredItems.items[1].image, null);
-  assert.equal(data.featuredItems.items[0].href, null, "no link until the detail route exists");
-  assert.equal(data.featuredItems.catalogHref, null);
-  // News: Thai date, no link yet.
-  assert.equal(data.news[0].publicationDate, "29 ตุลาคม 2569");
-  assert.equal(data.news[0].href, null);
-  // Gallery: item without approved media skipped; layout pattern kept.
-  assert.equal(data.gallery.length, 1);
-  assert.equal(data.gallery[0].layout, homepagePreviewData.gallery[0].layout);
-  assert.equal(data.gallery[0].label, "คำบรรยาย");
-  // About and worship guide from the history page, ordered.
-  assert.equal(data.about.title, "ศรัทธาที่อยู่คู่ใจ");
-  assert.equal(data.about.imageAlt, "องค์ปู่ดำ");
-  assert.deepEqual(data.worshipGuide.map((s) => s.title), ["ขั้นหนึ่ง", "ขั้นสอง"]);
-  assert.equal(data.worshipGuide[1].description, null, "missing detail stays null, not invented");
-  // Visitor information.
-  assert.equal(data.quickInformation.find((i) => i.id === "hours").value, "ทุกวัน 08:00 – 20:00 น.");
-  assert.equal(data.visit.find((i) => i.id === "address").value, "ที่อยู่ที่อนุมัติแล้ว");
-  assert.ok(data.quickActions.some((a) => a.id === "line" && a.href === "https://line.me/R/ti/p/%40sanpudam168"));
-  assert.ok(data.quickActions.some((a) => a.id === "directions" && a.external));
-});
-
-test("adapters: routes are linked only when enabled", async () => {
-  const routes = { sacredItems: true, sacredItemDetail: true, newsDetail: true };
-  const data = composeHomepageData(await homepageFrom(publishedSite()), homepagePreviewData, { routes });
-  assert.equal(data.featuredItems.items[0].href, "/sakkara/item-one");
-  assert.equal(data.featuredItems.catalogHref, "/sakkara");
-  assert.equal(data.news[0].href, "/news/news-one");
-});
-
-test("adapters: no content, unavailable, or empty results keep the approved UI unchanged", async () => {
-  const { contactConfig, ...withoutContent } = composeHomepageData(null, homepagePreviewData);
-  assert.equal(contactConfig, null);
-  assert.deepEqual(withoutContent, homepagePreviewData);
-
-  const empty = Object.fromEntries(Object.keys(publishedSite()).map((name) => [name, []]));
-  const { contactConfig: c2, ...fromEmpty } = composeHomepageData(await homepageFrom(empty), homepagePreviewData);
-  assert.equal(c2, null);
-  assert.deepEqual({ ...fromEmpty, banner: { ...fromEmpty.banner } }, homepagePreviewData);
-});
-
-test("adapters: missing hero media keeps the placeholder backdrop", async () => {
-  const site = publishedSite();
-  site.MediaAsset = [];
-  const data = composeHomepageData(await homepageFrom(site), homepagePreviewData);
-  assert.equal(data.banner.desktopImage, null);
-  assert.equal(data.banner.mobileImage, null);
-  assert.equal(data.about.image, null);
-  assert.deepEqual(data.gallery, homepagePreviewData.gallery);
-});
-
-test("adapters: contact details appear only when verified and valid", async () => {
-  const site = publishedSite();
-  const settings = (contact) => ({ status: "ok", data: { contact }, media: createMediaResolver([]) });
-  assert.equal(adaptContactConfig(settings({ ...site.SiteSettings[0].contact, verified: false })), null);
-  assert.deepEqual(adaptContactConfig(settings({ lineId: "not a line id!", directionsUrl: "https://share.google/xyz", phoneNumber: "12", verified: true })), {
-    lineInquiryUrl: null,
-    directionsUrl: null,
-    phoneNumber: null,
+test("media: the public query carries the same rule as the per-asset check", () => {
+  assert.deepEqual(publicMediaFilter(["1"]), {
+    _id: { $in: ["1"] },
+    "rights.status": "approved",
+    "approval.status": "approved",
+    $or: [{ "rights.containsIdentifiablePeople": { $ne: true } }, { "rights.consent.status": "obtained" }],
+    deletedAt: null,
   });
-
-  site.SiteSettings[0].contact.verified = false;
-  const data = composeHomepageData(await homepageFrom(site), homepagePreviewData);
-  assert.equal(data.contactConfig, null);
-  assert.deepEqual(data.quickActions, homepagePreviewData.quickActions);
-  assert.equal(data.quickInformation.find((i) => i.id === "contact").value, homepagePreviewData.quickInformation.find((i) => i.id === "contact").value);
+  // A query that ignores the filter still cannot leak: the resolver re-checks.
+  const media = createMediaResolver([asset("ok"), asset("people", { people: true }), asset("unsigned", { approval: "pending" })]);
+  assert.ok(media.resolve(imageRef("ok")));
+  assert.equal(media.resolve(imageRef("people")), null);
+  assert.equal(media.resolve(imageRef("unsigned")), null);
+  assert.ok(createMediaResolver([asset("people", { people: true })], { scope: "review" }).resolve(imageRef("people")), "review scope unchanged");
 });
 
-test("adapters: helpers", () => {
+test("helpers: Thai dates and LINE links", () => {
   assert.equal(formatThaiDate("2026-01-05"), "5 มกราคม 2569");
   assert.equal(formatThaiDate("05/01/2026"), null);
   assert.equal(formatThaiDate(null), null);
@@ -163,11 +92,4 @@ test("adapters: helpers", () => {
   assert.equal(lineUrlFromId("https://lin.ee/abc"), "https://lin.ee/abc");
   assert.equal(lineUrlFromId("https://evil.example/@x"), null);
   assert.equal(lineUrlFromId(""), null);
-});
-
-test("adapters: output contains no internal or unreviewed fields", async () => {
-  const json = JSON.stringify(composeHomepageData(await homepageFrom(publishedSite()), homepagePreviewData));
-  for (const field of ["legacy", "migration", "placeholderFields", "review", "rights", "legacy raw", "mediaMapping", "assetId"]) {
-    assert.ok(!json.includes(`"${field}"`) && !json.includes(field === "legacy raw" ? field : `"${field}":`), `${field} leaked`);
-  }
 });

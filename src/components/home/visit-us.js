@@ -2,11 +2,15 @@ import { Container } from "@/components/ui/container";
 import { ContactActions } from "@/components/ui/contact-actions";
 import { Icon } from "@/components/ui/icons";
 import { SectionIntro } from "@/components/home/section-intro";
+import { ReviewNote } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
 import { getContactActions } from "@/lib/contact-actions";
 
-export function VisitUs({ data }) {
-  const actions = getContactActions(["maps", "line", "phone"]);
+// Client Review only: actions replaces the siteConfig contact actions (built
+// with getContactActions from review data), and directionsNote labels an
+// unverified or unusable map link. Without them the section is unchanged.
+export function VisitUs({ data, actions: reviewActions = null, directionsNote = null }) {
+  const actions = reviewActions ?? getContactActions(["maps", "line", "phone"]);
   const hasDirections = actions.some((action) => action.id === "maps");
 
   return (
@@ -27,7 +31,10 @@ export function VisitUs({ data }) {
                   </span>
                   {detail.label}
                 </dt>
-                <dd>{detail.value}</dd>
+                <dd>
+                  {detail.value}
+                  <ReviewNote note={detail.note} />
+                </dd>
               </div>
             ))}
           </dl>
@@ -48,6 +55,7 @@ export function VisitUs({ data }) {
               ? "เปิดเส้นทางไปยังศาลได้จากปุ่ม “นำทางด้วย Google Maps”"
               : "แผนที่จะแสดงเมื่อได้รับตำแหน่งที่ยืนยันแล้ว"}
           </p>
+          <ReviewNote note={directionsNote} />
         </div>
       </Container>
     </Section>

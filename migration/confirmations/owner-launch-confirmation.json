@@ -1,0 +1,561 @@
+{
+  "schemaVersion": 1,
+  "confirmedAt": "2026-11-18",
+  "confirmedBy": "Shrine owner, decisions relayed by the project lead (Phase 0 launch audit)",
+  "targetDatabase": "sanpudam168_production",
+  "notes": [
+    "ก: the sample paragraph (starting with ข้อความ(ใน)ส่วนนี้เป็นตัวอย่าง) is removed from 4 fields; the remaining text is used as is. monks-blessing-ceremony title and date (2026-03-16) are confirmed as stored.",
+    "ข: every other open placeholder is confirmed correct as stored (already published on the legacy site).",
+    "ค: all 7 photos with identifiable people may be published (shrine ceremony photos; the shrine holds the rights).",
+    "ง: address, phone, LINE, and opening hours confirmed; Maps and all 3 social links confirmed (Facebook stored without tracking parameters).",
+    "จ: videos, reviews, and team members are not published in this launch."
+  ],
+  "records": [
+    {
+      "collection": "news",
+      "id": "33059c3c5c80fb101075aa68",
+      "label": "know-tra-phaendin-siam"
+    },
+    {
+      "collection": "news",
+      "id": "6135b0424263c05996573324",
+      "label": "tra-phaendin-ceremony-2569"
+    },
+    {
+      "collection": "news",
+      "id": "844ffa5ecd550d81633b9a6a",
+      "label": "monks-blessing-ceremony"
+    },
+    {
+      "collection": "gallery_items",
+      "id": "3882204598693d855a24291b",
+      "label": "gallery_items#1"
+    },
+    {
+      "collection": "gallery_items",
+      "id": "646f80ede0bb2300b821c497",
+      "label": "gallery_items#2"
+    },
+    {
+      "collection": "gallery_items",
+      "id": "3ae58bf3dd2dd8af13e2e180",
+      "label": "gallery_items#3"
+    },
+    {
+      "collection": "gallery_items",
+      "id": "545c6684e986765571743d14",
+      "label": "gallery_items#4"
+    },
+    {
+      "collection": "gallery_items",
+      "id": "ad6736a711ade384b5982a49",
+      "label": "gallery_items#5"
+    },
+    {
+      "collection": "gallery_items",
+      "id": "982c025111628c38805a6269",
+      "label": "gallery_items#6"
+    },
+    {
+      "collection": "gallery_items",
+      "id": "d31cbe7be24fcf29a8804fba",
+      "label": "gallery_items#7"
+    },
+    {
+      "collection": "gallery_items",
+      "id": "9e3cf4118f433b4f37a8591c",
+      "label": "gallery_items#8"
+    },
+    {
+      "collection": "gallery_items",
+      "id": "a46736a01658cf80e72785e4",
+      "label": "gallery_items#9"
+    },
+    {
+      "collection": "gallery_items",
+      "id": "f951bf8c1e1deb3d22386c35",
+      "label": "gallery_items#10"
+    },
+    {
+      "collection": "banners",
+      "id": "73534b38b8495dab1601fd2a",
+      "label": "banners#1"
+    },
+    {
+      "collection": "banners",
+      "id": "c03ff613f6d27ded47e2f20e",
+      "label": "banners#2"
+    },
+    {
+      "collection": "banners",
+      "id": "71a5f622f8a0a1ab8e9db017",
+      "label": "banners#3"
+    },
+    {
+      "collection": "banners",
+      "id": "774fee9a616109b4306afed6",
+      "label": "banners#4"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "21987ac9ab49a8d7b4d7ed43",
+      "label": "pu-dam-168"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "3121bc0db61c203c05fa0827",
+      "label": "tra-phaendin-siam"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "9a715d18ff3b7be172c9cf55",
+      "label": "luang-pu-sila"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "5b655cd05498539f56976cda",
+      "label": "coin-charoenlap-charoenyot"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "a9b15699e1f6c2ff5ce59d86",
+      "label": "shrine-gate"
+    },
+    {
+      "collection": "categories",
+      "id": "566e4b2dad0b5e4fb26a352b",
+      "label": "sacred-place"
+    },
+    {
+      "collection": "categories",
+      "id": "04624d56bd012c7b6bdf7736",
+      "label": "saimu"
+    },
+    {
+      "collection": "categories",
+      "id": "4150709093322bc903b864d6",
+      "label": "check-in"
+    },
+    {
+      "collection": "faqs",
+      "id": "a47fb43938d61edfc953238d",
+      "label": "faq#1"
+    },
+    {
+      "collection": "faqs",
+      "id": "8e0f749bded97167a47cbf58",
+      "label": "faq#2"
+    },
+    {
+      "collection": "faqs",
+      "id": "b6dbad027cf7ad138c8457fd",
+      "label": "faq#3"
+    },
+    {
+      "collection": "faqs",
+      "id": "f108969e97d5375e1e5cb190",
+      "label": "faq#4"
+    },
+    {
+      "collection": "faqs",
+      "id": "e740feb7386faaf3f7e0d6eb",
+      "label": "faq#5"
+    },
+    {
+      "collection": "faqs",
+      "id": "117e4e35a2118eedd9142d1b",
+      "label": "faq#6"
+    },
+    {
+      "collection": "pages",
+      "id": "b1d62c740afd56c6c02bfd62",
+      "label": "history"
+    },
+    {
+      "collection": "site_settings",
+      "id": "620cfe6bb6aac7fe6954f678",
+      "label": "default"
+    },
+    {
+      "collection": "media_assets",
+      "id": "f37ad3380ff4061fdedbd5ed",
+      "label": "brand-logo-mark"
+    },
+    {
+      "collection": "media_assets",
+      "id": "614f62ec09b5d40c62c8f36d",
+      "label": "shrine-interior-altar"
+    },
+    {
+      "collection": "media_assets",
+      "id": "a8caeb58d63d239ff30df64c",
+      "label": "shrine-front-entrance"
+    },
+    {
+      "collection": "media_assets",
+      "id": "d373c5792665d6daaea971a3",
+      "label": "shrine-signboard-side"
+    },
+    {
+      "collection": "media_assets",
+      "id": "2f37c20a08dc01faad994460",
+      "label": "surroundings-phraratchawang-police-station"
+    },
+    {
+      "collection": "media_assets",
+      "id": "6f7fd70a2c8c082106a5b0cc",
+      "label": "shrine-pu-dam-168-statue"
+    },
+    {
+      "collection": "media_assets",
+      "id": "ba023b8e003f4c5202c172eb",
+      "label": "shrine-tra-phaendin-coat-of-arms"
+    },
+    {
+      "collection": "media_assets",
+      "id": "e9fda593cb4a9a7060cb053c",
+      "label": "item-coin-charoenlap-charoenyot-poster"
+    },
+    {
+      "collection": "media_assets",
+      "id": "75c27a7d896514af5aba0e9a",
+      "label": "shrine-devotee-at-coat-of-arms"
+    },
+    {
+      "collection": "media_assets",
+      "id": "d3bdeda781d3054ee37cb140",
+      "label": "event-2569-03-16-newsletter-a"
+    },
+    {
+      "collection": "media_assets",
+      "id": "103990fdd0719b15aacde473",
+      "label": "event-2569-03-16-newsletter-b"
+    },
+    {
+      "collection": "media_assets",
+      "id": "f9d1b09884ea60cd0554724d",
+      "label": "event-officer-paying-respect"
+    },
+    {
+      "collection": "media_assets",
+      "id": "65ebd9b6597b12b94d321b04",
+      "label": "event-monks-holy-water"
+    },
+    {
+      "collection": "media_assets",
+      "id": "6f15f0f74d7a5c8e71820852",
+      "label": "event-monk-blessing-ceremony"
+    },
+    {
+      "collection": "media_assets",
+      "id": "bae7e18f41bf65e849f2ec09",
+      "label": "event-monk-blessing-devotees"
+    },
+    {
+      "collection": "media_assets",
+      "id": "392a83ee5bd5d5f31407b650",
+      "label": "editorial-tra-phaendin-infographic"
+    },
+    {
+      "collection": "media_assets",
+      "id": "129277321222ea2d5648a176",
+      "label": "brand-og-default"
+    }
+  ],
+  "placeholders": [
+    {
+      "collection": "news",
+      "id": "844ffa5ecd550d81633b9a6a",
+      "label": "monks-blessing-ceremony",
+      "path": "title",
+      "action": "confirm",
+      "value": "พระสงฆ์ประพรมน้ำพระพุทธมนต์ตราแผ่นดิน และให้พรผู้ศรัทธา"
+    },
+    {
+      "collection": "news",
+      "id": "844ffa5ecd550d81633b9a6a",
+      "label": "monks-blessing-ceremony",
+      "path": "date",
+      "action": "confirm",
+      "value": "2026-03-16"
+    },
+    {
+      "collection": "news",
+      "id": "844ffa5ecd550d81633b9a6a",
+      "label": "monks-blessing-ceremony",
+      "path": "body",
+      "action": "remove_sample_paragraph"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "21987ac9ab49a8d7b4d7ed43",
+      "label": "pu-dam-168",
+      "path": "body",
+      "action": "remove_sample_paragraph"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "21987ac9ab49a8d7b4d7ed43",
+      "label": "pu-dam-168",
+      "path": "offerings",
+      "action": "confirm",
+      "value": "พวงมาลัยดอกดาวเรือง ธูป 9 ดอก น้ำแดง และผลไม้มงคล"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "9a715d18ff3b7be172c9cf55",
+      "label": "luang-pu-sila",
+      "path": "excerpt",
+      "action": "confirm",
+      "value": "รูปเหมือนหลวงปู่ศิลา สิริจันโท ประดิษฐานด้านขวาของโถงศาล ให้ผู้ศรัทธาได้กราบไหว้ขอพร"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "9a715d18ff3b7be172c9cf55",
+      "label": "luang-pu-sila",
+      "path": "body",
+      "action": "remove_sample_paragraph"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "9a715d18ff3b7be172c9cf55",
+      "label": "luang-pu-sila",
+      "path": "prayerTopics",
+      "action": "confirm",
+      "value": "ความเป็นสิริมงคล แคล้วคลาดปลอดภัย"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "5b655cd05498539f56976cda",
+      "label": "coin-charoenlap-charoenyot",
+      "path": "inquiryText",
+      "action": "confirm",
+      "value": "สอบถามราคาและสั่งจองทางไลน์"
+    },
+    {
+      "collection": "sacred_items",
+      "id": "a9b15699e1f6c2ff5ce59d86",
+      "label": "shrine-gate",
+      "path": "body",
+      "action": "confirm",
+      "value": "ซุ้มประตูหน้าศาลตกแต่งด้วยลายไทยสีทองบนพื้นสีครีม ด้านบนมีป้าย \"ศาลปู่ดำ ◆ ตราแผ่นดิน\" ขนาบด้วยรูปองค์ปู่ดำและตราสถานีตำรวจนครบาลพระราชวัง เป็นจุดที่ผู้มาสักการะนิยมถ่ายรูปเช็กอิน\n\nช่วงเช้าแสงสวยที่สุดสำหรับการถ่ายรูป"
+    },
+    {
+      "collection": "faqs",
+      "id": "f108969e97d5375e1e5cb190",
+      "label": "faq#4",
+      "path": "answer",
+      "action": "confirm",
+      "value": "ของไหว้ที่นิยมคือพวงมาลัยดอกดาวเรือง ธูป 9 ดอก น้ำแดง และผลไม้มงคล ถวายตามกำลังศรัทธา"
+    },
+    {
+      "collection": "faqs",
+      "id": "e740feb7386faaf3f7e0d6eb",
+      "label": "faq#5",
+      "path": "answer",
+      "action": "confirm",
+      "value": "สอบถามและสั่งจองเหรียญปู่ดำ 168 รุ่นเจริญลาภ เจริญยศ ได้ทางไลน์ @sanpudam168 เหรียญมี 8 เนื้อ จัดสร้างเพื่อบูรณะศาลปู่ดำและตราแผ่นดิน"
+    },
+    {
+      "collection": "faqs",
+      "id": "117e4e35a2118eedd9142d1b",
+      "label": "faq#6",
+      "path": "answer",
+      "action": "confirm",
+      "value": "นั่งเรือด่วนเจ้าพระยาลงท่าช้าง แล้วเดินมาตามถนนมหาราชประมาณ 5 นาที หรือนั่ง MRT สายสีน้ำเงินลงสถานีสนามไชยแล้วต่อรถ ที่จอดรถบริเวณศาลมีจำกัด"
+    },
+    {
+      "collection": "pages",
+      "id": "b1d62c740afd56c6c02bfd62",
+      "label": "history",
+      "path": "historyBody",
+      "action": "remove_sample_paragraph"
+    },
+    {
+      "collection": "pages",
+      "id": "b1d62c740afd56c6c02bfd62",
+      "label": "history",
+      "path": "worshipSteps",
+      "action": "confirm",
+      "value": [
+        {
+          "key": "step-01",
+          "sortOrder": 1,
+          "title": "ตั้งจิตให้สงบ",
+          "detail": "จุดธูปสักการะองค์ปู่ดำและตราแผ่นดิน ตั้งจิตให้สงบ"
+        },
+        {
+          "key": "step-02",
+          "sortOrder": 2,
+          "title": "กล่าวคำขอพร",
+          "detail": "กล่าวชื่อ-นามสกุล วันเดือนปีเกิด และเรื่องที่ตั้งใจขอพรอย่างชัดเจน"
+        },
+        {
+          "key": "step-03",
+          "sortOrder": 3,
+          "title": "ถวายตามกำลังศรัทธา",
+          "detail": "ถวายพวงมาลัย ดอกไม้ หรือของไหว้ตามกำลังศรัทธา"
+        },
+        {
+          "key": "step-04",
+          "sortOrder": 4,
+          "title": "กราบขอบคุณ",
+          "detail": "กราบขอบคุณ และเมื่อสมหวังกลับมาแก้บนตามที่ได้ตั้งจิตไว้"
+        }
+      ]
+    },
+    {
+      "collection": "site_settings",
+      "id": "620cfe6bb6aac7fe6954f678",
+      "label": "default",
+      "path": "openingHours.daysText",
+      "action": "confirm",
+      "value": "ทุกวัน"
+    },
+    {
+      "collection": "site_settings",
+      "id": "620cfe6bb6aac7fe6954f678",
+      "label": "default",
+      "path": "contactTopics",
+      "action": "confirm",
+      "value": [
+        {
+          "key": "topic-01",
+          "sortOrder": 1,
+          "label": "สอบถามการเดินทางและเวลาเปิด"
+        },
+        {
+          "key": "topic-02",
+          "sortOrder": 2,
+          "label": "บูชาเหรียญปู่ดำ 168 รุ่นเจริญลาภ เจริญยศ"
+        },
+        {
+          "key": "topic-03",
+          "sortOrder": 3,
+          "label": "ร่วมทำบุญบูรณะศาล"
+        },
+        {
+          "key": "topic-04",
+          "sortOrder": 4,
+          "label": "แจ้งข่าวหรือขอข้อมูลสื่อมวลชน"
+        },
+        {
+          "key": "topic-05",
+          "sortOrder": 5,
+          "label": "เรื่องอื่นๆ"
+        }
+      ]
+    }
+  ],
+  "media": [
+    {
+      "manifestId": "brand-logo-mark",
+      "consent": "not_required"
+    },
+    {
+      "manifestId": "shrine-interior-altar",
+      "consent": "not_required"
+    },
+    {
+      "manifestId": "shrine-front-entrance",
+      "consent": "not_required"
+    },
+    {
+      "manifestId": "shrine-signboard-side",
+      "consent": "not_required"
+    },
+    {
+      "manifestId": "surroundings-phraratchawang-police-station",
+      "consent": "not_required"
+    },
+    {
+      "manifestId": "shrine-pu-dam-168-statue",
+      "consent": "not_required"
+    },
+    {
+      "manifestId": "shrine-tra-phaendin-coat-of-arms",
+      "consent": "not_required"
+    },
+    {
+      "manifestId": "item-coin-charoenlap-charoenyot-poster",
+      "consent": "not_required"
+    },
+    {
+      "manifestId": "shrine-devotee-at-coat-of-arms",
+      "consent": "obtained",
+      "note": "Shrine ceremony/visitor photo; the shrine holds the right to use it (owner launch confirmation 2026-11-18)."
+    },
+    {
+      "manifestId": "event-2569-03-16-newsletter-a",
+      "consent": "obtained",
+      "note": "Shrine ceremony/visitor photo; the shrine holds the right to use it (owner launch confirmation 2026-11-18)."
+    },
+    {
+      "manifestId": "event-2569-03-16-newsletter-b",
+      "consent": "obtained",
+      "note": "Shrine ceremony/visitor photo; the shrine holds the right to use it (owner launch confirmation 2026-11-18)."
+    },
+    {
+      "manifestId": "event-officer-paying-respect",
+      "consent": "obtained",
+      "note": "Shrine ceremony/visitor photo; the shrine holds the right to use it (owner launch confirmation 2026-11-18)."
+    },
+    {
+      "manifestId": "event-monks-holy-water",
+      "consent": "obtained",
+      "note": "Shrine ceremony/visitor photo; the shrine holds the right to use it (owner launch confirmation 2026-11-18)."
+    },
+    {
+      "manifestId": "event-monk-blessing-ceremony",
+      "consent": "obtained",
+      "note": "Shrine ceremony/visitor photo; the shrine holds the right to use it (owner launch confirmation 2026-11-18)."
+    },
+    {
+      "manifestId": "event-monk-blessing-devotees",
+      "consent": "obtained",
+      "note": "Shrine ceremony/visitor photo; the shrine holds the right to use it (owner launch confirmation 2026-11-18)."
+    },
+    {
+      "manifestId": "editorial-tra-phaendin-infographic",
+      "consent": "not_required"
+    },
+    {
+      "manifestId": "brand-og-default",
+      "consent": "not_required"
+    }
+  ],
+  "contact": {
+    "address": "79 ถนนมหาราช แขวงพระบรมมหาราชวัง เขตพระนคร กรุงเทพมหานคร 10200 (ด้านหลังสถานีตำรวจนครบาลพระราชวัง)",
+    "phoneNumber": "0823686168",
+    "lineId": "@sanpudam168",
+    "openingHours": {
+      "opens": "08:00",
+      "closes": "20:00",
+      "daysText": "ทุกวัน",
+      "displayText": "08:00 – 20:00 น."
+    },
+    "directionsUrl": "https://maps.app.goo.gl/xTiyZjWJcKTH3sHR7",
+    "socialLinks": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/share/19YGRfMnnS/",
+        "verified": true
+      },
+      {
+        "platform": "tiktok",
+        "url": "https://www.tiktok.com/@a.190162_",
+        "verified": true
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/@aslandarachart3393",
+        "verified": true
+      }
+    ]
+  },
+  "excludedCollections": [
+    "videos",
+    "reviews",
+    "team_members"
+  ]
+}

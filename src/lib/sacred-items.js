@@ -9,6 +9,7 @@
 //   category: { id: string, label: string } | null,
 //   image: { src, alt, width, height, focalPoint } | null,
 //   href: string | null,   // detail route, only when it exists
+//   reviewStatus: { tone, label, fields } | null,   // Client Review only
 // }
 //
 // No price, stock, or availability fields are part of this model.
@@ -26,6 +27,7 @@ export function normalizeSacredItem(raw) {
     category,
     image: raw.image?.src ? raw.image : null,
     href: raw.href ?? null,
+    ...(raw.reviewStatus ? { reviewStatus: raw.reviewStatus } : {}),
   };
 }
 
@@ -53,4 +55,13 @@ export function filterSacredItemsByCategory(items, categoryId) {
   return categoryId
     ? items.filter((item) => item.category?.id === categoryId)
     : items;
+}
+
+// ?cat=<slug> on /sakkara: the category id when the value is a well-formed
+// slug of a category in the list, otherwise null (show every item).
+const CATEGORY_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+export function activeCategory(value, categories) {
+  if (typeof value !== "string" || value.length > 100 || !CATEGORY_SLUG.test(value)) return null;
+  return categories.some((category) => category.id === value) ? value : null;
 }

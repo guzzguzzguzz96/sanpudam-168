@@ -19,8 +19,14 @@ export function PhotoGallery({ data }) {
                 alt={item.alt}
                 className="home-gallery__media"
                 desktopImage={item.image}
+                fit={item.image?.fit}
+                matte={item.image?.matte}
                 placeholderLabel={item.label}
-                sizes="(max-width: 767px) 50vw, 33vw"
+                sizes={
+                  item.layout === "home-gallery__item--feature"
+                    ? "(max-width: 1023px) 100vw, 50vw"
+                    : "(max-width: 1023px) 50vw, 25vw"
+                }
               />
             </li>
           ))}

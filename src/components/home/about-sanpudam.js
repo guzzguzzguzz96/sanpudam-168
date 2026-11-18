@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { MediaFrame } from "@/components/home/media-frame";
 import { SectionIntro } from "@/components/home/section-intro";
+import { ReviewStatus } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
 
 export function AboutSanpudam({ data }) {
@@ -22,6 +23,7 @@ export function AboutSanpudam({ data }) {
             title={data.title}
             description={data.description}
           />
+          <ReviewStatus status={data.reviewStatus} />
           <Button href={data.href} variant="outline">
             อ่านประวัติเพิ่มเติม
           </Button>

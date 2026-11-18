@@ -48,7 +48,16 @@ node --env-file=.env.local migration/scripts/import-mongodb.mjs --preflight   # 
 node --env-file=.env.local migration/scripts/import-mongodb.mjs --apply --plan-hash=<hash> --confirm-db=<db>   # approval required
 node --test migration/scripts/tests/mongodb.test.mjs            # in-memory tests
 node --test migration/scripts/tests/dns-config.test.mjs         # DNS workaround tests
+
+# 6. Launch (see docs/production-launch-th.md); --import stubs "server-only"
+node --env-file=.env.local --import ./tests/support/register.mjs migration/scripts/audit-launch-readiness.mjs   # read-only staging audit
+node --env-file=.env.local --import ./tests/support/register.mjs migration/scripts/promote-to-production.mjs    # dry run (reads only)
+node --env-file=.env.local --import ./tests/support/register.mjs migration/scripts/promote-to-production.mjs --apply --plan-hash=<hash> --confirm-db=sanpudam168_production   # approval required
+node --import ./tests/support/register.mjs --test migration/scripts/tests/promotion.test.mjs   # in-memory tests
 ```
+
+Owner decisions for the launch live in `migration/confirmations/owner-launch-confirmation.json`
+(committed; no secrets). Promotion refuses the whole batch if staging no longer matches it.
 
 ### Windows: `querySrv ECONNREFUSED`
 

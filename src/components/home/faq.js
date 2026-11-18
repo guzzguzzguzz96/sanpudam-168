@@ -1,5 +1,6 @@
 import { Container } from "@/components/ui/container";
 import { SectionIntro } from "@/components/home/section-intro";
+import { ReviewStatus } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
 
 export function Faq({ data }) {
@@ -19,6 +20,7 @@ export function Faq({ data }) {
               </summary>
               <div id={`faq-answer-${item.id}`} className="home-faq__answer">
                 <p>{item.answer}</p>
+                <ReviewStatus status={item.reviewStatus} />
               </div>
             </details>
           ))}

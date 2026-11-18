@@ -46,7 +46,11 @@ src/
 
 ## ขอบเขตระยะนี้
 
-หน้า `/` เป็น homepage prototype แบบ responsive ภาษาไทย ส่วนหน้า `/history`, `/sakkara`, `/news` และ `/visit` ในเมนูยังอยู่ระหว่างการพัฒนา ลิงก์เหล่านี้จึงยังไม่ใช่หน้าที่พร้อมใช้งาน ขณะนี้มี Mongoose models และเครื่องมือย้ายข้อมูลใน `migration/` แล้ว แต่หน้าเว็บยังไม่เชื่อมต่อ MongoDB Atlas และยังไม่มีการเขียนข้อมูลลงฐานข้อมูล ส่วนสื่อเดิมถูกนำเข้า Cloudinary staging แล้ว (ดู `docs/mongodb-import-plan.md` และ `docs/cloudinary-import-plan.md`) ยังไม่มี Auth.js, ระบบ Admin, Contact Form หรือ public registration และ metadata ของ prototype ตั้งค่าไม่ให้เครื่องมือค้นหาจัดทำดัชนี
+หน้า `/` เป็น homepage prototype แบบ responsive ภาษาไทย หน้า `/history`, `/sakkara`, `/sakkara/[slug]`, `/news`, `/news/[slug]` และ `/visit` อ่านเนื้อหาจาก CMS ตามกฎการเผยแพร่ (หรือเนื้อหาร่างใน Client Review Mode, ดู `docs/client-review-mode.md` §12–§13) ขณะนี้มี Mongoose models และเครื่องมือย้ายข้อมูลใน `migration/` แล้ว หน้าเว็บอ่านข้อมูลจาก MongoDB แบบอ่านอย่างเดียวเท่านั้น และไม่มีการเขียนข้อมูลลงฐานข้อมูล ส่วนสื่อเดิมถูกนำเข้า Cloudinary staging แล้ว (ดู `docs/mongodb-import-plan.md` และ `docs/cloudinary-import-plan.md`) ยังไม่มี Auth.js, ระบบ Admin, Contact Form หรือ public registration และ metadata ของ prototype ตั้งค่าไม่ให้เครื่องมือค้นหาจัดทำดัชนี
+
+## Client Review Mode
+
+หน้าแรกสามารถแสดงเนื้อหาและภาพที่นำเข้าจาก staging เพื่อให้เจ้าของตรวจทานได้ เฉพาะเมื่อเปิด Client Review Mode (ปิดเป็นค่าเริ่มต้น และเปิดไม่ได้ใน production) ดูวิธีเปิด ตัวแปร และข้อกำหนดก่อนเผยแพร่ใน `docs/client-review-mode.md`
 
 ## Git branching
 

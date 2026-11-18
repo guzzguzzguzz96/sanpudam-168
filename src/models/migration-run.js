@@ -8,11 +8,11 @@ const { Schema } = mongoose;
 const MigrationRunSchema = new Schema(
   {
     runId: { type: String, required: true, unique: true },
-    track: { type: String, enum: ["media", "site_settings", "content", "mongodb"], required: true },
+    track: { type: String, enum: ["media", "site_settings", "content", "mongodb", "promotion"], required: true },
     mode: { type: String, enum: ["dry_run", "preflight", "apply"], required: true },
     planHash: { type: String, required: true, match: /^[0-9a-f]{64}$/ },
     targetDatabase: { type: String, required: true },
-    sourceType: { type: String, enum: ["admin_ui_capture", "export", "manual_transcription", "public_site"], required: true },
+    sourceType: { type: String, enum: ["admin_ui_capture", "export", "manual_transcription", "public_site", "staging_promotion"], required: true },
     status: { type: String, enum: ["running", "completed", "completed_with_issues", "failed"], default: "running" },
     startedAt: { type: Date, required: true },
     finishedAt: { type: Date, default: null },

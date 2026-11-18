@@ -1,11 +1,10 @@
-// CMS session verification, draft preview authorization, and the private
-// preview layer. Offline: mock models, test-only secrets.
+// Draft preview authorization on top of admin sign-in, and the private
+// preview layer. Offline: mock models, test-only configuration, injected
+// sessions (no Google request).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createHmac } from "node:crypto";
-import { signSessionToken, verifySessionToken, MAX_SESSION_SECONDS } from "../../src/server/auth/session-token.js";
-import { SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS, readAuthConfig } from "../../src/server/auth/config.js";
-import { authorizePreviewSession, createPreviewAccessPolicy } from "../../src/server/auth/preview-access.js";
+import { getAdminAccess } from "../../src/server/auth/admin-access.js";
+import { authorizePreviewPrincipal, createPreviewAccessPolicy } from "../../src/server/auth/preview-access.js";
 import { getPreviewGrant } from "../../src/server/auth/request-session.js";
 import { DraftAccessDeniedError } from "../../src/server/cms/draft-access.js";
 import { createContentService } from "../../src/server/cms/content-service.js";
@@ -13,107 +12,58 @@ import { loadPreviewSection } from "../../src/server/preview/preview-content.js"
 import { describePublicationState } from "../../src/server/preview/publication-state.js";
 import { draft, imageRef, ids, pendingReview, published, publishedSite, mockModels } from "./fixtures.mjs";
 
-// Test-only values; not real credentials.
-const SECRET = "test-only-secret-0123456789abcdefghijklmnop";
-const env = { AUTH_SECRET: SECRET, CMS_PREVIEW_ALLOWED_SUBJECTS: "user-owner-1, user-editor-2" };
-const NOW = Date.UTC(2026, 9, 29, 12, 0, 0);
-const token = (subject = "user-owner-1", role = "owner", options = {}) => signSessionToken({ subject, role, ...options }, { secret: SECRET, now: options.now ?? NOW });
-
-// Builds a correctly signed token with an arbitrary payload.
-function craft(payload, secret = SECRET) {
-  const data = `v1.${Buffer.from(JSON.stringify(payload)).toString("base64url")}`;
-  return `${data}.${createHmac("sha256", secret).update(data).digest("base64url")}`;
+// Test-only values; not real credentials or accounts.
+const env = {
+  AUTH_SECRET: "test-only-secret-0123456789abcdefghijklmnop",
+  AUTH_URL: "http://localhost:3000",
+  AUTH_GOOGLE_ID: "test-client-id.apps.googleusercontent.com",
+  AUTH_GOOGLE_SECRET: "test-client-secret",
+  ADMIN_ALLOWED_ACCOUNTS: "owner@example.test:owner,editor@example.test:editor",
+};
+const NOW = Date.UTC(2026, 10, 9, 12, 0, 0);
+const sessionFor = (email, subject = "1000001") => ({
+  user: { name: "Test", email },
+  identity: { provider: "google", subject, email, authTime: Math.floor(NOW / 1000) - 60 },
+});
+async function principalFor(email) {
+  const access = await getAdminAccess({ env, readSession: async () => sessionFor(email), now: NOW, waitForRequest: async () => {} });
+  assert.equal(access.status, "ok");
+  return access.principal;
 }
-const iat = Math.floor(NOW / 1000);
 
-test("session: a signed token verifies and carries only minimal claims", () => {
-  const result = verifySessionToken(token(), { secret: SECRET, now: NOW });
-  assert.equal(result.ok, true);
-  assert.deepEqual(Object.keys(result.session).sort(), ["expiresAt", "issuedAt", "role", "sessionId", "subject"]);
-  assert.equal(result.session.expiresAt - result.session.issuedAt, MAX_SESSION_SECONDS);
+test("preview authorization: only issued admin principals with a preview role", async () => {
+  const owner = await principalFor("owner@example.test");
+  assert.deepEqual(authorizePreviewPrincipal(owner), { allowed: true, principal: { subject: "1000001", role: "owner" } });
+  assert.equal(authorizePreviewPrincipal(await principalFor("editor@example.test")).allowed, true);
+  // Same shape, not issued by getAdminAccess(): refused.
+  assert.equal(authorizePreviewPrincipal({ ...owner }).reason, "not_signed_in");
+  assert.equal(authorizePreviewPrincipal({ subject: "1000001", email: "owner@example.test", role: "owner" }).reason, "not_signed_in");
+  assert.equal(authorizePreviewPrincipal(null).reason, "not_signed_in");
 });
 
-test("session: forged, tampered, and malformed tokens are rejected", () => {
-  const valid = token("user-editor-2", "editor");
-  const [version, payload, signature] = valid.split(".");
-  const elevated = Buffer.from(JSON.stringify({ ...JSON.parse(Buffer.from(payload, "base64url")), role: "owner", sub: "user-owner-1" })).toString("base64url");
-  const cases = {
-    tamperedPayload: `${version}.${elevated}.${signature}`,
-    wrongSecret: signSessionToken({ subject: "user-owner-1", role: "owner" }, { secret: "another-secret-0123456789abcdefghijkl", now: NOW }),
-    noSignature: `${version}.${payload}.`,
-    unsignedAlgNone: `${version}.${payload}`,
-    otherVersion: `v2.${payload}.${signature}`,
-    jwtLike: "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLW93bmVyLTEifQ.",
-    garbage: "not a token",
-    oversized: `v1.${"a".repeat(5000)}.${signature}`,
-  };
-  for (const [name, value] of Object.entries(cases)) {
-    const result = verifySessionToken(value, { secret: SECRET, now: NOW });
-    assert.equal(result.ok, false, name);
-  }
-  assert.equal(verifySessionToken(cases.tamperedPayload, { secret: SECRET, now: NOW }).reason, "bad_signature");
-  for (const value of [undefined, null, "", 42, {}]) assert.equal(verifySessionToken(value, { secret: SECRET, now: NOW }).reason, "missing");
-  assert.equal(verifySessionToken(craft({ sub: "user-owner-1", role: "owner", sid: "s", iat: "x", exp: iat + 10 }), { secret: SECRET, now: NOW }).reason, "malformed");
-  assert.equal(verifySessionToken(craft({ sub: "bad subject!", role: "owner", sid: "s", iat, exp: iat + 10 }), { secret: SECRET, now: NOW }).reason, "malformed");
-});
-
-test("session: expired, future, and over-long sessions are rejected", () => {
-  const expired = token("user-owner-1", "owner", { ttlSeconds: 60 });
-  assert.equal(verifySessionToken(expired, { secret: SECRET, now: NOW + 61_000 }).reason, "expired");
-  assert.equal(verifySessionToken(token(), { secret: SECRET, now: NOW + MAX_SESSION_SECONDS * 1000 }).reason, "expired");
-  assert.equal(verifySessionToken(craft({ sub: "user-owner-1", role: "owner", sid: "s", iat: iat + 3600, exp: iat + 7200 }), { secret: SECRET, now: NOW }).reason, "not_yet_valid");
-  assert.equal(verifySessionToken(craft({ sub: "user-owner-1", role: "owner", sid: "s", iat, exp: iat + 30 * 24 * 3600 }), { secret: SECRET, now: NOW }).reason, "invalid_lifetime");
-  assert.throws(() => token("user-owner-1", "owner", { ttlSeconds: MAX_SESSION_SECONDS + 1 }), /lifetime/);
-});
-
-test("session: no secret means no sessions", () => {
-  assert.equal(verifySessionToken(token(), { secret: null }).reason, "not_configured");
-  assert.throws(() => signSessionToken({ subject: "a-b", role: "owner" }, { secret: "" }), /secret/);
-  assert.equal(readAuthConfig({}).enabled, false);
-  assert.equal(readAuthConfig({ AUTH_SECRET: "short", CMS_PREVIEW_ALLOWED_SUBJECTS: "a" }).enabled, false);
-  assert.equal(readAuthConfig({ AUTH_SECRET: SECRET }).enabled, false, "empty allowlist disables preview");
-  assert.equal(readAuthConfig(env).enabled, true);
-});
-
-test("session: cookie settings are host-only, HttpOnly, Secure, SameSite strict", () => {
-  assert.match(SESSION_COOKIE_NAME, /^__Host-/);
-  assert.deepEqual({ ...SESSION_COOKIE_OPTIONS }, { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: MAX_SESSION_SECONDS });
-});
-
-test("authorization: role and explicit allowlist are both required", () => {
-  assert.deepEqual(authorizePreviewSession(token(), { env, now: NOW }), { allowed: true, principal: { subject: "user-owner-1", role: "owner" } });
-  assert.equal(authorizePreviewSession(token("user-editor-2", "editor"), { env, now: NOW }).allowed, true);
-  assert.equal(authorizePreviewSession(token("user-owner-1", "viewer"), { env, now: NOW }).reason, "role_not_allowed");
-  assert.equal(authorizePreviewSession(token("someone-else", "owner"), { env, now: NOW }).reason, "subject_not_allowed");
-  assert.equal(authorizePreviewSession(null, { env, now: NOW }).reason, "missing");
-  assert.equal(authorizePreviewSession(token(), { env: { AUTH_SECRET: SECRET }, now: NOW }).reason, "not_configured");
-  assert.equal(authorizePreviewSession(token(), { env: {}, now: NOW }).reason, "not_configured");
-});
-
-test("authorization: client-supplied preview flags never grant access", async () => {
-  const policy = createPreviewAccessPolicy({ env, now: NOW });
+test("preview authorization: request data and review flags never grant access", async () => {
+  const policy = createPreviewAccessPolicy();
   const forged = [
     {},
-    { preview: true, draft: "1", role: "owner", subject: "user-owner-1" },
-    { searchParams: { preview: "true", token: token() }, headers: { authorization: `Bearer ${token()}`, "x-preview": "1" } },
-    { sessionToken: "v1.forged.signature" },
-    { sessionToken: token("user-owner-1", "owner", { now: NOW - (MAX_SESSION_SECONDS + 10) * 1000 }) },
+    { preview: true, draft: "1", role: "owner", subject: "1000001" },
+    { principal: { subject: "1000001", role: "owner" } },
+    { searchParams: { preview: "true" }, headers: { authorization: "Bearer x", "x-preview": "1" }, sessionToken: "v1.legacy.token" },
+    { CLIENT_REVIEW_ENABLED: "true", CLIENT_REVIEW_LOCAL: "true" },
   ];
   for (const request of forged) await assert.rejects(policy.requestGrant(request), DraftAccessDeniedError, JSON.stringify(Object.keys(request)));
-  const grant = await policy.requestGrant({ sessionToken: token() });
-  assert.deepEqual({ subject: grant.subject, role: grant.role }, { subject: "user-owner-1", role: "owner" });
+  const grant = await policy.requestGrant({ principal: await principalFor("owner@example.test") });
+  assert.deepEqual({ subject: grant.subject, role: grant.role }, { subject: "1000001", role: "owner" });
 });
 
-test("request binding: only the session cookie is read; failures return null", async () => {
-  const policy = createPreviewAccessPolicy({ env, now: NOW });
-  const reads = [];
-  const jar = (value) => async (name) => { reads.push(name); return value; };
-  assert.equal(await getPreviewGrant({ readCookie: jar(null), policy }), null);
-  assert.equal(await getPreviewGrant({ readCookie: jar("v1.bad.sig"), policy }), null);
-  assert.equal(await getPreviewGrant({ readCookie: jar(token("user-owner-1", "viewer")), policy }), null);
-  const grant = await getPreviewGrant({ readCookie: jar(token()), policy });
-  assert.equal(grant.subject, "user-owner-1");
-  assert.ok(reads.every((name) => name === SESSION_COOKIE_NAME));
+test("request binding: a grant only for an ok admin access result", async () => {
+  for (const status of ["unavailable", "unauthenticated", "forbidden"]) {
+    assert.equal(await getPreviewGrant({ getAccess: async () => ({ status, principal: null }) }), null, status);
+  }
+  // A fabricated "ok" result with an unissued principal is still refused.
+  assert.equal(await getPreviewGrant({ getAccess: async () => ({ status: "ok", principal: { subject: "1000001", role: "owner" } }) }), null);
+  const principal = await principalFor("editor@example.test");
+  const grant = await getPreviewGrant({ getAccess: async () => ({ status: "ok", principal }) });
+  assert.equal(grant.role, "editor");
 });
 
 // Mock models that throw on anything except find/findOne: proves preview is read-only.
@@ -139,7 +89,7 @@ function draftSite() {
 test("preview: denied grants stop before any query", async () => {
   const models = readOnlyModels(draftSite());
   const service = createContentService({ models, connect: async () => {}, logger: { error() {} } });
-  for (const grant of [null, undefined, { subject: "user-owner-1", role: "owner" }]) {
+  for (const grant of [null, undefined, { subject: "1000001", role: "owner" }]) {
     await assert.rejects(loadPreviewSection("homepage", grant, { service }), DraftAccessDeniedError);
   }
   for (const model of Object.values(models)) assert.equal(model.calls.length, 0);
@@ -150,12 +100,12 @@ test("preview: an authorized grant sees drafts with stage labels and placeholder
   const site = draftSite();
   const before = structuredClone(site);
   const service = createContentService({ models: readOnlyModels(site), connect: async () => {}, logger: { error() {} } });
-  const grant = await createPreviewAccessPolicy({ env, now: NOW }).requestGrant({ sessionToken: token() });
+  const grant = await createPreviewAccessPolicy().requestGrant({ principal: await principalFor("owner@example.test") });
 
   const preview = await loadPreviewSection("homepage", grant, { service });
   assert.equal(preview.isPreview, true);
   assert.deepEqual(preview.robots, { index: false, follow: false });
-  assert.deepEqual(preview.viewer, { subject: "user-owner-1", role: "owner" });
+  assert.deepEqual(preview.viewer, { subject: "1000001", role: "owner" });
   assert.equal(preview.view.faq[0].question, "ร่าง?");
   assert.equal(preview.view.featuredItems.items[0].href, "/sakkara/item-one");
   const settings = preview.records.find((r) => r.collection === "site_settings");
@@ -180,7 +130,7 @@ test("preview: sacred items, news, history, and gallery sections", async () => {
   const site = draftSite();
   site.Page[0].coatOfArms = { heading: "ตราแผ่นดิน", body: "เนื้อหา", image: imageRef(ids.approvedAsset), parts: [{ key: "p2", sortOrder: 2, part: "ข", meaning: "ความหมาย ข" }, { key: "p1", sortOrder: 1, part: "ก", meaning: "ความหมาย ก" }] };
   const service = createContentService({ models: readOnlyModels(site), connect: async () => {}, logger: { error() {} } });
-  const grant = await createPreviewAccessPolicy({ env, now: NOW }).requestGrant({ sessionToken: token("user-editor-2", "editor") });
+  const grant = await createPreviewAccessPolicy().requestGrant({ principal: await principalFor("editor@example.test") });
 
   const items = await loadPreviewSection("sacred-items", grant, { service });
   assert.equal(items.view.length, 2);

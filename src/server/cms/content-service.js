@@ -1,14 +1,17 @@
 import "server-only";
 import { assertDraftGrant } from "./draft-access.js";
 import { collectAssetIds, createMediaResolver } from "./media.js";
+import { assertReviewGrant } from "./review-access.js";
 import {
   CONTENT_PROJECTION,
   DRAFT_SCOPE,
   MEDIA_PROJECTION,
   PUBLIC_SCOPE,
+  REVIEW_SCOPE,
   draftContentFilter,
   draftMediaFilter,
   isPubliclyVisible,
+  isValidSlug,
   publicContentFilter,
   publicMediaFilter,
 } from "./policy.js";
@@ -64,8 +67,8 @@ export function createContentService({ models, connect, sanitize = (error) => er
     return createMediaResolver(assets, { scope: scope.name });
   }
 
-  // Wraps a loader so public reads degrade to "unavailable" instead of
-  // throwing. Draft reads throw: an editor must see real failures.
+  // Wraps a loader so public and review reads degrade to "unavailable"
+  // instead of throwing. Draft reads throw: an editor must see real failures.
   function guarded(scope, empty, loader) {
     return async (...args) => {
       try {
@@ -73,7 +76,7 @@ export function createContentService({ models, connect, sanitize = (error) => er
         const isEmpty = data === null || (Array.isArray(data) && data.length === 0);
         return { status: isEmpty ? "empty" : "ok", data: isEmpty ? empty() : data, ...rest };
       } catch (error) {
-        if (scope.name !== PUBLIC_SCOPE) throw sanitize(error);
+        if (scope.name === DRAFT_SCOPE) throw sanitize(error);
         logger.error(`[cms] content unavailable: ${sanitize(error).message}`);
         return { status: "unavailable", data: empty(), media: createMediaResolver([], { scope: scope.name }) };
       }
@@ -97,8 +100,28 @@ export function createContentService({ models, connect, sanitize = (error) => er
       sacredItems: guarded(scope, list, async ({ limit = 12 } = {}) => {
         const items = await find(scope, models.SacredItem, {}, { sort: { sortOrder: 1, _id: 1 }, limit });
         const categoryIds = [...new Set(items.map((item) => item.categoryId).filter(Boolean).map(String))];
-        const categories = categoryIds.length ? await find(scope, models.Category, { _id: { $in: categoryIds } }, { sort: { sortOrder: 1 } }) : [];
-        return { ...(await withMedia(items)), categories: new Map(categories.map((c) => [String(c._id), c])) };
+        // Categories and media depend only on the items: read them together.
+        const [categories, withItemMedia] = await Promise.all([
+          categoryIds.length ? find(scope, models.Category, { _id: { $in: categoryIds } }, { sort: { sortOrder: 1 } }) : [],
+          withMedia(items),
+        ]);
+        return { ...withItemMedia, categories: new Map(categories.map((c) => [String(c._id), c])) };
+      }),
+
+      // One sacred item by its slug: a validated string used as a literal
+      // equality match (never an operator or a field name). An invalid slug
+      // returns "empty" without a query.
+      sacredItemBySlug: guarded(scope, none, async (slug) => {
+        if (!isValidSlug(slug)) return { data: null, media: createMediaResolver([], { scope: scope.name }), category: null };
+        const item = await findOne(scope, models.SacredItem, { slug: String(slug) });
+        const [category, withItemMedia] = await Promise.all([item?.categoryId ? findOne(scope, models.Category, { _id: item.categoryId }) : null, withMedia(item)]);
+        return { ...withItemMedia, category };
+      }),
+
+      // One news article by its slug; same literal-match rule as above.
+      newsBySlug: guarded(scope, none, async (slug) => {
+        if (!isValidSlug(slug)) return { data: null, media: createMediaResolver([], { scope: scope.name }) };
+        return withMedia(await findOne(scope, models.News, { slug: String(slug) }));
       }),
 
       news: guarded(scope, list, async ({ limit = 3 } = {}) => withMedia(await find(scope, models.News, {}, { sort: { date: -1, _id: 1 }, limit }))),
@@ -127,6 +150,11 @@ export function createContentService({ models, connect, sanitize = (error) => er
     // one this throws DraftAccessDeniedError before any query runs.
     withDraftAccess(grant) {
       return repositories(createScope(DRAFT_SCOPE, assertDraftGrant(grant)));
+    },
+    // Requires a grant from the client review policy (review-access.js).
+    // Without one this throws ReviewAccessDeniedError before any query runs.
+    withReviewAccess(grant) {
+      return repositories(createScope(REVIEW_SCOPE, assertReviewGrant(grant)));
     },
   };
 }

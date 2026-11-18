@@ -1,5 +1,10 @@
+import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Icon } from "@/components/ui/icons";
+
+// Internal pages use next/link (client-side navigation, no full reload);
+// in-page anchors and external links stay plain anchors.
+const isInternalPage = (href) => typeof href === "string" && href.startsWith("/") && !href.startsWith("//");
 
 export function QuickActions({ data }) {
   if (data.length === 0) {
@@ -13,15 +18,9 @@ export function QuickActions({ data }) {
           ทางลัด
         </h2>
         <ul className="home-quick-actions__list">
-          {data.map((action) => (
-            <li key={action.id}>
-              <a
-                className="home-quick-actions__link"
-                href={action.href}
-                {...(action.external
-                  ? { rel: "noopener noreferrer", target: "_blank" }
-                  : {})}
-              >
+          {data.map((action) => {
+            const content = (
+              <>
                 <span className="home-quick-actions__icon">
                   <Icon name={action.icon} />
                 </span>
@@ -29,9 +28,29 @@ export function QuickActions({ data }) {
                 {action.external ? (
                   <span className="sr-only">(เปิดในหน้าต่างใหม่)</span>
                 ) : null}
-              </a>
-            </li>
-          ))}
+              </>
+            );
+
+            return (
+              <li key={action.id}>
+                {!action.external && isInternalPage(action.href) ? (
+                  <Link className="home-quick-actions__link" href={action.href} prefetch={false}>
+                    {content}
+                  </Link>
+                ) : (
+                  <a
+                    className="home-quick-actions__link"
+                    href={action.href}
+                    {...(action.external
+                      ? { rel: "noopener noreferrer", target: "_blank" }
+                      : {})}
+                  >
+                    {content}
+                  </a>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </Container>
     </nav>

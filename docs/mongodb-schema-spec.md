@@ -477,6 +477,8 @@ const MigrationRunSchema = new Schema({
 
 ห้ามบันทึกค่า environment, connection string, API key, ลายเซ็นคำขอ หรือ response แบบเต็ม
 
+การย้าย staging → production (`migration/scripts/promote-to-production.mjs`, `docs/production-launch-th.md`) บันทึกใน `migration_runs` ของ production ด้วย `track: "promotion"` และ `sourceType: "staging_promotion"` (model ปัจจุบันอยู่ที่ `src/models/migration-run.js`)
+
 ### 3.14 Collections ในอนาคต (ไม่รับข้อมูลจากระบบเดิม)
 
 | Collection | หมายเหตุ |

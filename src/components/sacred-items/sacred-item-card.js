@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MediaFrame } from "@/components/home/media-frame";
+import { ReviewStatus } from "@/components/review/review-status";
 
 // One link per card: the title link stretches over the whole card, so the
 // card is a single tab stop with no nested interactive elements.
@@ -40,6 +41,7 @@ export function SacredItemCard({
         {item.summary ? (
           <p className="sacred-item-card__summary">{item.summary}</p>
         ) : null}
+        <ReviewStatus status={item.reviewStatus} />
         {item.href ? (
           <span aria-hidden="true" className="sacred-item-card__more">
             ดูรายละเอียด
