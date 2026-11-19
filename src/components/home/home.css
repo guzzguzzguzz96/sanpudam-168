@@ -477,6 +477,105 @@
   margin-top: var(--space-6);
 }
 
+/* Featured sacred object (legacy dark-blue coin section): navy surface,
+   gold rule and lead line, hero button styles. Text first, image below on
+   mobile; side by side from 48rem. The image keeps its own aspect ratio. */
+.home-feature {
+  background: var(--deep-navy);
+  color: var(--warm-ivory);
+}
+
+.home-feature__layout {
+  display: grid;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.home-feature__title {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-4);
+  color: var(--white);
+  font-size: var(--type-h2);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-h2);
+}
+
+.home-feature__title-lead {
+  color: var(--royal-gold);
+}
+
+.home-feature__rule {
+  display: block;
+  width: 4rem;
+  height: 3px;
+  margin-bottom: var(--space-4);
+  border-radius: 3px;
+  background: var(--royal-gold);
+}
+
+.home-feature__summary {
+  max-width: 36rem;
+  margin: 0;
+  color: var(--warm-ivory);
+  font-size: var(--type-lead);
+  line-height: var(--leading-lead);
+}
+
+.home-feature__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+/* Mobile: both buttons span the column, like the hero. */
+.home-feature__actions .contact-actions,
+.home-feature__actions .contact-actions li,
+.home-feature__actions .contact-action {
+  width: 100%;
+  margin: 0;
+}
+
+.home-feature__actions .contact-action {
+  justify-content: center;
+}
+
+.home-feature__actions .ui-button,
+.home-feature__actions .contact-action {
+  min-height: 3.25rem;
+  padding-inline: var(--space-6);
+}
+
+.home-feature__media-link {
+  display: block;
+  border-radius: var(--card-radius);
+}
+
+.home-feature__media {
+  aspect-ratio: var(--home-feature-ratio, 4 / 3);
+}
+
+@media (min-width: 48rem) {
+  .home-feature__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: var(--space-12);
+  }
+
+  .home-feature__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .home-feature__actions .contact-actions,
+  .home-feature__actions .contact-actions li,
+  .home-feature__actions .contact-action {
+    width: auto;
+  }
+}
+
 .home-worship-guide {
   background: var(--white);
 }

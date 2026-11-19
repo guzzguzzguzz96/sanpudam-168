@@ -339,6 +339,30 @@ function featuredView(result, scope) {
   return { catalogHref: "/sakkara", items };
 }
 
+// Featured sacred object (the dark-blue coin section of the legacy
+// homepage): the first sacred item of type "sacred_object" in sortOrder,
+// from the same scoped query as the featured items. Only stored values are
+// used: name, excerpt, primary image (with its alt and presentation hint),
+// and slug. Variants, quantities, and the price note are never shown here.
+// The name is split before " รุ่น " into a lead and a rest line for the
+// two-line title; a name without it stays one line.
+export function featuredObjectView(result, scope) {
+  const doc = listOf(result).find((item) => item?.type === "sacred_object" && isValidSlug(item.slug) && text(item.name));
+  if (!doc) return null;
+  const name = text(doc.name);
+  const split = name.indexOf(" รุ่น ");
+  return {
+    id: String(doc._id),
+    name,
+    titleLead: split > 0 ? name.slice(0, split) : name,
+    titleRest: split > 0 ? name.slice(split + 1) : null,
+    summary: text(doc.excerpt),
+    image: image(result.media, doc.primaryImage),
+    href: `/sakkara/${doc.slug}`,
+    reviewStatus: statusOf(scope, doc, ["name", "excerpt", "primaryImage"]),
+  };
+}
+
 function newsView(result, scope) {
   const docs = listOf(result);
   if (!docs.length) return null;
@@ -444,6 +468,7 @@ export function buildHomepage(content, { scope = "review", overrides = REVIEW_CO
     quickInformation: visitor.quickInformation,
     about: aboutView(content.historyPage, scope),
     featuredItems: featuredView(content.sacredItems, scope),
+    featuredObject: featuredObjectView(content.sacredItems, scope),
     worshipGuide: worshipView(content.historyPage, scope),
     news: newsView(content.news, scope),
     gallery: galleryView(content.gallery),

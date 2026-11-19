@@ -211,3 +211,44 @@ test("launch policy: indexable only on Vercel Production with SITE_LAUNCHED=true
   assert.equal(readSiteUrl({ NEXT_PUBLIC_SITE_URL: "http://localhost:3000" }).href, "http://localhost:3000/");
   for (const value of ["http://sanpudam168.com", "https://sanpudam168.com/th", "https://u:p@sanpudam168.com", "not a url", ""]) assert.equal(readSiteUrl({ NEXT_PUBLIC_SITE_URL: value }), null, value);
 });
+
+// Featured sacred object (homepage coin section).
+function coinSite({ status = "published", type = "sacred_object" } = {}) {
+  const site = launchSite();
+  site.MediaAsset.push({ ...asset("poster"), width: 1600, height: 1131, cloudinary: { ...asset("poster").cloudinary, publicId: "sanpudam168/staging/legacy/sacred-items/coin-charoenlap-charoenyot/poster" } });
+  const coin = { _id: "coin", name: "เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ", slug: "coin-charoenlap-charoenyot", type, excerpt: "เหรียญบารมีปู่ดำ รุ่นเจริญลาภ เจริญยศ", categoryId: ids.category, primaryImage: imageRef("poster", { alt: "โปสเตอร์เหรียญ" }), sortOrder: 4, inquiryText: "สอบถามราคาและสั่งจองทางไลน์", showVariantQuantities: false, variants: [{ key: "v1", sortOrder: 1, name: "เนื้อทองคำ", quantity: 9 }] };
+  site.SacredItem.push(status === "published" ? published(coin) : draft(coin));
+  return site;
+}
+
+test("featured object: built from the published sacred_object record only", async () => {
+  const view = await publicHome(coinSite());
+  const feature = view.featuredObject;
+  assert.equal(feature.name, "เหรียญปู่ดำ 168 รุ่น เจริญลาภ เจริญยศ");
+  assert.equal(feature.titleLead, "เหรียญปู่ดำ 168");
+  assert.equal(feature.titleRest, "รุ่น เจริญลาภ เจริญยศ");
+  assert.equal(feature.summary, "เหรียญบารมีปู่ดำ รุ่นเจริญลาภ เจริญยศ");
+  assert.equal(feature.href, "/sakkara/coin-charoenlap-charoenyot");
+  assert.equal(feature.image.alt, "โปสเตอร์เหรียญ");
+  assert.equal(feature.image.fit, "contain", "poster is shown whole");
+  assert.deepEqual([feature.image.width, feature.image.height], [1600, 1131]);
+  assert.equal(feature.reviewStatus, null, "no review label on the public site");
+  const json = JSON.stringify(feature);
+  for (const hidden of ["สอบถามราคา", "quantity", "เนื้อทองคำ", "line.me"]) assert.ok(!json.includes(hidden), `${hidden} must not be in the section data`);
+  // The LINE button comes only from the verified contact config.
+  assert.equal(view.contactConfig.lineInquiryUrl, "https://line.me/R/ti/p/%40sanpudam168");
+});
+
+test("featured object: hidden when there is no published sacred_object", async () => {
+  assert.equal((await publicHome(launchSite())).featuredObject, null, "no record");
+  assert.equal((await publicHome(coinSite({ status: "draft" }))).featuredObject, null, "draft record");
+  assert.equal((await publicHome(coinSite({ type: "shrine_worship" }))).featuredObject, null, "not a sacred object");
+});
+
+test("featured object: Client Review shows it with its status label", async () => {
+  const site = coinSite({ status: "draft" });
+  site.SacredItem.at(-1).placeholderFields = [{ path: "excerpt", status: "placeholder" }];
+  const review = buildReviewHomepage(await loadHomepageSections(reviewRepos(site)));
+  assert.equal(review.featuredObject.href, "/sakkara/coin-charoenlap-charoenyot");
+  assert.equal(review.featuredObject.reviewStatus.tone, "sample");
+});

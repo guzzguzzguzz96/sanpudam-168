@@ -1,6 +1,7 @@
 import { AboutSanpudam } from "@/components/home/about-sanpudam";
 import { Faq } from "@/components/home/faq";
 import { FeaturedSacredItems } from "@/components/home/featured-sacred-items";
+import { FeaturedSacredObject } from "@/components/home/featured-sacred-object";
 import { HeroBanner } from "@/components/home/hero-banner";
 import { LatestNews } from "@/components/home/latest-news";
 import { PhotoGallery } from "@/components/home/photo-gallery";
@@ -59,6 +60,15 @@ export function HomepageView({ view, scope }) {
       <SectionOrNotice scope={scope} status={sections.featuredItems} id="review-featured-items" title="วัตถุมงคล">
         {view.featuredItems ? <FeaturedSacredItems data={view.featuredItems} /> : null}
       </SectionOrNotice>
+      {/* Featured sacred object (coin): only when the record exists in this
+          scope. LINE action from verified contact data on the public site;
+          Client Review shows its status label instead. */}
+      {view.featuredObject ? (
+        <FeaturedSacredObject
+          data={view.featuredObject}
+          lineActions={scope === "public" && view.contactConfig ? getContactActions(["line"], view.contactConfig) : []}
+        />
+      ) : null}
       <SectionOrNotice scope={scope} status={sections.worshipGuide} id="review-worship-guide" title="คำแนะนำการสักการะ">
         {view.worshipGuide ? <WorshipGuide data={view.worshipGuide.steps} reviewStatus={view.worshipGuide.reviewStatus} /> : null}
       </SectionOrNotice>
