@@ -124,7 +124,7 @@ Preview (`dev`) คงค่าเดิมของ Client Review ทั้ง�
 
 - [ ] หน้า `/`, `/history`, `/sakkara` (+ `?cat=sacred-place|saimu|check-in`), 5 หน้าวัตถุมงคล, `/news`, 3 หน้าข่าว, `/visit` แสดงข้อมูลจริง ไม่มีข้อความ "ตัวอย่าง" หรือป้าย review
 - [ ] ปุ่มโทร `0823686168`, LINE `@sanpudam168`, Google Maps, Facebook/TikTok/YouTube เปิดได้ (Facebook ไม่มี `mibextid`)
-- [ ] `/visit` มีแผนที่ Google ฝัง
+- [ ] หน้าแรก (ส่วน "การเยี่ยมชมและการเดินทาง") และ `/visit` มีแผนที่ Google ฝังตำแหน่งที่เจ้าของยืนยัน (`src/config/map-embed.js`, แสดงเฉพาะเมื่อ `contact.verified = true`) และปุ่ม "นำทางด้วย Google Maps" ยังอยู่
 - [ ] slug ที่ไม่มี (`/news/x`, `/sakkara/x`) ได้ HTTP 404 (`curl -I`)
 - [ ] `<title>`, description, canonical (`https://sanpudam168.com/...`), og:image ถูกต้อง; JSON-LD `FAQPage` บนหน้าแรก และ `NewsArticle` บนหน้าข่าว
 - [ ] robots.txt / sitemap.xml ตามข้อ 4.6; `/admin` มี `X-Robots-Tag: noindex`

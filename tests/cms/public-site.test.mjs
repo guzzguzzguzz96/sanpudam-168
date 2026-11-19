@@ -7,7 +7,8 @@ import { createContentService } from "../../src/server/cms/content-service.js";
 import { createReviewAccessPolicy } from "../../src/server/cms/review-access.js";
 import { evaluateReviewMode } from "../../src/lib/review-mode.js";
 import { REVIEW_LABELS, buildHomepage, buildReviewHomepage, buildSiteChrome, loadHomepageSections, reviewSocialLink } from "../../src/server/review/homepage.js";
-import { buildNewsListPage, buildVisitPage, mapEmbedUrl } from "../../src/server/site/pages.js";
+import { buildNewsListPage, buildVisitPage, publicMapEmbedUrl } from "../../src/server/site/pages.js";
+import { OWNER_CONFIRMED_MAP_EMBED_URL, isAllowedMapEmbedUrl } from "../../src/config/map-embed.js";
 import { evaluateSiteLaunch, readSiteUrl, robotsFor } from "../../src/lib/site-launch.js";
 import { cleanSocialUrl } from "../../src/lib/social-links.js";
 import { activeCategory } from "../../src/lib/sacred-items.js";
@@ -137,15 +138,59 @@ test("public media: images that fail the rule are hidden; the gallery takes the 
   assert.ok(review.news[0].image);
 });
 
-test("public /visit: map embed only for a verified contact block; never in review", async () => {
+// The owner-confirmed embed, verbatim (supplied 2026-11-19).
+const CONFIRMED_EMBED = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3875.5880934293764!2d100.49462369999999!3d13.743370099999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e299dcfc86f94b%3A0xdd43e1f925c44216!2z4Lio4Liy4Lil4Lib4Li54LmI4LiU4LizMTY4LeC4leC4o-C4suC5geC4nOC5iOC4meC4lOC4tOC4mQ!5e0!3m2!1sen!2sth!4v1795100442717!5m2!1sen!2sth";
+
+test("map embed: the owner-confirmed URL is stored verbatim and allowed", () => {
+  assert.equal(OWNER_CONFIRMED_MAP_EMBED_URL, CONFIRMED_EMBED);
+  assert.equal(isAllowedMapEmbedUrl(CONFIRMED_EMBED), true);
+  assert.equal(publicMapEmbedUrl(), CONFIRMED_EMBED);
+});
+
+test("map embed: only https://www.google.com/maps/embed with a pb parameter", () => {
+  for (const bad of [
+    CONFIRMED_EMBED.replace("https:", "http:"),
+    CONFIRMED_EMBED.replace("www.google.com", "maps.google.com"),
+    CONFIRMED_EMBED.replace("www.google.com", "www.google.com.evil.example"),
+    CONFIRMED_EMBED.replace("www.google.com", "evil.example"),
+    CONFIRMED_EMBED.replace("www.google.com", "www.google.com:8443"),
+    CONFIRMED_EMBED.replace("https://", "https://user:pass@"),
+    "https://www.google.com/maps?q=%E0%B8%A8%E0%B8%B2%E0%B8%A5&output=embed",
+    "https://www.google.com/maps/embed",
+    "https://www.google.com/maps/embed?pb=",
+    "https://www.google.com/maps/embed/v1/place?q=x",
+    "javascript:alert(1)",
+    "",
+    null,
+    undefined,
+    42,
+  ]) {
+    assert.equal(isAllowedMapEmbedUrl(bad), false, String(bad));
+  }
+  assert.equal(publicMapEmbedUrl("https://www.google.com/maps?q=x&output=embed"), null);
+});
+
+test("public /visit: the confirmed embed only for a verified contact block; never in review", async () => {
   const visit = buildVisitPage(await publicRepos(launchSite()).siteSettings(), { scope: "public" });
-  assert.equal(visit.mapEmbedUrl, "https://www.google.com/maps?q=%E0%B8%A8%E0%B8%B2%E0%B8%A5%E0%B8%9B%E0%B8%B9%E0%B9%88%E0%B8%94%E0%B8%B3%20%E0%B8%96%E0%B8%99%E0%B8%99%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%8A&hl=th&z=17&output=embed");
+  assert.equal(visit.mapEmbedUrl, CONFIRMED_EMBED);
+  assert.ok(visit.directions?.href, "the directions button stays");
   const unverified = launchSite();
   unverified.SiteSettings[0].contact.verified = false;
   assert.equal(buildVisitPage(await publicRepos(unverified).siteSettings(), { scope: "public" }).mapEmbedUrl, null);
   assert.equal(buildVisitPage(await reviewRepos(launchSite()).siteSettings(), { scope: "review" }).mapEmbedUrl, null);
-  assert.equal(mapEmbedUrl(""), null);
-  assert.equal(mapEmbedUrl("x".repeat(121)), null);
+});
+
+test("public homepage: the confirmed embed in the visit section; review keeps the placeholder", async () => {
+  const view = await publicHome();
+  assert.equal(view.visit.mapEmbedUrl, CONFIRMED_EMBED);
+  assert.equal(view.visit.directions.href, "https://maps.app.goo.gl/abc123", "directions unchanged");
+  const unverified = launchSite();
+  unverified.SiteSettings[0].contact.verified = false;
+  const hidden = await publicHome(unverified);
+  assert.equal(hidden.visit.mapEmbedUrl, null);
+  const review = buildReviewHomepage(await loadHomepageSections(reviewRepos(launchSite())));
+  assert.ok(!("mapEmbedUrl" in review.visit), "review visit shape is unchanged (placeholder box)");
+  assert.ok(!JSON.stringify(review).includes("google.com/maps/embed"));
 });
 
 test("/sakkara ?cat=: only a well-formed slug of a listed category filters", () => {

@@ -5,6 +5,7 @@ import { isValidSlug } from "../cms/policy.js";
 import { getPhoneHref } from "../../lib/contact-actions.js";
 import { normalizeSacredItem } from "../../lib/sacred-items.js";
 import { cleanSocialUrl } from "../../lib/social-links.js";
+import { OWNER_CONFIRMED_MAP_EMBED_URL, isAllowedMapEmbedUrl } from "../../config/map-embed.js";
 import { REVIEW_CONFIRMED_OVERRIDES } from "./overrides.js";
 
 // Homepage and header/footer view data: MongoDB content -> plain view data
@@ -265,7 +266,11 @@ function visitorViews(result, overrides, scope) {
 
   return {
     quickInformation: quickInformation.length ? quickInformation : null,
-    visit: details.length || contact.directions ? { details, directions: contact.directions } : null,
+    // Public scope adds the owner-confirmed map embed while the contact block
+    // is verified; the review shape is unchanged (placeholder box).
+    visit: details.length || contact.directions
+      ? { details, directions: contact.directions, ...(isPublic(scope) ? { mapEmbedUrl: contact.verified && isAllowedMapEmbedUrl(OWNER_CONFIRMED_MAP_EMBED_URL) ? OWNER_CONFIRMED_MAP_EMBED_URL : null } : {}) }
+      : null,
     // Compact summary (Step G): full values, including the full address and
     // social URLs, are on /visit. Short values come from their own fields
     // (locationShort, platform names), never by cutting a longer value. One
