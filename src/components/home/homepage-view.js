@@ -69,7 +69,15 @@ export function HomepageView({ view, scope }) {
         {view.gallery ? <PhotoGallery data={view.gallery} /> : null}
       </SectionOrNotice>
       <SectionOrNotice scope={scope} status={sections.siteSettings} id="review-visit" title="การเยี่ยมชมและการเดินทาง">
-        {view.visit ? <VisitUs data={view.visit.details} actions={visitActions(view, scope)} directionsNote={view.visit.directions?.note} /> : null}
+        {view.visit ? (
+          <VisitUs
+            actions={visitActions(view, scope)}
+            data={view.visit.details}
+            directionsNote={view.visit.directions?.note}
+            mapEmbedUrl={scope === "public" ? (view.visit.mapEmbedUrl ?? null) : null}
+            mapName={view.brand?.name ?? null}
+          />
+        ) : null}
       </SectionOrNotice>
       <SectionOrNotice scope={scope} status={sections.faq} id="review-faq" title="คำถามที่พบบ่อย">
         {view.faq ? <Faq data={view.faq} /> : null}

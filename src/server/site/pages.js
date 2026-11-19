@@ -4,6 +4,7 @@ import { mediaPresentation } from "../cms/media-presentation.js";
 import { isValidSlug } from "../cms/policy.js";
 import { REVIEW_LABELS, describeReviewStatus, reviewMapsUrl, reviewSocialLink } from "../review/homepage.js";
 import { getPhoneHref } from "../../lib/contact-actions.js";
+import { OWNER_CONFIRMED_MAP_EMBED_URL, isAllowedMapEmbedUrl } from "../../config/map-embed.js";
 
 // View data for /history, /sakkara, /sakkara/[slug], /news, /news/[slug],
 // and /visit (docs/client-review-mode.md §12–§13). The same builders serve both scopes:
@@ -189,11 +190,10 @@ export function buildNewsArticlePage(result) {
 
 // --- /visit --------------------------------------------------------------
 
-// Keyless Google Maps embed for a place query (at most 120 characters, as in
-// the schema). Returns null for an empty or oversized query.
-export function mapEmbedUrl(query) {
-  if (typeof query !== "string" || !query.trim() || query.trim().length > 120) return null;
-  return `https://www.google.com/maps?q=${encodeURIComponent(query.trim())}&hl=th&z=17&output=embed`;
+// The owner-confirmed embed (src/config/map-embed.js), or null if it ever
+// fails validation. Used by /visit and the homepage builder.
+export function publicMapEmbedUrl(value = OWNER_CONFIRMED_MAP_EMBED_URL) {
+  return isAllowedMapEmbedUrl(value) ? value : null;
 }
 
 // scope "review": imported values are shown as text with their labels;
@@ -244,9 +244,9 @@ export function buildVisitPage(result, { scope, overrides = null }) {
       // Review: text only, as before.
       .map((link) => ({ id: `social-${link.platform}`, label: link.label, value: link.value, ...(isReview ? {} : { href: link.href }), note: isReview && !link.verified ? REVIEW_LABELS.unverifiedContact : null })),
     directions,
-    // Embedded Google Maps (public, verified contact only). Keyless embed
-    // URL built from the stored query; never from request data.
-    mapEmbedUrl: !isReview && verified ? mapEmbedUrl(text(contact.mapEmbedQuery) ?? [text(settings.identity?.name), text(contact.locationShort)].filter(Boolean).join(" ")) : null,
+    // Embedded Google Maps of the exact place: public scope and
+    // owner-verified contact only; never from request data.
+    mapEmbedUrl: !isReview && verified ? publicMapEmbedUrl() : null,
     // Clickable phone/LINE actions: public and owner-verified only.
     verifiedContact: !isReview && verified ? { phoneNumber: phone, lineInquiryUrl: lineUrlFromId(contact.lineId) } : null,
   };

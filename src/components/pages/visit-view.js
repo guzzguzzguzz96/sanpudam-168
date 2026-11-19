@@ -3,6 +3,7 @@ import { ReviewNote } from "@/components/review/review-status";
 import { ContactActions } from "@/components/ui/contact-actions";
 import { Container } from "@/components/ui/container";
 import { Icon } from "@/components/ui/icons";
+import { MapEmbed } from "@/components/ui/map-embed";
 import { Section } from "@/components/ui/section";
 import { getContactActions } from "@/lib/contact-actions";
 
@@ -80,16 +81,7 @@ export function VisitView({ view }) {
           </div>
 
           {view.mapEmbedUrl ? (
-            <div className="home-visit__map home-visit__map--embed">
-              <iframe
-                allowFullScreen
-                className="home-visit__map-frame"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                src={view.mapEmbedUrl}
-                title={`แผนที่ Google Maps ตำแหน่ง${view.name ? view.name : "ศาล"}`}
-              />
-            </div>
+            <MapEmbed name={view.name} src={view.mapEmbedUrl} />
           ) : (
           <div className="home-visit__map">
             <span aria-hidden="true" className="home-visit__map-pin">
