@@ -248,6 +248,8 @@ svg {
   transform: translateY(0);
 }
 
+/* Status bar at the top of the page. Used by the Client Review banner
+   (components/review/review-banner.js); the public site has none. */
 .preview-notice {
   border-bottom: 1px solid var(--soft-border);
   background: var(--soft-blue);

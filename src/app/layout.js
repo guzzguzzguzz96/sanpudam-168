@@ -2,7 +2,6 @@ import { Noto_Sans_Thai, Noto_Sans_Thai_Looped } from "next/font/google";
 import { Suspense } from "react";
 import { PublicSiteFooter, PublicSiteHeader } from "@/app/_site/site-chrome";
 import { ReviewSiteFooter, ReviewSiteHeader } from "@/app/_review/review-chrome";
-import { PreviewNotice } from "@/components/preview-notice";
 import { ReviewBanner } from "@/components/review/review-banner";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -33,7 +32,7 @@ const displayFont = Noto_Sans_Thai({
   fallback: ["Leelawadee UI", "Tahoma", "sans-serif"],
 });
 
-// Indexing and the prototype notice follow the launch policy
+// Indexing follows the launch policy
 // (src/lib/site-launch.js): only a Vercel Production deployment with
 // SITE_LAUNCHED=true is indexable. Read when pages are built.
 const launch = evaluateSiteLaunch(process.env);
@@ -86,11 +85,7 @@ export default function RootLayout({ children }) {
         >
           ข้ามไปยังเนื้อหาหลัก
         </a>
-        {reviewMode ? (
-          <ReviewBanner />
-        ) : !launch.launched ? (
-          <PreviewNotice />
-        ) : null}
+        {reviewMode ? <ReviewBanner /> : null}
         {reviewMode ? (
           <Suspense fallback={<SiteHeader />}>
             <ReviewSiteHeader />

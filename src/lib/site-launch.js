@@ -7,7 +7,8 @@
 //   SITE_LAUNCHED=true      (explicit launch switch, set at launch)
 // Every other combination, including missing or unexpected values, local
 // builds, and Vercel Preview, is not launched: pages are noindex, robots.txt
-// disallows everything, the sitemap is empty, and the prototype notice shows.
+// disallows everything, and the sitemap is empty. (There is no visual
+// banner; launch state is visible only in robots/meta/sitemap.)
 // Both values are read when pages are built, so changing SITE_LAUNCHED needs
 // a redeploy.
 

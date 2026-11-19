@@ -79,7 +79,7 @@ Preview (`dev`) คงค่าเดิมของ Client Review ทั้ง�
    รันซ้ำได้: ผลเป็น `unchanged`; เอกสารที่ถูกแก้บน Production หลังย้าย จะเป็น `conflict` และไม่ถูกเขียนทับ
 5. **ตั้ง env Production** ตามข้อ 3 (ยังไม่ตั้ง `SITE_LAUNCHED`) → deploy `main` → ตรวจบน URL ของ Vercel:
    หน้าแรก/ประวัติ/วัตถุมงคล 5 รายการ/ข่าว 3 ข่าว/เยี่ยมชม แสดงข้อมูลจริง, ไม่มีป้าย review, ปุ่มโทร/LINE/Maps ทำงาน, `/news/ไม่มีจริง` ได้ 404, robots.txt = `Disallow: /`
-6. **เปิดให้ค้นหา**: ตั้ง `SITE_LAUNCHED=true` → redeploy → ตรวจ `https://sanpudam168.com/robots.txt` (Allow + Sitemap), `/sitemap.xml` (หน้า + 5 วัตถุมงคล + 3 ข่าว), meta `index, follow`, ไม่มีแถบ "เว็บไซต์ทดสอบ · ยังไม่เปิดให้บริการจริง"
+6. **เปิดให้ค้นหา**: ตั้ง `SITE_LAUNCHED=true` → redeploy → ตรวจ `https://sanpudam168.com/robots.txt` (Allow + Sitemap), `/sitemap.xml` (หน้า + 5 วัตถุมงคล + 3 ข่าว), meta `index, follow` (เว็บไม่มีแถบสถานะแล้ว ตรวจสถานะการเปิดจาก robots/meta/sitemap เท่านั้น)
 7. **DNS** (ข้อ 5) แล้วส่ง sitemap ใน Google Search Console
 
 ## 5. DNS (Cloudflare)
