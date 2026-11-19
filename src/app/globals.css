@@ -450,10 +450,19 @@ svg {
   font-size: var(--type-small);
 }
 
-.site-brand:hover .site-brand__name {
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.25em;
+/* The brand link never underlines (hover, active, or focus); keyboard
+   focus keeps a clear outline around the whole brand. */
+.site-brand:hover,
+.site-brand:active,
+.site-brand:hover .site-brand__name,
+.site-brand:active .site-brand__name {
+  text-decoration: none;
+}
+
+.site-brand:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--control-radius);
 }
 
 .site-header__desktop {
