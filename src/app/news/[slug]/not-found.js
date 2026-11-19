@@ -8,7 +8,7 @@ export default function NewsArticleNotFound() {
     <main id="main-content" className="content-page">
       <PageHeader
         current="ไม่พบข่าว"
-        description="ไม่พบข่าวที่ต้องการ ข่าวอาจยังไม่เผยแพร่หรือที่อยู่ไม่ถูกต้อง"
+        description="ไม่พบข่าวที่ต้องการ กรุณาตรวจสอบที่อยู่อีกครั้ง"
         title="ไม่พบข่าวนี้"
         trail={[{ href: "/news", label: "ข่าวสาร" }]}
       />

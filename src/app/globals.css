@@ -940,6 +940,11 @@ svg {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  /* Three columns (brand, menu, contact): contact spans the second row. */
+  .site-footer__grid > :last-child {
+    grid-column: 1 / -1;
+  }
+
   .type-ramp {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -963,9 +968,11 @@ svg {
   }
 
   .site-footer__grid {
-    grid-template-columns:
-      minmax(0, 1.2fr) minmax(0, 0.8fr) minmax(0, 1.4fr)
-      minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 1.4fr);
+  }
+
+  .site-footer__grid > :last-child {
+    grid-column: auto;
   }
 
   .preview-card-grid {

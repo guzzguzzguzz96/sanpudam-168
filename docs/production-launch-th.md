@@ -128,4 +128,5 @@ Preview (`dev`) คงค่าเดิมของ Client Review ทั้ง�
 - [ ] slug ที่ไม่มี (`/news/x`, `/sakkara/x`) ได้ HTTP 404 (`curl -I`)
 - [ ] `<title>`, description, canonical (`https://sanpudam168.com/...`), og:image ถูกต้อง; JSON-LD `FAQPage` บนหน้าแรก และ `NewsArticle` บนหน้าข่าว
 - [ ] robots.txt / sitemap.xml ตามข้อ 4.6; `/admin` มี `X-Robots-Tag: noindex`
+- [ ] `https://sanpudam-168.vercel.app/<path>?<query>` ได้ 308 ไป `https://sanpudam168.com/<path>?<query>` (เฉพาะ Production, ต้องตั้ง `NEXT_PUBLIC_SITE_URL`; `src/lib/canonical-host.js`)
 - [ ] Preview (`dev`) ยังเป็น review mode มีป้าย และหลังบ้านใช้ได้

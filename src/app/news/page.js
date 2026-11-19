@@ -25,7 +25,7 @@ async function NewsContent() {
           <ul className="content-page__news-list">
             {page.view.map((article) => (
               <li key={article.id}>
-                <NewsCard article={article} headingLevel="h2" hideMissingImage={page.scope === "public"} />
+                <NewsCard article={article} headingLevel="h2" hidePending={page.scope === "public"} />
               </li>
             ))}
           </ul>

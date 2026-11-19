@@ -13,8 +13,10 @@ const contactActions = getContactActions(["line", "phone", "maps"]);
 // contact values (text, never links) with one shared verification note
 // (review only) and a link to the full details on /visit. actions holds
 // verified (public) or owner-confirmed (review) actions only. Without them
-// the footer uses siteConfig.
-export function SiteFooter({ brand = null, contact = null, actions = null }) {
+// the footer uses siteConfig. hidePending (public site): with no verified
+// actions or details, the contact column shows nothing instead of a
+// "pending" message.
+export function SiteFooter({ brand = null, contact = null, actions = null, hidePending = false }) {
   const name = brand?.name ?? siteConfig.localName;
   const descriptor = brand?.descriptor ?? siteConfig.name;
 
@@ -76,19 +78,13 @@ export function SiteFooter({ brand = null, contact = null, actions = null }) {
             ) : (
               <ContactActions
                 actions={contactActions}
-                emptyMessage="ช่องทางติดต่อจะแสดงเมื่อได้รับการยืนยัน"
+                emptyMessage={hidePending ? null : "ช่องทางติดต่อจะแสดงเมื่อได้รับการยืนยัน"}
                 layout="stack"
                 tone="dark"
               />
             )}
           </section>
 
-          <section aria-labelledby="footer-privacy-title">
-            <h2 id="footer-privacy-title" className="site-footer__heading">
-              ข้อมูลความเป็นส่วนตัว
-            </h2>
-            <p>นโยบายความเป็นส่วนตัวจะเผยแพร่ก่อนเปิดรับข้อมูลติดต่อ</p>
-          </section>
         </div>
       </Container>
     </footer>

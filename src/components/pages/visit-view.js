@@ -11,7 +11,10 @@ import { getContactActions } from "@/lib/contact-actions";
 // contact values are text only; actions come from getContactActions for
 // the directions link and, on the public site, owner-verified channels.
 // No transport routes, parking, coordinates, or embed are invented.
-export function VisitView({ view }) {
+// hidePending (public site): no "pending" message when actions or the map
+// are missing; the map column is left out and the content spans the row.
+export function VisitView({ view, hidePending = false }) {
+  const showMapBox = Boolean(view.mapEmbedUrl) || !hidePending;
   const details = [
     view.hours ? { id: "hours", icon: "clock", label: "เวลาเปิดทำการ", ...view.hours } : null,
     view.address ? { id: "address", icon: "mapPin", label: "ที่อยู่", ...view.address } : null,
@@ -28,7 +31,7 @@ export function VisitView({ view }) {
       <PageHeader current="เยี่ยมชม" eyebrow="วางแผนการเดินทาง" title={"การเยี่ยมชม\u200Bและการเดินทาง"} />
 
       <Section aria-label="ข้อมูลการเยี่ยมชม" className="home-visit content-page__section content-page__section--first">
-        <Container className="home-visit__layout">
+        <Container className={`home-visit__layout${showMapBox ? "" : " home-visit__layout--single"}`}>
           <div className="home-visit__content">
             {details.length ? (
               <dl className="home-visit__details">
@@ -52,7 +55,7 @@ export function VisitView({ view }) {
             <ContactActions
               actions={actions}
               className="home-visit__actions"
-              emptyMessage="ปุ่มนำทางและช่องทางติดต่อจะแสดงเมื่อได้รับข้อมูลที่ยืนยันแล้ว"
+              emptyMessage={hidePending ? null : "ปุ่มนำทางและช่องทางติดต่อจะแสดงเมื่อได้รับข้อมูลที่ยืนยันแล้ว"}
             />
 
             {channels.length ? (
@@ -82,7 +85,7 @@ export function VisitView({ view }) {
 
           {view.mapEmbedUrl ? (
             <MapEmbed name={view.name} src={view.mapEmbedUrl} />
-          ) : (
+          ) : !showMapBox ? null : (
           <div className="home-visit__map">
             <span aria-hidden="true" className="home-visit__map-pin">
               <Icon name="mapPin" size={32} />

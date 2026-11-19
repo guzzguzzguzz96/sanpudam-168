@@ -26,8 +26,8 @@ async function SacredItemsContent() {
       <Container>
         {/* ?cat=<slug> is read in the browser only (legacy-compatible links);
             the server output is the full, cacheable list. */}
-        <Suspense fallback={<SacredItemGrid emptyMessage="ยังไม่มีรายการวัตถุมงคลที่เผยแพร่" headingLevel="h2" items={page.view} />}>
-          <SacredItemFilter emptyMessage="ยังไม่มีรายการวัตถุมงคลที่เผยแพร่" headingLevel="h2" items={page.view} />
+        <Suspense fallback={<SacredItemGrid emptyMessage="ยังไม่มีรายการวัตถุมงคลที่เผยแพร่" headingLevel="h2" hidePending={page.scope === "public"} items={page.view} />}>
+          <SacredItemFilter emptyMessage="ยังไม่มีรายการวัตถุมงคลที่เผยแพร่" headingLevel="h2" hidePending={page.scope === "public"} items={page.view} />
         </Suspense>
       </Container>
     </Section>

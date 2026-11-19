@@ -5,7 +5,7 @@ import { SectionIntro } from "@/components/home/section-intro";
 import { Section } from "@/components/ui/section";
 import { normalizeSacredItem } from "@/lib/sacred-items";
 
-export function FeaturedSacredItems({ data }) {
+export function FeaturedSacredItems({ data, hidePending = false }) {
   const items = data.items.map(normalizeSacredItem);
 
   return (
@@ -20,7 +20,7 @@ export function FeaturedSacredItems({ data }) {
           eyebrow="วัตถุมงคล"
           title="รายการแนะนำ"
         />
-        <SacredItemGrid items={items} />
+        <SacredItemGrid hidePending={hidePending} items={items} />
         {/* Shown only once the catalog route exists. */}
         {data.catalogHref ? (
           <div className="home-section-action">

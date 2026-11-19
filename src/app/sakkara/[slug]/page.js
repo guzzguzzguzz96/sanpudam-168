@@ -58,5 +58,5 @@ export default async function SacredItemPage({ params }) {
   const { slug } = await params;
   const page = await getSacredItemPage(slug);
   if (page.status === "not_found") notFound();
-  return <main id="main-content" className="content-page">{page.status === "ok" ? <SacredItemView view={page.view} /> : <Unavailable />}</main>;
+  return <main id="main-content" className="content-page">{page.status === "ok" ? <SacredItemView hidePending view={page.view} /> : <Unavailable />}</main>;
 }

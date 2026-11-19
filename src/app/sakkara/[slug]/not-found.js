@@ -8,7 +8,7 @@ export default function SacredItemNotFound() {
     <main id="main-content" className="content-page">
       <PageHeader
         current="ไม่พบรายการ"
-        description="ไม่พบวัตถุมงคลที่ต้องการ รายการอาจยังไม่เผยแพร่หรือที่อยู่ไม่ถูกต้อง"
+        description="ไม่พบวัตถุมงคลที่ต้องการ กรุณาตรวจสอบที่อยู่อีกครั้ง"
         title="ไม่พบรายการนี้"
         trail={[{ href: "/sakkara", label: "วัตถุมงคล" }]}
       />

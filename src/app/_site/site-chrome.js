@@ -24,5 +24,5 @@ export async function PublicSiteHeader() {
 
 export async function PublicSiteFooter() {
   const chrome = await getSiteChrome();
-  return <SiteFooter brand={brandOf(chrome)} actions={actionsOf(chrome, ["line", "phone", "maps"])} contact={chrome.status === "ok" ? chrome.footer : null} />;
+  return <SiteFooter brand={brandOf(chrome)} actions={actionsOf(chrome, ["line", "phone", "maps"])} contact={chrome.status === "ok" ? chrome.footer : null} hidePending />;
 }

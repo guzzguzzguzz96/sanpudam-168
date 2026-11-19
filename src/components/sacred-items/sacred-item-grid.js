@@ -2,7 +2,7 @@ import { SacredItemCard } from "@/components/sacred-items/sacred-item-card";
 
 // Presentational grid of normalized items. A Phase 03 category filter can
 // pass a filtered list (see filterSacredItemsByCategory) without changes here.
-export function SacredItemGrid({ items, headingLevel, emptyMessage = null }) {
+export function SacredItemGrid({ items, headingLevel, emptyMessage = null, hidePending = false }) {
   if (items.length === 0) {
     return emptyMessage ? (
       <p className="sacred-item-grid__empty">{emptyMessage}</p>
@@ -13,7 +13,7 @@ export function SacredItemGrid({ items, headingLevel, emptyMessage = null }) {
     <ul className="sacred-item-grid">
       {items.map((item) => (
         <li key={item.id}>
-          <SacredItemCard item={item} headingLevel={headingLevel} />
+          <SacredItemCard item={item} headingLevel={headingLevel} hidePending={hidePending} />
         </li>
       ))}
     </ul>

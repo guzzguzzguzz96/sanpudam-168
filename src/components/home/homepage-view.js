@@ -51,14 +51,14 @@ export function HomepageView({ view, scope }) {
 
   return (
     <main id="main-content" className="home-page">
-      <HeroBanner data={banner} />
+      <HeroBanner data={banner} hidePending={scope === "public"} />
       {view.quickInformation ? <QuickInformation data={view.quickInformation} /> : null}
       <QuickActions data={view.quickActions} />
       <SectionOrNotice scope={scope} status={sections.about} id="review-about" title="เกี่ยวกับศาล">
-        {view.about ? <AboutSanpudam data={view.about} /> : null}
+        {view.about ? <AboutSanpudam data={view.about} hidePending={scope === "public"} /> : null}
       </SectionOrNotice>
       <SectionOrNotice scope={scope} status={sections.featuredItems} id="review-featured-items" title="วัตถุมงคล">
-        {view.featuredItems ? <FeaturedSacredItems data={view.featuredItems} /> : null}
+        {view.featuredItems ? <FeaturedSacredItems data={view.featuredItems} hidePending={scope === "public"} /> : null}
       </SectionOrNotice>
       {/* Featured sacred object (coin): only when the record exists in this
           scope. LINE action from verified contact data on the public site;
@@ -73,7 +73,7 @@ export function HomepageView({ view, scope }) {
         {view.worshipGuide ? <WorshipGuide data={view.worshipGuide.steps} reviewStatus={view.worshipGuide.reviewStatus} /> : null}
       </SectionOrNotice>
       <SectionOrNotice scope={scope} status={sections.news} id="review-news" title="ข่าวสาร">
-        {view.news ? <LatestNews data={view.news} hideMissingImages={scope === "public"} /> : null}
+        {view.news ? <LatestNews data={view.news} hidePending={scope === "public"} /> : null}
       </SectionOrNotice>
       <SectionOrNotice scope={scope} status={sections.gallery} id="review-gallery" title="แกลเลอรี">
         {view.gallery ? <PhotoGallery data={view.gallery} /> : null}
@@ -84,6 +84,7 @@ export function HomepageView({ view, scope }) {
             actions={visitActions(view, scope)}
             data={view.visit.details}
             directionsNote={view.visit.directions?.note}
+            hidePending={scope === "public"}
             mapEmbedUrl={scope === "public" ? (view.visit.mapEmbedUrl ?? null) : null}
             mapName={view.brand?.name ?? null}
           />

@@ -7,6 +7,7 @@ import { ReviewStatus } from "@/components/review/review-status";
 export function SacredItemCard({
   item,
   headingLevel: Heading = "h3",
+  hidePending = false,
   sizes = "(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw",
 }) {
   return (
@@ -18,6 +19,7 @@ export function SacredItemCard({
         alt={item.image?.alt}
         className="sacred-item-card__media"
         desktopImage={item.image}
+        hidePending={hidePending}
         placeholderLabel="ยังไม่มีภาพวัตถุมงคลที่ได้รับอนุมัติ"
         sizes={sizes}
       />

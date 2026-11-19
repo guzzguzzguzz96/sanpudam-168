@@ -4,7 +4,8 @@ import { MediaFrame } from "@/components/home/media-frame";
 import { Section } from "@/components/ui/section";
 import { ThaiPhrases } from "@/components/ui/thai-phrases";
 
-export function HeroBanner({ data }) {
+// hidePending (public site): no "temporary image" note when no banner image.
+export function HeroBanner({ data, hidePending = false }) {
   const hasImage = Boolean(data.desktopImage?.src || data.mobileImage?.src);
 
   return (
@@ -46,7 +47,7 @@ export function HeroBanner({ data }) {
             </Button>
           </div>
         </div>
-        {hasImage ? null : (
+        {hasImage || hidePending ? null : (
           <p className="home-hero__media-note">
             <ThaiPhrases text="ภาพประกอบชั่วคราว · รอภาพถ่ายที่ได้รับอนุมัติ" />
           </p>

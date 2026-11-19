@@ -9,7 +9,8 @@ import { Section } from "@/components/ui/section";
 // /sakkara/[slug] from the item view data (src/server/site/pages.js). No
 // price, stock, ordering, or contact actions: those are not part of the
 // item model, and imported contact details are unverified.
-export function SacredItemView({ view }) {
+// hidePending (public site): no placeholder box when the image is missing.
+export function SacredItemView({ view, hidePending = false }) {
   const { status } = view;
   const facts = [
     view.prayerTopics ? { id: "prayer", label: "เรื่องที่นิยมขอพร", value: view.prayerTopics, status: status.prayerTopics } : null,
@@ -32,6 +33,7 @@ export function SacredItemView({ view }) {
             className="content-page__media content-page__media--item"
             desktopImage={view.image}
             fit={view.image?.fit}
+            hidePending={hidePending}
             matte={view.image?.matte}
             placeholderLabel="ยังไม่มีภาพวัตถุมงคลที่ได้รับอนุมัติ"
             priority

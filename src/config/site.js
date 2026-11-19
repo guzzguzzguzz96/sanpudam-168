@@ -2,8 +2,6 @@ export const siteConfig = {
   name: "Sanpudam 168",
   // Provisional Thai name; pending owner verification.
   localName: "ศาลปู่ดำ168 และตราแผ่นดิน",
-  description:
-    "พื้นที่ออนไลน์สำหรับ Sanpudam 168 กำลังอยู่ระหว่างการจัดเตรียม",
   // Contact actions render only when an owner-verified value is set here.
   // Values are validated in src/lib/contact-actions.js.
   // LINE: https://line.me/... or https://lin.ee/... inquiry link.

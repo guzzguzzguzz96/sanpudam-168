@@ -45,7 +45,9 @@ export async function generateMetadata() {
   const site = await getSiteMetadataDefaults();
   const name = site?.shortName ?? siteConfig.name;
   const title = site?.title ?? siteConfig.name;
-  const description = site?.description ?? siteConfig.description;
+  // No generic fallback text: without site settings the description is
+  // simply omitted.
+  const description = site?.description ?? undefined;
   return {
     ...(siteUrl ? { metadataBase: siteUrl } : {}),
     applicationName: name,
@@ -101,7 +103,7 @@ export default function RootLayout({ children }) {
             <ReviewSiteFooter />
           </Suspense>
         ) : (
-          <Suspense fallback={<SiteFooter />}>
+          <Suspense fallback={<SiteFooter hidePending />}>
             <PublicSiteFooter />
           </Suspense>
         )}

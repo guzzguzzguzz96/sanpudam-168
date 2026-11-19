@@ -18,7 +18,7 @@ const header = <PageHeader current="เยี่ยมชม" eyebrow="วาง
 
 async function VisitContent() {
   const page = await getVisitPage();
-  if (page.status === "ok") return <VisitView view={page.view} />;
+  if (page.status === "ok") return <VisitView hidePending={page.scope === "public"} view={page.view} />;
 
   return (
     <>

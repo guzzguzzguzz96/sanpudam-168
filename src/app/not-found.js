@@ -12,7 +12,7 @@ export default function NotFound() {
     <main id="main-content" className="content-page">
       <PageHeader
         current="ไม่พบหน้า"
-        description="หน้าที่ต้องการไม่มีอยู่ หรือยังอยู่ระหว่างการจัดทำ"
+        description="ไม่พบหน้าที่ต้องการ กรุณาตรวจสอบที่อยู่อีกครั้ง หรือกลับไปที่หน้าแรก"
         title="ไม่พบหน้านี้"
       />
       <Section className="content-page__section content-page__section--first">

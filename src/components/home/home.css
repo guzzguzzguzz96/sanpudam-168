@@ -869,6 +869,11 @@
     min-height: 100%;
   }
 
+  /* Public site without a map: the details span the row. */
+  .home-visit__layout--single {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .home-visit__map--embed {
     min-height: 24rem;
   }

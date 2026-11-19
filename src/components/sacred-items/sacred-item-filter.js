@@ -12,7 +12,7 @@ import { activeCategory, filterSacredItemsByCategory, getSacredItemCategories } 
 // in the list (activeCategory); anything else shows every item. It never
 // reaches the server.
 
-export function SacredItemFilter({ items, headingLevel, emptyMessage }) {
+export function SacredItemFilter({ items, headingLevel, emptyMessage, hidePending = false }) {
   const query = useSearchParams();
   const categories = getSacredItemCategories(items);
   const active = activeCategory(query.get("cat"), categories);
@@ -44,7 +44,7 @@ export function SacredItemFilter({ items, headingLevel, emptyMessage }) {
           </ul>
         </nav>
       ) : null}
-      <SacredItemGrid emptyMessage={emptyMessage} headingLevel={headingLevel} items={visible} />
+      <SacredItemGrid emptyMessage={emptyMessage} headingLevel={headingLevel} hidePending={hidePending} items={visible} />
     </>
   );
 }

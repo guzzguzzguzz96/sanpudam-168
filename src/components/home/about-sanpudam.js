@@ -5,7 +5,7 @@ import { SectionIntro } from "@/components/home/section-intro";
 import { ReviewStatus } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
 
-export function AboutSanpudam({ data }) {
+export function AboutSanpudam({ data, hidePending = false }) {
   return (
     <Section id="about" aria-labelledby="about-sanpudam-title" className="home-about">
       <Container className="home-about__layout">
@@ -16,6 +16,7 @@ export function AboutSanpudam({ data }) {
           // Presentation hint (server/cms/media-presentation.js): the statue
           // cutout is shown whole on a white matte instead of being cropped.
           fit={data.image?.fit}
+          hidePending={hidePending}
           matte={data.image?.matte}
           placeholderLabel="พื้นที่ภาพประกอบตัวอย่าง · รอภาพที่ได้รับอนุมัติ"
           sizes="(max-width: 767px) 100vw, 45vw"

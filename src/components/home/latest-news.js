@@ -9,10 +9,11 @@ import { Section } from "@/components/ui/section";
 // Thumbnail in a consistent 16:9 frame. Posters and newsletters are shown
 // whole (fit "contain" on a neutral matte); the full image stays on the
 // article page.
-// hideMissingImage (public site): an article whose cover image is not
-// approved for public use renders as a text-only card, with no empty frame.
-// Client Review keeps the placeholder frame so missing media stays visible.
-export function NewsCard({ article, headingLevel: Heading = "h3", hideMissingImage = false }) {
+// hidePending (public site): an article whose cover image is not approved
+// for public use renders as a text-only card, with no empty frame, and a
+// missing date is simply left out. Client Review keeps the placeholder frame
+// and the "date pending" text so missing data stays visible.
+export function NewsCard({ article, headingLevel: Heading = "h3", hidePending = false }) {
   const title = article.href ? (
     <Link href={article.href} prefetch={false}>
       {article.title}
@@ -22,8 +23,8 @@ export function NewsCard({ article, headingLevel: Heading = "h3", hideMissingIma
   );
 
   return (
-    <Card as="article" className={`home-news-card${!article.image && hideMissingImage ? " home-news-card--text-only" : ""}`}>
-      {!article.image && hideMissingImage ? null : <MediaFrame
+    <Card as="article" className={`home-news-card${!article.image && hidePending ? " home-news-card--text-only" : ""}`}>
+      {!article.image && hidePending ? null : <MediaFrame
         alt={article.image?.alt}
         className="home-news-card__media"
         desktopImage={article.image}
@@ -32,9 +33,11 @@ export function NewsCard({ article, headingLevel: Heading = "h3", hideMissingIma
         placeholderLabel="พื้นที่ภาพข่าวตัวอย่าง · ไม่มีภาพข่าวจริง"
         sizes="(max-width: 767px) 100vw, (max-width: 1023px) 40vw, 30vw"
       />}
-      <p className="home-news-card__date">
-        {article.publicationDate ?? "วันที่เผยแพร่รอการยืนยัน"}
-      </p>
+      {article.publicationDate || !hidePending ? (
+        <p className="home-news-card__date">
+          {article.publicationDate ?? "วันที่เผยแพร่รอการยืนยัน"}
+        </p>
+      ) : null}
       <Heading className="home-news-card__title">{title}</Heading>
       <p className="home-news-card__description">{article.description}</p>
       <ReviewStatus status={article.reviewStatus} />
@@ -52,7 +55,7 @@ export function NewsCard({ article, headingLevel: Heading = "h3", hideMissingIma
 }
 
 // Equal cards in reading order; each keeps its natural height.
-export function LatestNews({ data, hideMissingImages = false }) {
+export function LatestNews({ data, hidePending = false }) {
   return (
     <Section aria-labelledby="latest-news-title" className="home-latest-news">
       <Container>
@@ -64,7 +67,7 @@ export function LatestNews({ data, hideMissingImages = false }) {
         <ul className="home-news-grid">
           {data.map((article) => (
             <li key={article.id}>
-              <NewsCard article={article} hideMissingImage={hideMissingImages} />
+              <NewsCard article={article} hidePending={hidePending} />
             </li>
           ))}
         </ul>

@@ -1,3 +1,4 @@
+import { aliasRedirects } from "./src/lib/canonical-host.js";
 import { evaluateReviewMode, reviewResponseHeaders } from "./src/lib/review-mode.js";
 
 // Client Review Mode (docs/client-review-mode.md) is decided from the
@@ -38,6 +39,11 @@ const nextConfig = {
         pathname: "/lov36obu/image/upload/*/sanpudam168/staging/**",
       },
     ],
+  },
+  // Vercel Production only: sanpudam-168.vercel.app -> custom domain (308,
+  // path and query kept). See src/lib/canonical-host.js.
+  async redirects() {
+    return aliasRedirects(process.env);
   },
   async headers() {
     return [...reviewResponseHeaders(reviewMode), ...adminResponseHeaders];

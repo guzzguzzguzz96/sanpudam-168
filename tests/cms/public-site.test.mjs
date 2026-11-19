@@ -252,3 +252,25 @@ test("featured object: Client Review shows it with its status label", async () =
   assert.equal(review.featuredObject.href, "/sakkara/coin-charoenlap-charoenyot");
   assert.equal(review.featuredObject.reviewStatus.tone, "sample");
 });
+
+// Production alias redirect (next.config.mjs redirects()).
+test("alias redirect: only the production vercel.app alias goes to the custom domain", async () => {
+  const { aliasRedirectTarget, aliasRedirects } = await import("../../src/lib/canonical-host.js");
+  const prod = { VERCEL_ENV: "production", NEXT_PUBLIC_SITE_URL: "https://sanpudam168.com" };
+  const to = (host, pathname = "/", search = "", env = prod) => aliasRedirectTarget({ host, pathname, search }, env);
+  assert.equal(to("sanpudam-168.vercel.app", "/news/know-tra-phaendin-siam", "?utm=x&a=1"), "https://sanpudam168.com/news/know-tra-phaendin-siam?utm=x&a=1");
+  assert.equal(to("sanpudam-168.vercel.app"), "https://sanpudam168.com/");
+  assert.equal(to("SANPUDAM-168.VERCEL.APP:443", "/visit"), "https://sanpudam168.com/visit");
+  for (const host of ["sanpudam168.com", "www.sanpudam168.com", "sanpudam-168-git-dev-guzzguzzguzz96s-projects.vercel.app", "sanpudam-168-gqwxajrfx-guzzguzzguzz96s-projects.vercel.app", "localhost:3000", "evil.sanpudam-168.vercel.app", "sanpudam-168.vercel.app.evil.example", "sanpudam-168xvercel.app", ""]) {
+    assert.equal(to(host, "/visit"), null, host);
+  }
+  for (const path of ["/_next/static/chunks/a.js", "/_next/image", "/api/auth/session", "/api/auth"]) assert.equal(to("sanpudam-168.vercel.app", path), null, path);
+  for (const env of [{}, { VERCEL_ENV: "preview", NEXT_PUBLIC_SITE_URL: "https://sanpudam168.com" }, { VERCEL_ENV: "production" }, { VERCEL_ENV: "production", NEXT_PUBLIC_SITE_URL: "http://sanpudam168.com" }, { VERCEL_ENV: "production", NEXT_PUBLIC_SITE_URL: "https://sanpudam-168.vercel.app" }]) {
+    assert.deepEqual(aliasRedirects(env), [], JSON.stringify(env));
+    assert.equal(to("sanpudam-168.vercel.app", "/", "", env), null);
+  }
+  const [rule] = aliasRedirects(prod);
+  assert.equal(rule.permanent, true, "308");
+  assert.equal(rule.destination, "https://sanpudam168.com/:path");
+  assert.deepEqual(rule.has, [{ type: "host", value: String.raw`^sanpudam-168\.vercel\.app$` }]);
+});

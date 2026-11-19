@@ -3,12 +3,15 @@ import Image, { getImageProps } from "next/image";
 // fit: "cover" (default, scene photography) or "contain" (whole image
 // visible, for cutouts and posters). matte: background behind a contained
 // image, "white" or "neutral". Both come from server presentation hints.
+// hidePending (public site): with no image, render nothing instead of the
+// "awaiting approved image" placeholder box. Client Review keeps the box.
 export function MediaFrame({
   alt,
   className = "",
   desktopFocalPoint = "50% 50%",
   desktopImage,
   fit = "cover",
+  hidePending = false,
   matte = null,
   mobileFocalPoint,
   mobileImage,
@@ -32,6 +35,7 @@ export function MediaFrame({
       : null;
 
   if (!fallbackImage?.src) {
+    if (hidePending) return null;
     return (
       <div
         className={`home-media home-media--placeholder ${className}`.trim()}
