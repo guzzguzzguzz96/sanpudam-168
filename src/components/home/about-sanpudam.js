@@ -13,6 +13,10 @@ export function AboutSanpudam({ data }) {
           alt={data.imageAlt}
           className="home-about__media"
           desktopImage={data.image}
+          // Presentation hint (server/cms/media-presentation.js): the statue
+          // cutout is shown whole on a white matte instead of being cropped.
+          fit={data.image?.fit}
+          matte={data.image?.matte}
           placeholderLabel="พื้นที่ภาพประกอบตัวอย่าง · รอภาพที่ได้รับอนุมัติ"
           sizes="(max-width: 767px) 100vw, 45vw"
         />

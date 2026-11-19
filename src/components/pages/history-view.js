@@ -31,6 +31,8 @@ export function HistoryView({ view }) {
                 alt={view.image.alt}
                 className="content-page__media content-page__media--square"
                 desktopImage={view.image}
+                fit={view.image.fit}
+                matte={view.image.matte}
                 priority
                 sizes="(max-width: 767px) 100vw, 40vw"
               />
@@ -56,6 +58,8 @@ export function HistoryView({ view }) {
                 alt={view.coatOfArms.image.alt}
                 className="content-page__media content-page__media--portrait"
                 desktopImage={view.coatOfArms.image}
+                fit={view.coatOfArms.image.fit}
+                matte={view.coatOfArms.image.matte}
                 sizes="(max-width: 767px) 100vw, 40vw"
               />
             ) : null}

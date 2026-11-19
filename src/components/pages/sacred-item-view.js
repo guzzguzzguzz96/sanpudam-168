@@ -31,6 +31,8 @@ export function SacredItemView({ view }) {
             alt={view.image?.alt}
             className="content-page__media content-page__media--item"
             desktopImage={view.image}
+            fit={view.image?.fit}
+            matte={view.image?.matte}
             placeholderLabel="ยังไม่มีภาพวัตถุมงคลที่ได้รับอนุมัติ"
             priority
             sizes="(max-width: 767px) 100vw, 45vw"
