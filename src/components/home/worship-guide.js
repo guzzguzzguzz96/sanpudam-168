@@ -1,8 +1,19 @@
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icons";
 import { Container } from "@/components/ui/container";
 import { SectionIntro } from "@/components/home/section-intro";
 import { ReviewStatus } from "@/components/review/review-status";
 import { Section } from "@/components/ui/section";
+
+// Decorative icon per step, by the step's stable key (pages.worshipSteps[].key,
+// passed through as step.id). Not stored in the database; a step with an
+// unknown key simply has no icon.
+const STEP_ICONS = Object.freeze({
+  "step-01": "flame",
+  "step-02": "scroll",
+  "step-03": "gift",
+  "step-04": "flower",
+});
 
 export function WorshipGuide({ data, reviewStatus = null }) {
   return (
@@ -29,9 +40,16 @@ export function WorshipGuide({ data, reviewStatus = null }) {
         >
           {data.map((step, index) => (
             <li key={step.id} className="home-worship-guide__step">
-              <span className="home-worship-guide__number" aria-hidden="true">
-                {String(index + 1).padStart(2, "0")}
-              </span>
+              <div className="home-worship-guide__marker">
+                <span className="home-worship-guide__number" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                {Object.hasOwn(STEP_ICONS, step.id) ? (
+                  <span className="home-worship-guide__icon">
+                    <Icon name={STEP_ICONS[step.id]} size={22} />
+                  </span>
+                ) : null}
+              </div>
               <h3>{step.title}</h3>
               {step.description ? <p>{step.description}</p> : null}
             </li>

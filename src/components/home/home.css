@@ -595,9 +595,28 @@
   border-top: 1px solid var(--soft-border);
 }
 
+.home-worship-guide__marker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+/* Decorative step icon (aria-hidden via Icon); same soft circle as the
+   visit and quick-information icons. */
+.home-worship-guide__icon {
+  display: inline-grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--soft-blue);
+  color: var(--navy);
+}
+
 .home-worship-guide__number {
   display: inline-block;
-  margin-bottom: var(--space-3);
   color: var(--deep-gold);
   font-family: var(--font-display-family);
   font-size: var(--type-h3);
